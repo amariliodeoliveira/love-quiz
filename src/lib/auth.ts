@@ -1,7 +1,9 @@
-import { createHmac, timingSafeEqual } from "crypto";
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "crypto";
+import { cookies } from "next/headers";
+import type { Role, Session } from "@/lib/db";
 
 const COOKIE_NAME = "admin_session";
-const SESSION_VALUE = "authenticated";
+const SCRYPT_KEYLEN = 64;
 
 function getSecret(): string {
   const secret = process.env.ADMIN_SESSION_SECRET;
@@ -15,31 +17,61 @@ function sign(value: string): string {
   return createHmac("sha256", getSecret()).update(value).digest("hex");
 }
 
-export function checkPassword(password: string): boolean {
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) {
-    throw new Error("ADMIN_PASSWORD is not configured");
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
+}
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const derived = scryptSync(password, salt, SCRYPT_KEYLEN).toString("hex");
+  return `${salt}:${derived}`;
+}
+
+export function verifyPassword(password: string, storedHash: string): boolean {
+  const [salt, key] = storedHash.split(":");
+  if (!salt || !key) return false;
+  const keyBuffer = Buffer.from(key, "hex");
+  const derived = scryptSync(password, salt, keyBuffer.length);
+  return derived.length === keyBuffer.length && timingSafeEqual(derived, keyBuffer);
+}
+
+export function createSessionCookieValue(session: Session): string {
+  const encoded = Buffer.from(JSON.stringify(session)).toString("base64url");
+  return `${encoded}.${sign(encoded)}`;
+}
+
+export function parseSessionCookie(
+  cookieValue: string | undefined,
+): Session | null {
+  if (!cookieValue) return null;
+  const [encoded, signature] = cookieValue.split(".");
+  if (!encoded || !signature || !safeEqual(signature, sign(encoded))) {
+    return null;
   }
-  const a = Buffer.from(password);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
+  try {
+    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
+    if (
+      typeof payload?.userId !== "number" ||
+      typeof payload?.username !== "string" ||
+      (payload.role !== "admin" && payload.role !== "user")
+    ) {
+      return null;
+    }
+    return {
+      userId: payload.userId,
+      username: payload.username,
+      role: payload.role as Role,
+    };
+  } catch {
+    return null;
+  }
 }
 
-export function createSessionCookieValue(): string {
-  const signature = sign(SESSION_VALUE);
-  return `${SESSION_VALUE}.${signature}`;
-}
-
-export function isValidSessionCookie(cookieValue: string | undefined): boolean {
-  if (!cookieValue) return false;
-  const [value, signature] = cookieValue.split(".");
-  if (!value || !signature) return false;
-  const expectedSignature = sign(value);
-  const a = Buffer.from(signature);
-  const b = Buffer.from(expectedSignature);
-  if (a.length !== b.length) return false;
-  return value === SESSION_VALUE && timingSafeEqual(a, b);
+export async function getSession(): Promise<Session | null> {
+  const cookieStore = await cookies();
+  return parseSessionCookie(cookieStore.get(COOKIE_NAME)?.value);
 }
 
 export { COOKIE_NAME };

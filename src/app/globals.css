@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
 :root {
   --background: #0d0d14;
   --foreground: #e8e8f0;
 
+  /* Core palette */
   --bg: #0d0d14;
   --surface: #16161f;
   --border: #2a2a38;
@@ -11,15 +15,38 @@
   --text: #e8e8f0;
   --subtext: #9090a8;
 
+  /* Level accent colors */
   --green: #4ade80;
   --green-dim: #1a3a26;
   --yellow: #facc15;
   --yellow-dim: #3a3010;
   --red: #f87171;
   --red-dim: #3a1a1a;
-
   --purple: #c084fc;
   --purple-dim: #2a1a3a;
+
+  /* Spacing scale (4px base unit) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-15: 60px;
+  --space-18: 72px;
+  --space-20: 80px;
+
+  /* Radius scale */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
@@ -29,6 +56,9 @@
   --font-serif: var(--font-dm-serif);
 }
 
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
 *,
 *::before,
 *::after {
@@ -46,13 +76,15 @@ body {
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-weight: 300;
   min-height: 100vh;
-  padding: 0 0 80px;
+  padding: 0 0 var(--space-20);
 }
 
-/* ── HERO ── */
+/* ============================================================
+   GAME: HERO
+   ============================================================ */
 .hero {
   text-align: center;
-  padding: 72px 24px 56px;
+  padding: var(--space-18) var(--space-6) var(--space-14);
   border-bottom: 1px solid var(--border);
 }
 .hero-eyebrow {
@@ -61,7 +93,7 @@ body {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
 }
 .hero h1 {
   font-family: var(--font-dm-serif), Georgia, serif;
@@ -69,7 +101,7 @@ body {
   font-weight: 400;
   line-height: 1.1;
   color: var(--text);
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }
 .hero h1 em {
   font-style: italic;
@@ -83,7 +115,9 @@ body {
   line-height: 1.6;
 }
 
-/* ── LEVEL TABS ── */
+/* ============================================================
+   GAME: LEVEL TABS
+   ============================================================ */
 .tabs {
   display: flex;
   justify-content: center;
@@ -98,8 +132,8 @@ body {
   font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.08em;
-  padding: 8px 20px;
-  border-radius: 99px;
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-full);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -133,19 +167,21 @@ body {
   background: #1e1e2c;
 }
 
-/* ── MAIN ── */
+/* ============================================================
+   GAME: DECK (main / level sections / cards)
+   ============================================================ */
 main {
+  width: 100%;
   max-width: 680px;
   margin: 0 auto;
-  padding: 0 16px;
+  padding: 0 var(--space-4);
 }
 
-/* ── LEVEL SECTION ── */
 .level-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 48px 0 20px;
+  gap: var(--space-3);
+  padding: var(--space-12) 0 var(--space-5);
 }
 .level-dot {
   width: 10px;
@@ -181,13 +217,12 @@ main {
 .level-divider {
   height: 1px;
   background: var(--border);
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
-/* ── CARDS ── */
 .card {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   margin-bottom: 10px;
   overflow: hidden;
   transition: border-color 0.2s;
@@ -214,7 +249,7 @@ main {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 16px 20px;
+  padding: var(--space-4) var(--space-5);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -245,7 +280,7 @@ main {
 }
 
 .card-body {
-  padding: 0 20px 20px 62px;
+  padding: 0 var(--space-5) var(--space-5) 62px;
 }
 
 .card-question {
@@ -281,18 +316,476 @@ main {
   color: var(--purple);
 }
 
-/* ── FOOTER ── */
+/* ============================================================
+   FOOTER (shared by the game page and the /profile layout)
+   ============================================================ */
 footer {
   text-align: center;
-  padding: 60px 24px 0;
+  padding: var(--space-15) var(--space-6) 0;
   font-size: 0.75rem;
   color: var(--muted);
   letter-spacing: 0.06em;
 }
 
+.footer-admin-link {
+  display: inline-block;
+  margin-top: var(--space-3);
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--muted);
+}
+.footer-admin-link:hover {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+
+/* ============================================================
+   PROFILE LAYOUT (header, back link, avatar menu)
+   ============================================================ */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+.profile-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+}
+.profile-back-link:hover {
+  color: var(--text);
+}
+
+.profile-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.center-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.avatar-menu {
+  position: relative;
+}
+.avatar-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-1);
+}
+.avatar-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-family: var(--font-dm-serif), Georgia, serif;
+  font-size: 0.9rem;
+  color: var(--bg);
+  flex-shrink: 0;
+}
+.avatar-username {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.avatar-popover {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-popover);
+  z-index: 40;
+}
+.avatar-popover-label {
+  font-size: 0.8rem;
+  color: var(--subtext);
+  margin-bottom: var(--space-3);
+}
+.avatar-swatches {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+.avatar-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+.avatar-swatch.selected {
+  border-color: var(--text);
+}
+.avatar-logout {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+  color: var(--red);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.avatar-logout:hover {
+  opacity: 0.8;
+}
+
+/* ============================================================
+   DESIGN SYSTEM PRIMITIVES
+   Reused across the login form, the profile dashboard, and modals.
+   ============================================================ */
+.btn {
+  display: inline-block;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px var(--space-4);
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn:hover {
+  opacity: 0.85;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.btn-block {
+  width: 100%;
+}
+
+.btn-ghost {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--subtext);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) 14px;
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-ghost:hover {
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.btn-danger:hover {
+  opacity: 0.8;
+}
+
+.btn-danger-solid {
+  background: var(--red);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px var(--space-4);
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-danger-solid:hover {
+  opacity: 0.85;
+}
+
+.input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 10px var(--space-3);
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.9rem;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--muted);
+}
+.input::placeholder {
+  color: var(--muted);
+}
+.textarea {
+  resize: vertical;
+}
+
+.form-error {
+  color: var(--red);
+  font-size: 0.85rem;
+}
+
+/* Custom rounded <select> replacement (native dropdown popups can't be themed) */
+.select {
+  position: relative;
+}
+.select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 10px var(--space-3);
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.select-trigger:hover {
+  border-color: var(--muted);
+}
+.select-arrow {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.select-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 6px;
+  box-shadow: var(--shadow-popover);
+  z-index: 60;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.select-option {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) 10px;
+  color: var(--text);
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.select-option:hover {
+  background: var(--border);
+}
+.select-option.selected {
+  color: var(--purple);
+}
+
+/* Modal (backdrop + panel), used for add/edit/confirm dialogs */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  z-index: 50;
+}
+.modal-panel {
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+.modal-title {
+  font-family: var(--font-dm-serif), Georgia, serif;
+  font-size: 1.3rem;
+  color: var(--text);
+  margin-bottom: var(--space-4);
+}
+.modal-message {
+  color: var(--subtext);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-6);
+}
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+/* ============================================================
+   LOGIN PAGE
+   ============================================================ */
+.login-card {
+  width: 100%;
+  max-width: 360px;
+}
+.page-title {
+  font-family: var(--font-dm-serif), Georgia, serif;
+  font-size: 1.6rem;
+  color: var(--text);
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+.login-hint {
+  font-size: 0.75rem;
+  color: var(--subtext);
+}
+
+.password-field {
+  position: relative;
+}
+.password-field .input {
+  padding-right: 40px;
+}
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: var(--space-2);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: var(--space-1);
+  color: var(--muted);
+  cursor: pointer;
+}
+.password-toggle:hover {
+  color: var(--text);
+}
+
+/* ============================================================
+   PROFILE DASHBOARD
+   ============================================================ */
+.page-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-6);
+}
+
+.text-muted {
+  color: var(--subtext);
+}
+
+.dashboard-header {
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+.dashboard-subtitle {
+  margin-top: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+.dashboard-level-group {
+  margin-bottom: var(--space-8);
+}
+.dashboard-level-title {
+  font-family: var(--font-dm-serif), Georgia, serif;
+  font-size: 1.1rem;
+  color: var(--text);
+  margin-bottom: var(--space-3);
+}
+.dashboard-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
+  background: var(--surface);
+}
+.dashboard-card-question {
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+.dashboard-card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   NOT FOUND
+   ============================================================ */
+.not-found {
+  text-align: center;
+}
+.not-found-code {
+  font-family: var(--font-dm-serif), Georgia, serif;
+  font-size: 4.5rem;
+  color: var(--muted);
+  line-height: 1;
+  margin-bottom: var(--space-2);
+}
+.not-found-title {
+  font-family: var(--font-dm-serif), Georgia, serif;
+  font-size: 1.4rem;
+  color: var(--text);
+  margin-bottom: var(--space-2);
+}
+.not-found-text {
+  color: var(--subtext);
+  margin-bottom: var(--space-6);
+}
+
+/* ============================================================
+   RESPONSIVE / ACCESSIBILITY
+   ============================================================ */
 @media (max-width: 480px) {
   .card-body {
-    padding-left: 20px;
+    padding-left: var(--space-5);
   }
   .card-question {
     font-size: 0.9rem;
@@ -305,160 +798,4 @@ footer {
   .tab {
     transition: none;
   }
-}
-
-/* ── ADMIN ── */
-.admin-page {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 48px 24px;
-}
-
-.admin-login-page {
-  max-width: 360px;
-  margin: 96px auto;
-  padding: 0 24px;
-}
-
-.admin-title {
-  font-family: var(--font-dm-serif), Georgia, serif;
-  font-size: 1.6rem;
-  color: var(--text);
-  margin-bottom: 24px;
-}
-
-.admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-}
-
-.admin-input,
-.admin-select {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-family: var(--font-dm-sans), sans-serif;
-  font-size: 0.9rem;
-}
-
-.admin-input:focus,
-.admin-select:focus {
-  outline: none;
-  border-color: var(--muted);
-}
-
-.admin-input::placeholder {
-  color: var(--muted);
-}
-
-.admin-login-form .admin-input {
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.admin-error {
-  color: var(--red);
-  font-size: 0.85rem;
-  margin-bottom: 12px;
-}
-
-.admin-button {
-  background: var(--text);
-  color: var(--bg);
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-family: var(--font-dm-sans), sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.admin-button:hover {
-  opacity: 0.85;
-}
-
-.admin-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.admin-button-ghost {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--subtext);
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-family: var(--font-dm-sans), sans-serif;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.admin-button-ghost:hover {
-  border-color: var(--muted);
-  color: var(--text);
-}
-
-.admin-button-danger {
-  background: none;
-  border: none;
-  color: var(--red);
-  font-family: var(--font-dm-sans), sans-serif;
-  font-size: 0.8rem;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.admin-button-danger:hover {
-  opacity: 0.8;
-}
-
-.admin-add-form {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 32px;
-}
-
-.admin-add-form .admin-input {
-  flex: 1;
-}
-
-.admin-level-group {
-  margin-bottom: 32px;
-}
-
-.admin-level-title {
-  font-family: var(--font-dm-serif), Georgia, serif;
-  font-size: 1.1rem;
-  color: var(--text);
-  margin-bottom: 12px;
-}
-
-.admin-card-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-bottom: 8px;
-  background: var(--surface);
-}
-
-.admin-card-question {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--text);
-  line-height: 1.5;
-}
-
-.admin-muted {
-  color: var(--subtext);
 }
