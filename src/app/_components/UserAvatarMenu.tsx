@@ -14,9 +14,13 @@ function capitalize(value: string): string {
 export default function UserAvatarMenu({
   username,
   avatarColor,
+  hasCountdown,
+  onEditCountdown,
 }: {
   username: string;
   avatarColor: string;
+  hasCountdown: boolean;
+  onEditCountdown: () => void;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -69,6 +73,16 @@ export default function UserAvatarMenu({
               />
             ))}
           </div>
+          <button
+            type="button"
+            className="mb-2 w-full cursor-pointer text-left text-xs text-subtext hover:text-text"
+            onClick={() => {
+              setOpen(false);
+              onEditCountdown();
+            }}
+          >
+            {hasCountdown ? "Edit countdown" : "+ Set countdown"}
+          </button>
           <button type="button" className="avatar-logout" onClick={handleLogout}>
             Log out
           </button>

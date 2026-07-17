@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/auth";
-import { getUserById } from "@/lib/db";
+import { getUserById, getCountdown } from "@/lib/db";
+import { toCountdownDisplay } from "@/lib/countdown";
 import { GAME_PATH } from "@/lib/routes";
 import AppHeader from "../_components/AppHeader";
 
@@ -10,10 +11,16 @@ export default async function ProfileLayout({
 }) {
   const session = await getSession();
   const user = session ? await getUserById(session.userId) : null;
+  const countdown = toCountdownDisplay(await getCountdown());
 
   return (
     <>
-      <AppHeader backHref={GAME_PATH} backLabel="← Back to game" user={user} />
+      <AppHeader
+        backHref={GAME_PATH}
+        backLabel="← Back to game"
+        user={user}
+        countdown={countdown}
+      />
       <main className="profile-main">{children}</main>
       <footer>
         <p>Couples Card Deck</p>

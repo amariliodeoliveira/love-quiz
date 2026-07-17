@@ -25,8 +25,31 @@ CREATE TABLE cards (
   level TEXT NOT NULL,
   question TEXT NOT NULL,
   position INTEGER NOT NULL,
-  user_id INTEGER REFERENCES users(id)
+  user_id INTEGER REFERENCES users(id),
+  answered_at TIMESTAMPTZ
   -- level is app-validated against src/data/cards.ts ALL_LEVELS — no DB check constraint today.
   -- user_id has no index today; getCardsForUser() filters by it on every dashboard load —
   -- worth an index (CREATE INDEX cards_user_id_idx ON cards(user_id);) if the deck grows a lot.
+  -- answered_at: NULL = not answered yet; shared across both users (the deck is a joint
+  -- reading guide for a call, not per-user progress). Set via an explicit {answered: bool}
+  -- request (never a server-side toggle) so two people marking it around the same time
+  -- can't race each other into flipping it back off — see src/app/api/cards/[id]/answered.
+);
+
+-- Single shared row: the live countdown shown to both signed-in users (e.g. "next time
+-- we see each other"). Pinned to id=1 by the check constraint so writes are a plain
+-- upsert (INSERT ... ON CONFLICT (id) DO UPDATE) instead of a select-then-branch.
+--
+-- target_at is the absolute UTC instant — always what the countdown math compares
+-- "now" against. time_zone is the IANA zone the date/time was entered in (e.g. the
+-- meeting place's zone), used to convert the picked wall-clock time to target_at
+-- (see src/lib/countdown.ts zonedTimeToUtc) and to re-populate the edit form correctly.
+-- location is a free-text label only (e.g. "Lisbon, Portugal") — never used in the math.
+CREATE TABLE countdown (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  target_at TIMESTAMPTZ NOT NULL,
+  time_zone TEXT NOT NULL,
+  location TEXT,
+  label TEXT NOT NULL DEFAULT 'Together again in',
+  CONSTRAINT countdown_singleton CHECK (id = 1)
 );

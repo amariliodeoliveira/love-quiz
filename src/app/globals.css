@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* react-day-picker's own stylesheet — plain, unlayered CSS (not Tailwind's @layer
+   system). The theme override for it further down in this file must stay unlayered
+   too and come after this import, or it would always lose the cascade. */
+@import "react-day-picker/style.css";
+
 /* Feature-scoped Block styles (CUBE CSS) — see .claude/engineering-guidelines.md.
    Each partial is wrapped in `@layer components` so Tailwind utilities can
    always override them predictably. */
@@ -101,6 +106,45 @@ body {
 }
 body:has(footer) {
   padding-bottom: var(--space-20);
+}
+
+/* Twemoji images (see src/lib/emoji.ts) — standard sizing so they sit inline with text
+   instead of at their native raster/SVG size. `display: inline` overrides Tailwind
+   Preflight's `img { display: block }`, which would otherwise force a line break
+   around every single emoji. */
+.emoji {
+  display: inline;
+  height: 1em;
+  width: 1em;
+  margin: 0 0.05em 0 0.1em;
+  vertical-align: -0.1em;
+}
+
+/* react-day-picker theme override (see src/app/_components/DateTimePicker.tsx). Matches
+   the site's dark palette through the library's own CSS custom properties. */
+.rdp-root {
+  --rdp-accent-color: var(--purple);
+  --rdp-accent-background-color: var(--purple-dim);
+  --rdp-day-width: 34px;
+  --rdp-day-height: 34px;
+  --rdp-day_button-width: 32px;
+  --rdp-day_button-height: 32px;
+  --rdp-nav_button-width: 26px;
+  --rdp-nav_button-height: 26px;
+  --rdp-nav-height: 30px;
+  font-family: var(--font-dm-sans), sans-serif;
+  font-size: 0.85rem;
+}
+.rdp-month_caption {
+  font-family: var(--font-dm-serif), Georgia, serif;
+  font-weight: 400;
+  font-size: 1rem;
+}
+.rdp-weekday {
+  color: var(--muted);
+}
+.rdp-day_button:hover:not(:disabled) {
+  background: var(--border);
 }
 
 /* GAME: HERO — migrated to Tailwind utilities directly on the Home page
