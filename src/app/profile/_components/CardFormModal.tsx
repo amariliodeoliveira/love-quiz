@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { LEVEL_META, type Level } from "@/data/cards";
 import type { DbCard } from "@/lib/db";
-import Modal from "./Modal";
-import Select from "./Select";
+import Modal from "@/app/_components/Modal";
+import Select from "@/app/_components/Select";
 
 const LEVEL_OPTIONS = Object.entries(LEVEL_META).map(([value, meta]) => ({
   value,
