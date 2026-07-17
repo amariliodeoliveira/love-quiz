@@ -13,9 +13,11 @@
     "db:qa-user:cleanup": "node --env-file=.env.local scripts/qa-test-user.mjs cleanup"
   },
   "dependencies": {
+    "@twemoji/api": "^17.0.3",
     "@vercel/postgres": "^0.10.0",
     "next": "16.2.10",
     "react": "19.2.7",
+    "react-day-picker": "^10.0.1",
     "react-dom": "19.2.7"
   },
   "devDependencies": {
