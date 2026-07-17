@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:qa-user:create": "node --env-file=.env.local scripts/qa-test-user.mjs create",
+    "db:qa-user:cleanup": "node --env-file=.env.local scripts/qa-test-user.mjs cleanup"
   },
   "dependencies": {
     "@vercel/postgres": "^0.10.0",
