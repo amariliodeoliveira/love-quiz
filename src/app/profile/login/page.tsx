@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { GAME_PATH } from "@/lib/routes";
+import { postJson } from "@/lib/http";
+import { isSafeRedirectTarget } from "@/lib/url";
 import FormField from "../_components/FormField";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,21 +20,20 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const res = await fetch("/api/profile/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
+    const { ok, data } = await postJson<{ error?: string }>(
+      "/api/profile/login",
+      { username, password },
+    );
 
     setLoading(false);
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => null);
+    if (!ok) {
       setError(data?.error ?? "Incorrect username or password");
       return;
     }
 
-    router.push("/profile");
+    const from = searchParams.get("from");
+    router.push(isSafeRedirectTarget(from) ? from : GAME_PATH);
     router.refresh();
   }
 
@@ -62,5 +65,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

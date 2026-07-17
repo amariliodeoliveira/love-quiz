@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCardsForUser } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { LOGIN_PATH } from "@/lib/routes";
 import ProfileDashboard from "./_components/ProfileDashboard";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function ProfilePage() {
   const session = await getSession();
   if (!session) {
-    redirect("/profile/login");
+    redirect(LOGIN_PATH);
   }
 
   const cards = await getCardsForUser(session);

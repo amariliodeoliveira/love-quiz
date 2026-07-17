@@ -1,15 +1,24 @@
-import CardDeck from "./_components/CardDeck";
-import { getAllCards } from "@/lib/db";
+import Link from "next/link";
+import { LOGIN_PATH } from "@/lib/routes";
 
-export const dynamic = "force-dynamic";
-
-export default async function Home() {
-  const dbCards = await getAllCards();
-  const cards = dbCards.map((c) => ({
-    id: String(c.id),
-    level: c.level,
-    question: c.question,
-  }));
-
-  return <CardDeck cards={cards} />;
+export default function Home() {
+  return (
+    <div className="center-screen">
+      <div className="hero">
+        <p className="hero-eyebrow">Interactive Game</p>
+        <h1>
+          Couples
+          <br />
+          <em>Card Deck</em>
+        </h1>
+        <p>
+          A little game for the two of you. Sign in to open your deck and
+          start flipping cards together.
+        </p>
+        <Link href={LOGIN_PATH} className="btn">
+          Sign in
+        </Link>
+      </div>
+    </div>
+  );
 }

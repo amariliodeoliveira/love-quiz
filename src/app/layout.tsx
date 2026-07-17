@@ -17,7 +17,7 @@ const dmSerifDisplay = DM_Serif_Display({
 
 export const metadata: Metadata = {
   title: "Couples Card Deck",
-  description: "Tap a card to reveal the question.",
+  description: "A little game for the two of you.",
 };
 
 export default function RootLayout({
