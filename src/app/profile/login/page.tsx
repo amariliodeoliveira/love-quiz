@@ -38,7 +38,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="center-screen">
+    <div className="flex flex-1 items-center justify-center p-6">
       <div className="login-card">
         <h1 className="page-title">Login</h1>
         <form onSubmit={handleSubmit} className="login-form">

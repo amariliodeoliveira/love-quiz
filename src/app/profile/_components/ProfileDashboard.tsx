@@ -56,7 +56,7 @@ export default function ProfileDashboard({
     <div className="page-container">
       <div className="dashboard-header">
         <h1 className="page-title">Deck Studio</h1>
-        <p className="text-muted dashboard-subtitle">
+        <p className="text-subtext dashboard-subtitle">
           {session.role === "admin" ? "Seeing all cards" : "Seeing only your cards"}
         </p>
         <button onClick={() => setFormCard("new")} className="btn">

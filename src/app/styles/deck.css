@@ -1,0 +1,148 @@
+/* GAME: DECK (main / level sections / cards) */
+@layer components {
+  main {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+  }
+
+  .level-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-12) 0 var(--space-5);
+  }
+  .level-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .l1 .level-dot {
+    background: var(--green);
+  }
+  .l2 .level-dot {
+    background: var(--yellow);
+  }
+  .l3 .level-dot {
+    background: var(--red);
+  }
+  .ldare .level-dot {
+    background: var(--purple);
+  }
+
+  .level-label {
+    font-family: var(--font-dm-serif), Georgia, serif;
+    font-size: 1.3rem;
+    color: var(--text);
+  }
+  .level-count {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  .level-divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: var(--space-6);
+  }
+
+  .card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    background: var(--surface);
+    cursor: pointer;
+  }
+  .card:hover {
+    border-color: var(--muted);
+  }
+  .card.open.l1 {
+    border-color: var(--green);
+  }
+  .card.open.l2 {
+    border-color: var(--yellow);
+  }
+  .card.open.l3 {
+    border-color: var(--red);
+  }
+  .card.open.ldare {
+    border-color: var(--purple);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: var(--space-4) var(--space-5);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .card-num {
+    font-family: var(--font-dm-serif), Georgia, serif;
+    font-size: 1rem;
+    color: var(--muted);
+    min-width: 28px;
+  }
+  .card-emoji {
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .card-hint {
+    font-size: 0.8rem;
+    color: var(--muted);
+    flex: 1;
+    font-style: italic;
+  }
+  .card-arrow {
+    font-size: 0.75rem;
+    color: var(--muted);
+    transition: transform 0.25s;
+    margin-left: auto;
+  }
+  .card.open .card-arrow {
+    transform: rotate(90deg);
+  }
+
+  .card-body {
+    padding: 0 var(--space-5) var(--space-5) 62px;
+  }
+
+  .card-question {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text);
+    font-weight: 300;
+  }
+
+  /* color accents on open */
+  .card.open.l1 .card-num {
+    color: var(--green);
+  }
+  .card.open.l2 .card-num {
+    color: var(--yellow);
+  }
+  .card.open.l3 .card-num {
+    color: var(--red);
+  }
+  .card.open.ldare .card-num {
+    color: var(--purple);
+  }
+  .card.open.l1 .card-arrow {
+    color: var(--green);
+  }
+  .card.open.l2 .card-arrow {
+    color: var(--yellow);
+  }
+  .card.open.l3 .card-arrow {
+    color: var(--red);
+  }
+  .card.open.ldare .card-arrow {
+    color: var(--purple);
+  }
+}
