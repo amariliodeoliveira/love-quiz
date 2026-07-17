@@ -23,6 +23,34 @@ export interface DbCard {
   question: string;
   position: number;
   userId: number | null;
+  answeredAt: Date | null;
+}
+
+interface CardRow {
+  id: number;
+  level: Level;
+  question: string;
+  position: number;
+  user_id: number | null;
+  answered_at: string | Date | null;
+}
+
+function mapCardRow(row: CardRow): DbCard {
+  return {
+    id: row.id,
+    level: row.level,
+    question: row.question,
+    position: row.position,
+    userId: row.user_id,
+    answeredAt: row.answered_at ? new Date(row.answered_at) : null,
+  };
+}
+
+export interface Countdown {
+  targetAt: Date;
+  timeZone: string;
+  location: string | null;
+  label: string;
 }
 
 export interface Session {
@@ -114,25 +142,25 @@ export async function updateAvatarColor(
 }
 
 export async function getAllCards(): Promise<DbCard[]> {
-  const { rows } = await sql<DbCard>`
-    SELECT id, level, question, position, user_id AS "userId"
+  const { rows } = await sql<CardRow>`
+    SELECT id, level, question, position, user_id, answered_at
     FROM cards
     ORDER BY level, position;
   `;
-  return rows;
+  return rows.map(mapCardRow);
 }
 
 export async function getCardsForUser(session: Session): Promise<DbCard[]> {
   if (session.role === "admin") {
     return getAllCards();
   }
-  const { rows } = await sql<DbCard>`
-    SELECT id, level, question, position, user_id AS "userId"
+  const { rows } = await sql<CardRow>`
+    SELECT id, level, question, position, user_id, answered_at
     FROM cards
     WHERE user_id = ${session.userId}
     ORDER BY level, position;
   `;
-  return rows;
+  return rows.map(mapCardRow);
 }
 
 export async function createCard(
@@ -145,12 +173,31 @@ export async function createCard(
   `;
   const nextPosition = (maxRows[0].max ?? -1) + 1;
 
-  const { rows } = await sql<DbCard>`
+  const { rows } = await sql<CardRow>`
     INSERT INTO cards (level, question, position, user_id)
     VALUES (${level}, ${question}, ${nextPosition}, ${userId})
-    RETURNING id, level, question, position, user_id AS "userId";
+    RETURNING id, level, question, position, user_id, answered_at;
   `;
-  return rows[0];
+  return mapCardRow(rows[0]);
+}
+
+/**
+ * Sets (never toggles) whether a card is answered. Always takes an explicit target
+ * value from the caller rather than flipping whatever's currently stored — with two
+ * people sharing this deck from separate logins, a toggle could race (both see
+ * "unanswered", both flip, second flip cancels the first). Setting an explicit value
+ * is idempotent: both requests land on the same end state no matter which arrives last.
+ */
+export async function setCardAnswered(id: number, answered: boolean): Promise<void> {
+  await sql`
+    UPDATE cards SET answered_at = ${answered ? new Date().toISOString() : null}
+    WHERE id = ${id};
+  `;
+}
+
+/** Clears answered_at for every card — lets the deck be replayed from scratch. */
+export async function resetAllAnswered(): Promise<void> {
+  await sql`UPDATE cards SET answered_at = NULL;`;
 }
 
 /** Updates a card's level/question, enforcing ownership for non-admins. Returns whether a row was changed. */
@@ -186,4 +233,41 @@ export async function deleteCard(
     DELETE FROM cards WHERE id = ${id} AND user_id = ${requester.userId};
   `;
   return (rowCount ?? 0) > 0;
+}
+
+export async function getCountdown(): Promise<Countdown | null> {
+  const { rows } = await sql<{
+    target_at: string;
+    time_zone: string;
+    location: string | null;
+    label: string;
+  }>`
+    SELECT target_at, time_zone, location, label FROM countdown WHERE id = 1;
+  `;
+  const row = rows[0];
+  return row
+    ? {
+        targetAt: new Date(row.target_at),
+        timeZone: row.time_zone,
+        location: row.location,
+        label: row.label,
+      }
+    : null;
+}
+
+export async function setCountdown(
+  targetAt: Date,
+  timeZone: string,
+  location: string | null,
+  label: string,
+): Promise<void> {
+  await sql`
+    INSERT INTO countdown (id, target_at, time_zone, location, label)
+    VALUES (1, ${targetAt.toISOString()}, ${timeZone}, ${location}, ${label})
+    ON CONFLICT (id) DO UPDATE SET
+      target_at = EXCLUDED.target_at,
+      time_zone = EXCLUDED.time_zone,
+      location = EXCLUDED.location,
+      label = EXCLUDED.label;
+  `;
 }

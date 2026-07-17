@@ -9,6 +9,7 @@ export default async function TruthOrDarePage() {
     id: String(c.id),
     level: c.level,
     question: c.question,
+    answered: c.answeredAt !== null,
   }));
 
   return <CardDeck cards={cards} />;

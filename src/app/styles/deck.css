@@ -55,12 +55,14 @@
     border-radius: var(--radius-md);
     margin-bottom: 10px;
     overflow: hidden;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, opacity 0.2s;
     background: var(--surface);
-    cursor: pointer;
   }
   .card:hover {
     border-color: var(--muted);
+  }
+  .card.answered:not(.open) {
+    opacity: 0.55;
   }
   .card.open.l1 {
     border-color: var(--green);
@@ -78,10 +80,31 @@
   .card-header {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
     padding: var(--space-4) var(--space-5);
     user-select: none;
     -webkit-user-select: none;
+  }
+  .card-check {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--purple);
+    cursor: pointer;
+  }
+  .card-toggle {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    background: none;
+    border: 0;
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
   }
   .card-num {
     font-family: var(--font-dm-serif), Georgia, serif;
