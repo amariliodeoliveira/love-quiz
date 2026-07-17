@@ -1,34 +1,27 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getCardsForUser, createCard } from "@/lib/db";
-import { requireSession } from "@/lib/api";
-import { LEVEL_META, type Level } from "@/data/cards";
+import { withSession } from "@/lib/api";
+import { ALL_LEVELS } from "@/data/cards";
+import { GAME_PATH } from "@/lib/routes";
 
-const VALID_LEVELS = Object.keys(LEVEL_META) as Level[];
-
-export async function GET() {
-  const session = await requireSession();
-  if (session instanceof NextResponse) return session;
-
+export const GET = withSession(async (session) => {
   const cards = await getCardsForUser(session);
   return NextResponse.json({ cards });
-}
+});
 
-export async function POST(request: Request) {
-  const session = await requireSession();
-  if (session instanceof NextResponse) return session;
-
+export const POST = withSession(async (session, request: Request) => {
   const { level, question } = await request.json();
 
   if (
     typeof question !== "string" ||
     !question.trim() ||
-    !VALID_LEVELS.includes(level)
+    !ALL_LEVELS.includes(level)
   ) {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
 
   const card = await createCard(level, question.trim(), session.userId);
-  revalidatePath("/");
+  revalidatePath(GAME_PATH);
   return NextResponse.json({ card });
-}
+});
