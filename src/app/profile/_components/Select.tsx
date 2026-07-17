@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { useClickOutside } from "@/lib/useClickOutside";
 
 export default function Select({
   value,
@@ -14,16 +15,7 @@ export default function Select({
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    function onPointerDown(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
-  }, [open]);
+  useClickOutside(rootRef, open, () => setOpen(false));
 
   const selected = options.find((o) => o.value === value);
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ALL_LEVELS, LEVEL_META, type Level } from "@/data/cards";
 import type { DbCard, Session } from "@/lib/db";
+import { postJson, patchJson } from "@/lib/http";
 import CardFormModal from "./CardFormModal";
 import ConfirmModal from "./ConfirmModal";
 
@@ -19,22 +20,19 @@ export default function ProfileDashboard({
 
   async function handleFormSubmit(level: Level, question: string) {
     if (formCard === "new") {
-      const res = await fetch("/api/profile/cards", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ level, question }),
-      });
-      if (res.ok) {
-        const { card } = await res.json();
-        setCards((prev) => [...prev, card]);
+      const { ok, data } = await postJson<{ card: DbCard }>(
+        "/api/profile/cards",
+        { level, question },
+      );
+      if (ok && data) {
+        setCards((prev) => [...prev, data.card]);
       }
     } else if (formCard) {
-      const res = await fetch(`/api/profile/cards/${formCard.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ level, question }),
+      const { ok } = await patchJson(`/api/profile/cards/${formCard.id}`, {
+        level,
+        question,
       });
-      if (res.ok) {
+      if (ok) {
         setCards((prev) =>
           prev.map((c) => (c.id === formCard.id ? { ...c, level, question } : c)),
         );

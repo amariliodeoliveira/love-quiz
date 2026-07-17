@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AVATAR_COLORS, avatarColorHex, type AvatarColorName } from "@/lib/avatar";
+import { useClickOutside } from "@/lib/useClickOutside";
+import { LOGIN_PATH } from "@/lib/routes";
+import { patchJson } from "@/lib/http";
 
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -20,29 +23,16 @@ export default function UserAvatarMenu({
   const [color, setColor] = useState(avatarColor);
   const rootRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    function onPointerDown(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onPointerDown);
-    return () => document.removeEventListener("mousedown", onPointerDown);
-  }, [open]);
+  useClickOutside(rootRef, open, () => setOpen(false));
 
   async function handlePickColor(name: AvatarColorName) {
     setColor(name);
-    await fetch("/api/profile/me", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ avatarColor: name }),
-    });
+    await patchJson("/api/profile/me", { avatarColor: name });
   }
 
   async function handleLogout() {
     await fetch("/api/profile/logout", { method: "POST" });
-    router.push("/profile/login");
+    router.push(LOGIN_PATH);
     router.refresh();
   }
 
