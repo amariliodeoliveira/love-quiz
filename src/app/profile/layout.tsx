@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { getUserById } from "@/lib/db";
-import UserAvatarMenu from "./_components/UserAvatarMenu";
+import { GAME_PATH } from "@/lib/routes";
+import AppHeader from "../_components/AppHeader";
 
 export default async function ProfileLayout({
   children,
@@ -13,14 +13,7 @@ export default async function ProfileLayout({
 
   return (
     <>
-      <header className="profile-header">
-        <Link href="/" className="profile-back-link">
-          ← Back to game
-        </Link>
-        {user && (
-          <UserAvatarMenu username={user.username} avatarColor={user.avatarColor} />
-        )}
-      </header>
+      <AppHeader backHref={GAME_PATH} backLabel="← Back to game" user={user} />
       <main className="profile-main">{children}</main>
       <footer>
         <p>Couples Card Deck</p>
