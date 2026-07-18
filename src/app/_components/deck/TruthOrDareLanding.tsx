@@ -3,7 +3,7 @@ import { GAME_ROUND_PATH } from "@/lib/routes";
 
 export default function TruthOrDareLanding() {
   return (
-    <div className="border-b border-border px-6 pt-18 pb-14 text-center">
+    <div className="px-6 pt-18 pb-14 text-center">
       <p className="mb-5 text-xs font-medium tracking-[0.18em] text-muted uppercase">
         Interactive Game
       </p>
