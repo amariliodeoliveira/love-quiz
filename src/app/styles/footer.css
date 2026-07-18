@@ -2,7 +2,7 @@
 @layer components {
   footer {
     text-align: center;
-    padding: var(--space-15) var(--space-6) 0;
+    padding: var(--space-15) var(--space-6) var(--space-8);
     font-size: 0.75rem;
     color: var(--muted);
     letter-spacing: 0.06em;

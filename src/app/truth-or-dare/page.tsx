@@ -17,7 +17,9 @@ export default async function TruthOrDarePage() {
     <>
       <AppHeader user={user} countdown={countdown} />
       <div className="profile-main">
-        <TruthOrDareLanding />
+        <div className="flex flex-1 flex-col justify-center">
+          <TruthOrDareLanding />
+        </div>
         <DeckFooter questionCount={questionCount} dareCount={dareCount} />
       </div>
     </>
