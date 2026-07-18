@@ -36,34 +36,34 @@ describe("proxy", () => {
 
   it("redirects an unauthenticated request away from a protected page", () => {
     const location = redirectLocation(proxy(requestFor("/truth-or-dare")));
-    expect(location?.pathname).toBe("/profile/login");
+    expect(location?.pathname).toBe("/manage/login");
     expect(location?.searchParams.get("from")).toBe("/truth-or-dare");
   });
 
   it("preserves nested paths under a protected prefix in the redirect", () => {
-    const location = redirectLocation(proxy(requestFor("/profile/settings")));
-    expect(location?.searchParams.get("from")).toBe("/profile/settings");
+    const location = redirectLocation(proxy(requestFor("/manage/settings")));
+    expect(location?.searchParams.get("from")).toBe("/manage/settings");
   });
 
   it("lets an unauthenticated request reach the login page itself", () => {
-    expect(isPassThrough(proxy(requestFor("/profile/login")))).toBe(true);
+    expect(isPassThrough(proxy(requestFor("/manage/login")))).toBe(true);
   });
 
   it("lets an authenticated request through to a protected page", () => {
     expect(isPassThrough(proxy(requestFor("/truth-or-dare", true)))).toBe(true);
-    expect(isPassThrough(proxy(requestFor("/profile", true)))).toBe(true);
+    expect(isPassThrough(proxy(requestFor("/manage", true)))).toBe(true);
   });
 
   it("bounces an authenticated request away from the login page", () => {
-    const location = redirectLocation(proxy(requestFor("/profile/login", true)));
+    const location = redirectLocation(proxy(requestFor("/manage/login", true)));
     expect(location?.pathname).toBe("/truth-or-dare");
   });
 
   it("treats a request with a tampered session cookie as unauthenticated", () => {
-    const request = new NextRequest(new URL("/profile", BASE_URL), {
+    const request = new NextRequest(new URL("/manage", BASE_URL), {
       headers: { cookie: `${COOKIE_NAME}=garbage.signature` },
     });
     const location = redirectLocation(proxy(request));
-    expect(location?.pathname).toBe("/profile/login");
+    expect(location?.pathname).toBe("/manage/login");
   });
 });

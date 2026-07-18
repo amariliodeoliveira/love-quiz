@@ -4,7 +4,7 @@ import { toCountdownDisplay } from "@/lib/countdown";
 import { GAME_PATH } from "@/lib/routes";
 import AppHeader from "../_components/AppHeader";
 
-export default async function ProfileLayout({
+export default async function ManageLayout({
   children,
 }: {
   children: React.ReactNode;

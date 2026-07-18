@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { parseSessionCookie, COOKIE_NAME } from "@/lib/auth";
-import { LOGIN_PATH, PROFILE_PATH, GAME_PATH } from "@/lib/routes";
+import { LOGIN_PATH, MANAGE_PATH, GAME_PATH } from "@/lib/routes";
 
-const PROTECTED_PREFIXES = [PROFILE_PATH, GAME_PATH];
+const PROTECTED_PREFIXES = [MANAGE_PATH, GAME_PATH];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -28,7 +28,7 @@ export function proxy(request: NextRequest) {
 }
 
 // Next requires `matcher` entries to be static string literals (parsed at build
-// time), so these can't be derived from PROFILE_PATH/GAME_PATH — keep in sync by hand.
+// time), so these can't be derived from MANAGE_PATH/GAME_PATH — keep in sync by hand.
 export const config = {
-  matcher: ["/profile/:path*", "/truth-or-dare/:path*"],
+  matcher: ["/manage/:path*", "/truth-or-dare/:path*"],
 };
