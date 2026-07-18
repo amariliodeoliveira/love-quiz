@@ -219,15 +219,10 @@ export async function incrementDareCompleted(id: number): Promise<void> {
  * Returns whether a row was changed.
  */
 export async function reactivateCard(id: number, requester: Session): Promise<boolean> {
-  if (requester.role === "admin") {
-    const { rowCount } = await sql`
-      UPDATE cards SET answered_at = NULL WHERE id = ${id};
-    `;
-    return (rowCount ?? 0) > 0;
-  }
+  const isAdmin = requester.role === "admin";
   const { rowCount } = await sql`
     UPDATE cards SET answered_at = NULL
-    WHERE id = ${id} AND user_id = ${requester.userId};
+    WHERE id = ${id} AND (${isAdmin} OR user_id = ${requester.userId});
   `;
   return (rowCount ?? 0) > 0;
 }
@@ -239,15 +234,10 @@ export async function updateCard(
   question: string,
   requester: Session,
 ): Promise<boolean> {
-  if (requester.role === "admin") {
-    const { rowCount } = await sql`
-      UPDATE cards SET level = ${level}, question = ${question} WHERE id = ${id};
-    `;
-    return (rowCount ?? 0) > 0;
-  }
+  const isAdmin = requester.role === "admin";
   const { rowCount } = await sql`
     UPDATE cards SET level = ${level}, question = ${question}
-    WHERE id = ${id} AND user_id = ${requester.userId};
+    WHERE id = ${id} AND (${isAdmin} OR user_id = ${requester.userId});
   `;
   return (rowCount ?? 0) > 0;
 }
@@ -257,12 +247,9 @@ export async function deleteCard(
   id: number,
   requester: Session,
 ): Promise<boolean> {
-  if (requester.role === "admin") {
-    const { rowCount } = await sql`DELETE FROM cards WHERE id = ${id};`;
-    return (rowCount ?? 0) > 0;
-  }
+  const isAdmin = requester.role === "admin";
   const { rowCount } = await sql`
-    DELETE FROM cards WHERE id = ${id} AND user_id = ${requester.userId};
+    DELETE FROM cards WHERE id = ${id} AND (${isAdmin} OR user_id = ${requester.userId});
   `;
   return (rowCount ?? 0) > 0;
 }
