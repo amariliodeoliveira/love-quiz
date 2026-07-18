@@ -23,7 +23,7 @@ export default function CountdownTicker({
   return (
     <button
       type="button"
-      className="flex flex-col items-center gap-0.5 text-subtext hover:text-text"
+      className="flex cursor-pointer flex-col items-center gap-0.5 text-subtext hover:text-text"
       onClick={onClick}
     >
       <span className="text-base font-medium tracking-[0.02em] tabular-nums">

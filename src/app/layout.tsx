@@ -28,9 +28,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${dmSerifDisplay.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${dmSerifDisplay.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      {/* min-h-dvh (dynamic viewport height), not min-h-full: `full` is a percentage
+          chained through html's own height, which is fragile (breaks if any ancestor
+          in that chain loses an explicit height) and doesn't account for mobile browser
+          chrome showing/hiding. `dvh` always reflects the actual visible viewport, so
+          the body — and any `flex-1` main content inside it — reliably fills at least
+          one full screen, keeping a page footer pinned to the bottom instead of
+          floating right after short content. */}
+      <body className="flex min-h-dvh flex-col">{children}</body>
     </html>
   );
 }

@@ -9,7 +9,6 @@
    Each partial is wrapped in `@layer components` so Tailwind utilities can
    always override them predictably. */
 @import "./styles/tabs.css";
-@import "./styles/deck.css";
 @import "./styles/footer.css";
 @import "./styles/profile.css";
 @import "./styles/primitives.css";
@@ -102,10 +101,6 @@ body {
   color: var(--text);
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-weight: 300;
-  min-height: 100vh;
-}
-body:has(footer) {
-  padding-bottom: var(--space-20);
 }
 
 /* Twemoji images (see src/lib/emoji.ts) — standard sizing so they sit inline with text
