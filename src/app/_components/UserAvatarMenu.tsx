@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AVATAR_COLORS, avatarColorHex, type AvatarColorName } from "@/lib/avatar";
 import { useClickOutside } from "@/lib/useClickOutside";
-import { LOGIN_PATH } from "@/lib/routes";
+import { LOGIN_PATH, MANAGE_PATH } from "@/lib/routes";
 import { patchJson } from "@/lib/http";
 
 function capitalize(value: string): string {
@@ -83,6 +84,13 @@ export default function UserAvatarMenu({
           >
             {hasCountdown ? "Edit countdown" : "+ Set countdown"}
           </button>
+          <Link
+            href={MANAGE_PATH}
+            className="mb-2 block w-full cursor-pointer text-left text-xs text-subtext hover:text-text"
+            onClick={() => setOpen(false)}
+          >
+            Edit couple card deck
+          </Link>
           <button type="button" className="avatar-logout" onClick={handleLogout}>
             Log out
           </button>

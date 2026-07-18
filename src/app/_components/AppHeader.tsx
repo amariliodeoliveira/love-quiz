@@ -5,19 +5,23 @@ import Link from "next/link";
 import type { DbUser } from "@/lib/db";
 import type { CountdownDisplay } from "@/lib/countdown";
 import UserAvatarMenu from "./UserAvatarMenu";
-import CountdownTicker from "./CountdownTicker";
-import CountdownView from "./CountdownView";
+import CountdownTicker from "./countdown/CountdownTicker";
+import CountdownView from "./countdown/CountdownView";
 import Modal from "./Modal";
-import CountdownForm, { type CountdownFormInitial } from "./CountdownForm";
+import CountdownForm, { type CountdownFormInitial } from "./countdown/CountdownForm";
 
 export default function AppHeader({
   backHref,
   backLabel,
+  variant = "default",
   user,
   countdown: initialCountdown,
 }: {
-  backHref: string;
-  backLabel: string;
+  backHref?: string;
+  backLabel?: string;
+  /** "game" swaps the countdown ticker for the game wordmark and styles the back
+   * link as an exit action — used only on the immersive /truth-or-dare/game screen. */
+  variant?: "default" | "game";
   user: Pick<DbUser, "username" | "avatarColor"> | null;
   countdown: CountdownDisplay | null;
 }) {
@@ -36,16 +40,25 @@ export default function AppHeader({
 
   return (
     <header className="profile-header">
-      <Link href={backHref} className="profile-back-link">
-        {backLabel}
-      </Link>
+      {backHref && backLabel && (
+        <Link
+          href={backHref}
+          className={variant === "game" ? "profile-back-link exit-game-link" : "profile-back-link"}
+        >
+          {backLabel}
+        </Link>
+      )}
 
-      {countdown && (
-        <CountdownTicker
-          msRemaining={countdown.msRemaining}
-          label={countdown.label}
-          onClick={() => setViewingCountdown(true)}
-        />
+      {variant === "game" ? (
+        <p className="header-game-wordmark">Couples Card Deck</p>
+      ) : (
+        countdown && (
+          <CountdownTicker
+            msRemaining={countdown.msRemaining}
+            label={countdown.label}
+            onClick={() => setViewingCountdown(true)}
+          />
+        )
       )}
 
       {user && (
