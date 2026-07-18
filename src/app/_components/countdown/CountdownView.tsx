@@ -1,7 +1,7 @@
 "use client";
 
 import { useCountdownTick } from "@/lib/useCountdownTick";
-import EmojiText from "./EmojiText";
+import EmojiText from "../EmojiText";
 
 function pad(n: number): string {
   return n.toString().padStart(2, "0");

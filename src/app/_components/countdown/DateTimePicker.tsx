@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { useClickOutside } from "@/lib/useClickOutside";
-import Select from "./Select";
+import Select from "../Select";
 import type { WallClockParts } from "@/lib/countdown";
 
 const HOUR_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1).map((h) => ({
