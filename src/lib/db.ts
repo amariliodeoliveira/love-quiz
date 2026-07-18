@@ -24,6 +24,7 @@ export interface DbCard {
   position: number;
   userId: number | null;
   answeredAt: Date | null;
+  timesCompleted: number;
 }
 
 interface CardRow {
@@ -33,6 +34,7 @@ interface CardRow {
   position: number;
   user_id: number | null;
   answered_at: string | Date | null;
+  times_completed: number;
 }
 
 function mapCardRow(row: CardRow): DbCard {
@@ -43,6 +45,7 @@ function mapCardRow(row: CardRow): DbCard {
     position: row.position,
     userId: row.user_id,
     answeredAt: row.answered_at ? new Date(row.answered_at) : null,
+    timesCompleted: row.times_completed,
   };
 }
 
@@ -143,7 +146,7 @@ export async function updateAvatarColor(
 
 export async function getAllCards(): Promise<DbCard[]> {
   const { rows } = await sql<CardRow>`
-    SELECT id, level, question, position, user_id, answered_at
+    SELECT id, level, question, position, user_id, answered_at, times_completed
     FROM cards
     ORDER BY level, position;
   `;
@@ -155,7 +158,7 @@ export async function getCardsForUser(session: Session): Promise<DbCard[]> {
     return getAllCards();
   }
   const { rows } = await sql<CardRow>`
-    SELECT id, level, question, position, user_id, answered_at
+    SELECT id, level, question, position, user_id, answered_at, times_completed
     FROM cards
     WHERE user_id = ${session.userId}
     ORDER BY level, position;
@@ -176,7 +179,7 @@ export async function createCard(
   const { rows } = await sql<CardRow>`
     INSERT INTO cards (level, question, position, user_id)
     VALUES (${level}, ${question}, ${nextPosition}, ${userId})
-    RETURNING id, level, question, position, user_id, answered_at;
+    RETURNING id, level, question, position, user_id, answered_at, times_completed;
   `;
   return mapCardRow(rows[0]);
 }
@@ -198,6 +201,35 @@ export async function setCardAnswered(id: number, answered: boolean): Promise<vo
 /** Clears answered_at for every card — lets the deck be replayed from scratch. */
 export async function resetAllAnswered(): Promise<void> {
   await sql`UPDATE cards SET answered_at = NULL;`;
+}
+
+/** Increments a dare's completion counter. Scoped to level='dare' — dares never get
+ * answered_at set, so this is the only signal for how many times one's been done. */
+export async function incrementDareCompleted(id: number): Promise<void> {
+  await sql`
+    UPDATE cards SET times_completed = times_completed + 1
+    WHERE id = ${id} AND level = 'dare';
+  `;
+}
+
+/**
+ * Puts an answered truth back into the draw pool, enforcing ownership for non-admins.
+ * Unlike setCardAnswered (shared gameplay state, no ownership check), this is a personal
+ * management action — a user should only be able to reactivate their own cards.
+ * Returns whether a row was changed.
+ */
+export async function reactivateCard(id: number, requester: Session): Promise<boolean> {
+  if (requester.role === "admin") {
+    const { rowCount } = await sql`
+      UPDATE cards SET answered_at = NULL WHERE id = ${id};
+    `;
+    return (rowCount ?? 0) > 0;
+  }
+  const { rowCount } = await sql`
+    UPDATE cards SET answered_at = NULL
+    WHERE id = ${id} AND user_id = ${requester.userId};
+  `;
+  return (rowCount ?? 0) > 0;
 }
 
 /** Updates a card's level/question, enforcing ownership for non-admins. Returns whether a row was changed. */

@@ -26,7 +26,8 @@ CREATE TABLE cards (
   question TEXT NOT NULL,
   position INTEGER NOT NULL,
   user_id INTEGER REFERENCES users(id),
-  answered_at TIMESTAMPTZ
+  answered_at TIMESTAMPTZ,
+  times_completed INTEGER NOT NULL DEFAULT 0
   -- level is app-validated against src/data/cards.ts ALL_LEVELS — no DB check constraint today.
   -- user_id has no index today; getCardsForUser() filters by it on every dashboard load —
   -- worth an index (CREATE INDEX cards_user_id_idx ON cards(user_id);) if the deck grows a lot.
@@ -34,6 +35,9 @@ CREATE TABLE cards (
   -- reading guide for a call, not per-user progress). Set via an explicit {answered: bool}
   -- request (never a server-side toggle) so two people marking it around the same time
   -- can't race each other into flipping it back off — see src/app/api/cards/[id]/answered.
+  -- Only ever meaningful for level='dare' rows: dares never get answered_at set (they never
+  -- leave the draw pool), and instead track completions via times_completed, incremented by
+  -- src/app/api/cards/[id]/complete.
 );
 
 -- Single shared row: the live countdown shown to both signed-in users (e.g. "next time
