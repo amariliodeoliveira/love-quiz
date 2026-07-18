@@ -1,16 +1,13 @@
 import AppHeader from "../_components/AppHeader";
 import TruthOrDareLanding from "../_components/deck/TruthOrDareLanding";
 import DeckFooter from "../_components/deck/DeckFooter";
-import { getSession } from "@/lib/auth";
-import { getUserById, getAllCards, getCountdown } from "@/lib/db";
-import { toCountdownDisplay } from "@/lib/countdown";
+import { getAppHeaderData } from "@/lib/appHeaderData";
+import { getAllCards } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function TruthOrDarePage() {
-  const session = await getSession();
-  const user = session ? await getUserById(session.userId) : null;
-  const countdown = toCountdownDisplay(await getCountdown());
+  const { user, countdown } = await getAppHeaderData();
   const cards = await getAllCards();
 
   const dareCount = cards.filter((c) => c.level === "dare").length;

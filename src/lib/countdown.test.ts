@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { breakdownDuration, msUntil, utcToZonedParts, zonedTimeToUtc } from "./countdown";
+import {
+  breakdownDuration,
+  msUntil,
+  toCountdownDisplay,
+  utcToZonedParts,
+  zonedTimeToUtc,
+} from "./countdown";
 
 describe("breakdownDuration", () => {
   it("breaks down a duration with all units present", () => {
@@ -47,6 +53,40 @@ describe("msUntil", () => {
     const now = new Date("2026-01-02T00:00:00.000Z");
     const target = new Date("2026-01-01T00:00:00.000Z");
     expect(msUntil(target, now)).toBe(-86_400_000);
+  });
+});
+
+describe("toCountdownDisplay", () => {
+  it("returns null when no countdown is configured — the normal 'not set yet' state", () => {
+    expect(toCountdownDisplay(null)).toBeNull();
+  });
+
+  it("maps a configured countdown to display shape with a positive msRemaining", () => {
+    const future = new Date(Date.now() + 60_000);
+    const result = toCountdownDisplay({
+      targetAt: future,
+      timeZone: "America/Sao_Paulo",
+      location: "Lisbon, Portugal",
+      label: "Together again in",
+    });
+    expect(result).toMatchObject({
+      label: "Together again in",
+      location: "Lisbon, Portugal",
+      timeZone: "America/Sao_Paulo",
+      targetAtIso: future.toISOString(),
+    });
+    expect(result!.msRemaining).toBeGreaterThan(0);
+  });
+
+  it("reports a negative msRemaining once the target has already passed", () => {
+    const past = new Date(Date.now() - 60_000);
+    const result = toCountdownDisplay({
+      targetAt: past,
+      timeZone: "UTC",
+      location: null,
+      label: "Together again in",
+    });
+    expect(result!.msRemaining).toBeLessThan(0);
   });
 });
 

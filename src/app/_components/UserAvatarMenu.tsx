@@ -82,7 +82,7 @@ export default function UserAvatarMenu({
               onEditCountdown();
             }}
           >
-            {hasCountdown ? "Edit countdown" : "+ Set countdown"}
+            {hasCountdown ? "Edit countdown" : "Create a countdown"}
           </button>
           <Link
             href={MANAGE_PATH}

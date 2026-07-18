@@ -1,5 +1,4 @@
-import { getSession } from "@/lib/auth";
-import { getUserById } from "@/lib/db";
+import { getAppHeaderData } from "@/lib/appHeaderData";
 import { GAME_PATH } from "@/lib/routes";
 import AppHeader from "../../_components/AppHeader";
 
@@ -8,8 +7,7 @@ export default async function GameLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
-  const user = session ? await getUserById(session.userId) : null;
+  const { user, countdown } = await getAppHeaderData();
 
   return (
     <>
@@ -18,7 +16,7 @@ export default async function GameLayout({
         backHref={GAME_PATH}
         backLabel="➔ Exit Game"
         user={user}
-        countdown={null}
+        countdown={countdown}
       />
       <div className="profile-main">{children}</div>
     </>

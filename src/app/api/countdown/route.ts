@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { setCountdown } from "@/lib/db";
 import { withSession } from "@/lib/api";
 import { zonedTimeToUtc } from "@/lib/countdown";
@@ -39,5 +40,9 @@ export const PATCH = withSession(async (_session, request: Request) => {
   }
 
   await setCountdown(targetAt, timeZone, location?.trim() || null, label.trim());
+  // { expire: 0 }, not the "max" stale-while-revalidate profile: a Route Handler responding
+  // to this exact save needs the countdown to read fresh on the very next request, not after
+  // one more stale serve — see Next's revalidateTag docs on immediate-expiration Route Handlers.
+  revalidateTag("countdown", { expire: 0 });
   return NextResponse.json({ ok: true });
 });
