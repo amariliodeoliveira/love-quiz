@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Couples Card Deck
 
-## Getting Started
+A small private site for two — a Truth or Dare card deck, and a live countdown to when
+we next see each other. Built with Next.js (App Router), React, TypeScript, Tailwind
+CSS v4, and Postgres (Neon) via `@vercel/postgres`.
 
-First, run the development server:
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). You'll need a `.env.local` with
+the database and session env vars — see [.claude/database-guidelines.md](.claude/database-guidelines.md)
+for what each one is for.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Useful scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint            # eslint
+npm run test            # vitest run
+npm run test:watch      # vitest watch mode
+npm run build            # production build
+npm run db:qa-user:create   # create a disposable logged-in test user (no password)
+npm run db:qa-user:cleanup  # remove it
+```
 
-## Learn More
+## Where things live
 
-To learn more about Next.js, take a look at the following resources:
+- `src/app/_components/` — shared UI (`AppHeader`, `Modal`, `Select`, `UserAvatarMenu`,
+  `EmojiText`), plus `countdown/`, `deck/`, and `game/` subfolders for those features'
+  own components.
+- `src/app/manage/_components/` — dashboard/login-only UI.
+- `src/lib/` — shared logic (auth, db, countdown math, geocoding, etc.), tested
+  alongside the code it covers (`foo.ts` + `foo.test.ts`).
+- `db/schema.sql` — a snapshot of the live schema, kept in sync by hand (see
+  [.claude/database-guidelines.md](.claude/database-guidelines.md)).
+- `docs/vision.md` — where this project is headed (feed, plans, diary, entertainment
+  hub) — not built yet, just captured so it isn't lost.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project guidelines
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This repo is developed with Claude Code; the guidelines it (and any contributor)
+follows live in `.claude/`: [git-guidelines.md](.claude/git-guidelines.md),
+[engineering-guidelines.md](.claude/engineering-guidelines.md),
+[database-guidelines.md](.claude/database-guidelines.md),
+[testing-guidelines.md](.claude/testing-guidelines.md).
