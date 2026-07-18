@@ -55,24 +55,11 @@
     opacity: 0.8;
   }
 
-  .btn-danger-solid {
-    background: var(--red);
-    color: var(--bg);
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 10px var(--space-4);
-    font-family: var(--font-dm-sans), sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .btn-danger-solid:hover {
-    opacity: 0.85;
-  }
-
+  /* Shared shape for solid confirm-action buttons — only `background` differs
+     per variant below (text stays `--bg` across every solid button, including
+     `.btn` above, for contrast against a bold background). */
+  .btn-danger-solid,
   .btn-success-solid {
-    background: var(--green);
     color: var(--bg);
     border: none;
     border-radius: var(--radius-sm);
@@ -83,8 +70,15 @@
     cursor: pointer;
     transition: opacity 0.2s;
   }
+  .btn-danger-solid:hover,
   .btn-success-solid:hover {
     opacity: 0.85;
+  }
+  .btn-danger-solid {
+    background: var(--red);
+  }
+  .btn-success-solid {
+    background: var(--green);
   }
 
   .input {

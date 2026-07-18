@@ -43,14 +43,14 @@ export default function AppHeader({
       {backHref && backLabel && (
         <Link
           href={backHref}
-          className={variant === "game" ? "profile-back-link exit-game-link" : "profile-back-link"}
+          className={variant === "game" ? "profile-back-link font-semibold" : "profile-back-link"}
         >
           {backLabel}
         </Link>
       )}
 
       {variant === "game" ? (
-        <p className="header-game-wordmark">Couples Card Deck</p>
+        <p className="font-serif text-base text-text">Couples Card Deck</p>
       ) : (
         countdown && (
           <CountdownTicker
