@@ -1,4 +1,5 @@
 import GameRound from "../../_components/game/GameRound";
+import DeckFooter from "../../_components/deck/DeckFooter";
 import { getAllCards } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -12,5 +13,13 @@ export default async function GamePage() {
     answered: c.answeredAt !== null,
   }));
 
-  return <GameRound cards={cards} />;
+  const dareCount = cards.filter((c) => c.level === "dare").length;
+  const questionCount = cards.length - dareCount;
+
+  return (
+    <>
+      <GameRound cards={cards} />
+      <DeckFooter questionCount={questionCount} dareCount={dareCount} />
+    </>
+  );
 }

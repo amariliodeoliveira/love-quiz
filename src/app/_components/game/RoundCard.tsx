@@ -18,7 +18,7 @@ export default function RoundCard({
   onSkip?: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-6 px-6 py-16 text-center">
+    <>
       <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">
         {meta.emoji} {meta.label}
       </p>
@@ -35,6 +35,6 @@ export default function RoundCard({
           {skipLabel}
         </button>
       )}
-    </div>
+    </>
   );
 }
