@@ -1,6 +1,7 @@
 import { sql } from "@vercel/postgres";
-import type { Level } from "@/data/cards";
+import type { Card, Level } from "@/data/cards";
 import type { AvatarColorName } from "@/lib/avatar";
+import type { CardRef } from "@/lib/id";
 
 export type Role = "admin" | "user";
 
@@ -252,6 +253,174 @@ export async function deleteCard(
     DELETE FROM cards WHERE id = ${id} AND (${isAdmin} OR user_id = ${requester.userId});
   `;
   return (rowCount ?? 0) > 0;
+}
+
+export interface DbAiCard {
+  id: number;
+  level: Level;
+  question: string;
+  model: string;
+  createdAt: Date;
+  answeredAt: Date | null;
+  timesCompleted: number;
+}
+
+interface AiCardRow {
+  id: number;
+  level: Level;
+  question: string;
+  model: string;
+  created_at: string | Date;
+  answered_at: string | Date | null;
+  times_completed: number;
+}
+
+function mapAiCardRow(row: AiCardRow): DbAiCard {
+  return {
+    id: row.id,
+    level: row.level,
+    question: row.question,
+    model: row.model,
+    createdAt: new Date(row.created_at),
+    answeredAt: row.answered_at ? new Date(row.answered_at) : null,
+    timesCompleted: row.times_completed,
+  };
+}
+
+/** All AI-generated cards, most recent first — used by the Manage screen's "IA" tab. */
+export async function getAiCards(): Promise<DbAiCard[]> {
+  const { rows } = await sql<AiCardRow>`
+    SELECT id, level, question, model, created_at, answered_at, times_completed
+    FROM ai_cards
+    ORDER BY created_at DESC;
+  `;
+  return rows.map(mapAiCardRow);
+}
+
+export async function createAiCard(
+  level: Level,
+  question: string,
+  model: string,
+): Promise<DbAiCard> {
+  const { rows } = await sql<AiCardRow>`
+    INSERT INTO ai_cards (level, question, model)
+    VALUES (${level}, ${question}, ${model})
+    RETURNING id, level, question, model, created_at, answered_at, times_completed;
+  `;
+  return mapAiCardRow(rows[0]);
+}
+
+/** Mirrors setCardAnswered — same explicit-value, no-toggle reasoning applies. */
+export async function setAiCardAnswered(id: number, answered: boolean): Promise<void> {
+  await sql`
+    UPDATE ai_cards SET answered_at = ${answered ? new Date().toISOString() : null}
+    WHERE id = ${id};
+  `;
+}
+
+/** Mirrors incrementDareCompleted. */
+export async function incrementAiDareCompleted(id: number): Promise<void> {
+  await sql`
+    UPDATE ai_cards SET times_completed = times_completed + 1
+    WHERE id = ${id} AND level = 'dare';
+  `;
+}
+
+/** The compact, LLM-maintained summary of topics already covered — '' until the first refresh. */
+export async function getAiContextSummary(): Promise<string> {
+  const { rows } = await sql<{ summary: string }>`
+    SELECT summary FROM ai_context WHERE id = 1;
+  `;
+  return rows[0]?.summary ?? "";
+}
+
+export async function upsertAiContextSummary(summary: string): Promise<void> {
+  await sql`
+    INSERT INTO ai_context (id, summary, updated_at)
+    VALUES (1, ${summary}, now())
+    ON CONFLICT (id) DO UPDATE SET summary = EXCLUDED.summary, updated_at = EXCLUDED.updated_at;
+  `;
+}
+
+/** Just the text of every already-answered question, across both tables — used to
+ * build the AI prompt context without pulling every column of every card over the wire
+ * (a plain SELECT of one column, not the full getAllCards()/getAiCards() shape). */
+export async function getAnsweredQuestions(): Promise<string[]> {
+  const { rows } = await sql<{ question: string }>`
+    SELECT question FROM cards WHERE answered_at IS NOT NULL
+    UNION ALL
+    SELECT question FROM ai_cards WHERE answered_at IS NOT NULL;
+  `;
+  return rows.map((r) => r.question);
+}
+
+/** How many ai_cards were created after the context summary was last refreshed. */
+export async function countAiCardsSinceContextUpdate(): Promise<number> {
+  const { rows } = await sql<{ count: number }>`
+    SELECT COUNT(*)::int AS count FROM ai_cards
+    WHERE created_at > COALESCE((SELECT updated_at FROM ai_context WHERE id = 1), '-infinity');
+  `;
+  return rows[0]?.count ?? 0;
+}
+
+/**
+ * The full draw pool for the game screen: manual cards plus AI-generated ones, merged
+ * into the lightweight `Card` shape GameRound already works with. AI card ids are
+ * prefixed `ai-<id>` so callers (the answered/complete API routes) can tell which table
+ * an id belongs to without either table knowing the other exists — see parseCardRef in
+ * src/lib/id.ts. This is the only place in the app that queries both tables at once.
+ */
+export async function getGameCards(): Promise<Card[]> {
+  const [manual, ai] = await Promise.all([getAllCards(), getAiCards()]);
+  const toCard = (id: string, c: { level: Level; question: string; answeredAt: Date | null }): Card => ({
+    id,
+    level: c.level,
+    question: c.question,
+    answered: c.answeredAt !== null,
+  });
+
+  return [
+    ...manual.map((c) => toCard(String(c.id), c)),
+    ...ai.map((c) => toCard(`ai-${c.id}`, c)),
+  ];
+}
+
+/** Routes "mark answered" to the right table for a card id of either source — the one
+ * place outside getGameCards that needs to know both tables exist. */
+export async function setCardAnsweredByRef(ref: CardRef, answered: boolean): Promise<void> {
+  if (ref.source === "ai") {
+    await setAiCardAnswered(ref.id, answered);
+  } else {
+    await setCardAnswered(ref.id, answered);
+  }
+}
+
+/** Routes "increment dare completion" to the right table for a card id of either source. */
+export async function incrementCardCompletedByRef(ref: CardRef): Promise<void> {
+  if (ref.source === "ai") {
+    await incrementAiDareCompleted(ref.id);
+  } else {
+    await incrementDareCompleted(ref.id);
+  }
+}
+
+/**
+ * One random unanswered manual truth, if any exists — used by the game's AI fallback
+ * flow to cheaply check "did the real deck pick up a new question?" (e.g. a partner
+ * added one mid-session) without pulling the whole pool over the wire for a single
+ * skip/confirm click.
+ */
+export async function getRandomUnansweredManualTruth(): Promise<Card | null> {
+  const { rows } = await sql<{ id: number; level: Level; question: string }>`
+    SELECT id, level, question FROM cards
+    WHERE level != 'dare' AND answered_at IS NULL
+    ORDER BY random()
+    LIMIT 1;
+  `;
+  const row = rows[0];
+  return row
+    ? { id: String(row.id), level: row.level, question: row.question, answered: false }
+    : null;
 }
 
 export async function getCountdown(): Promise<Countdown | null> {

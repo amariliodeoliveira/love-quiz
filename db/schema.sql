@@ -49,6 +49,34 @@ CREATE TABLE cards (
 -- meeting place's zone), used to convert the picked wall-clock time to target_at
 -- (see src/lib/countdown.ts zonedTimeToUtc) and to re-populate the edit form correctly.
 -- location is a free-text label only (e.g. "Lisbon, Portugal") — never used in the math.
+-- Questions generated on-demand by an LLM (via the Vercel AI Gateway) when the manual
+-- deck runs dry, or manually from the Manage screen's "IA" tab. Kept separate from
+-- `cards` because it has no `position` (no manual ordering — it's drawn like the rest
+-- of the deck) and no `user_id` (nobody "owns" an AI-generated question), and because it
+-- carries its own metadata (`model`) that has no meaning for a manually-written card.
+-- Joined into the shared game pool by src/lib/db.ts getAllCards(), with ids prefixed
+-- `ai-<id>` there to disambiguate from `cards` ids.
+CREATE TABLE ai_cards (
+  id SERIAL PRIMARY KEY,
+  level TEXT NOT NULL,
+  question TEXT NOT NULL,
+  model TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  answered_at TIMESTAMPTZ,
+  times_completed INTEGER NOT NULL DEFAULT 0
+);
+
+-- Single shared row (singleton, same pattern as `countdown` below): a compact,
+-- LLM-maintained summary of topics already covered by answered questions, sent as
+-- prompt context instead of the full question history so the prompt stays small as
+-- the deck grows. Refreshed periodically by src/lib/ai/context.ts.
+CREATE TABLE ai_context (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  summary TEXT NOT NULL DEFAULT '',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT ai_context_singleton CHECK (id = 1)
+);
+
 CREATE TABLE countdown (
   id INTEGER PRIMARY KEY DEFAULT 1,
   target_at TIMESTAMPTZ NOT NULL,

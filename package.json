@@ -13,8 +13,11 @@
     "db:qa-user:cleanup": "node --env-file=.env.local scripts/qa-test-user.mjs cleanup"
   },
   "dependencies": {
+    "@ai-sdk/google": "^4.0.39",
     "@twemoji/api": "^17.0.3",
+    "@vercel/functions": "^3.9.1",
     "@vercel/postgres": "^0.10.0",
+    "ai": "^7.0.58",
     "next": "16.2.10",
     "react": "19.2.7",
     "react-day-picker": "^10.0.1",
