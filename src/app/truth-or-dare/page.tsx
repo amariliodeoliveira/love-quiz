@@ -2,13 +2,13 @@ import AppHeader from "../_components/AppHeader";
 import TruthOrDareLanding from "../_components/deck/TruthOrDareLanding";
 import DeckFooter from "../_components/deck/DeckFooter";
 import { getAppHeaderData } from "@/lib/appHeaderData";
-import { getAllCards } from "@/lib/db";
+import { getGameCards } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function TruthOrDarePage() {
   const { user, countdown } = await getAppHeaderData();
-  const cards = await getAllCards();
+  const cards = await getGameCards();
 
   const dareCount = cards.filter((c) => c.level === "dare").length;
   const questionCount = cards.length - dareCount;
