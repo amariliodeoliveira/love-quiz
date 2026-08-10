@@ -19,18 +19,20 @@ const STAT_LABEL: Record<(typeof STAT_ORDER)[number], string> = {
  * exact date). No editing here on purpose: editing lives in the avatar menu. */
 export default function CountdownView({
   msRemaining,
+  anchoredAt,
   label,
   location,
   timeZone,
   targetAtIso,
 }: {
   msRemaining: number;
+  anchoredAt: number;
   label: string;
   location: string | null;
   timeZone: string;
   targetAtIso: string;
 }) {
-  const breakdown = useCountdownTick(msRemaining);
+  const breakdown = useCountdownTick(msRemaining, anchoredAt);
 
   const exactDate = new Intl.DateTimeFormat("en-US", {
     dateStyle: "full",

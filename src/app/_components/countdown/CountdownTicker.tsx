@@ -11,14 +11,16 @@ function pad(n: number): string {
  * read-only expanded view (see CountdownView); editing lives in the avatar menu. */
 export default function CountdownTicker({
   msRemaining,
+  anchoredAt,
   label,
   onClick,
 }: {
   msRemaining: number;
+  anchoredAt: number;
   label: string;
   onClick: () => void;
 }) {
-  const breakdown = useCountdownTick(msRemaining);
+  const breakdown = useCountdownTick(msRemaining, anchoredAt);
 
   return (
     <button

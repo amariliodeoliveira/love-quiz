@@ -26,6 +26,7 @@ export default function AppHeader({
   countdown: CountdownDisplay | null;
 }) {
   const [countdown, setCountdown] = useState(initialCountdown);
+  const [anchoredAt, setAnchoredAt] = useState(() => Date.now());
   const [viewingCountdown, setViewingCountdown] = useState(false);
   const [editingCountdown, setEditingCountdown] = useState(false);
 
@@ -55,6 +56,7 @@ export default function AppHeader({
         countdown && (
           <CountdownTicker
             msRemaining={countdown.msRemaining}
+            anchoredAt={anchoredAt}
             label={countdown.label}
             onClick={() => setViewingCountdown(true)}
           />
@@ -78,6 +80,7 @@ export default function AppHeader({
         {countdown && (
           <CountdownView
             msRemaining={countdown.msRemaining}
+            anchoredAt={anchoredAt}
             label={countdown.label}
             location={countdown.location}
             timeZone={countdown.timeZone}
@@ -95,6 +98,7 @@ export default function AppHeader({
           initial={formInitial}
           onCancel={() => setEditingCountdown(false)}
           onSaved={(result) => {
+            setAnchoredAt(Date.now());
             setCountdown({
               msRemaining: new Date(result.targetAtIso).getTime() - Date.now(),
               label: result.label,

@@ -34,6 +34,6 @@ export async function getAppHeaderData(): Promise<{
 }> {
   const session = await getSession();
   const user = session ? await getUserById(session.userId) : null;
-  const countdown = await getCachedCountdownDisplay();
+  const countdown = session ? await getCachedCountdownDisplay() : null;
   return { user, countdown };
 }
