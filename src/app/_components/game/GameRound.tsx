@@ -12,7 +12,9 @@ type Screen = "idle" | "truth" | "dare" | "finished";
 
 export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
   const [cards, setCards] = useState<Card[]>(initialCards);
-  const [screen, setScreen] = useState<Screen>("idle");
+  const [screen, setScreen] = useState<Screen>(() =>
+    initialCards.some((c) => c.level !== "dare" && !c.answered) ? "idle" : "finished",
+  );
   const [truthId, setTruthId] = useState<string | null>(null);
   const [dareId, setDareId] = useState<string | null>(null);
   const [dareError, setDareError] = useState<string | null>(null);
