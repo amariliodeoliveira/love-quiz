@@ -2,27 +2,69 @@
 
 import { useMemo, useState } from "react";
 import { LEVEL_META, type Level } from "@/data/cards";
-import type { DbCard, Session } from "@/lib/db";
+import type { DbAiCard, DbCard, Session } from "@/lib/db";
 import { formatAnsweredAtManila } from "@/lib/datetime";
 import { postJson, patchJson } from "@/lib/http";
 import ConfirmationModal from "@/app/_components/ConfirmationModal";
 import CardFormModal from "./CardFormModal";
+import AIGenerateModal from "./AIGenerateModal";
 
-type TopTab = "truths" | "dares";
-type TruthSubTab = "active" | "history";
+type TopTab = "truths" | "dares" | "ai";
+type SubTab = "active" | "history";
 
 const RANK_BADGES = ["🥇", "🥈", "🥉"];
 
+function byAnsweredAtDesc<T extends { answeredAt: Date | null }>(a: T, b: T): number {
+  return b.answeredAt!.getTime() - a.answeredAt!.getTime();
+}
+
+/** Active/History toggle shared by the Truths and IA tabs. */
+function SubTabToggle({
+  value,
+  onChange,
+  label,
+}: {
+  value: SubTab;
+  onChange: (value: SubTab) => void;
+  label: string;
+}) {
+  return (
+    <div className="tabs mb-6" role="group" aria-label={label}>
+      <button
+        type="button"
+        className={`tab ${value === "active" ? "active-all" : ""}`}
+        aria-pressed={value === "active"}
+        onClick={() => onChange("active")}
+      >
+        Active
+      </button>
+      <button
+        type="button"
+        className={`tab ${value === "history" ? "active-all" : ""}`}
+        aria-pressed={value === "history"}
+        onClick={() => onChange("history")}
+      >
+        History
+      </button>
+    </div>
+  );
+}
+
 export default function ManageDashboard({
   initialCards,
+  initialAiCards,
   session,
 }: {
   initialCards: DbCard[];
+  initialAiCards: DbAiCard[];
   session: Session;
 }) {
   const [cards, setCards] = useState<DbCard[]>(initialCards);
+  const [aiCards, setAiCards] = useState<DbAiCard[]>(initialAiCards);
   const [topTab, setTopTab] = useState<TopTab>("truths");
-  const [truthSubTab, setTruthSubTab] = useState<TruthSubTab>("active");
+  const [truthSubTab, setTruthSubTab] = useState<SubTab>("active");
+  const [aiSubTab, setAiSubTab] = useState<SubTab>("active");
+  const [showAiGenerateModal, setShowAiGenerateModal] = useState(false);
   const [formCard, setFormCard] = useState<DbCard | "new" | null>(null);
   const [pendingDelete, setPendingDelete] = useState<DbCard | null>(null);
   const [pendingReactivate, setPendingReactivate] = useState<DbCard | null>(null);
@@ -75,13 +117,27 @@ export default function ManageDashboard({
     setPendingReactivate(null);
   }
 
+  async function handleGenerateAi(level: Level) {
+    const { ok, data } = await postJson<{ card: DbAiCard }>("/api/ai-cards/generate", { level });
+    if (ok && data) {
+      setAiCards((prev) => [data.card, ...prev]);
+    }
+    return ok;
+  }
+
+  const activeAiCards = useMemo(
+    () => aiCards.filter((c) => c.answeredAt === null),
+    [aiCards],
+  );
+  const historyAiCards = useMemo(
+    () => aiCards.filter((c) => c.answeredAt !== null).sort(byAnsweredAtDesc),
+    [aiCards],
+  );
+
   const truths = useMemo(() => cards.filter((c) => c.level !== "dare"), [cards]);
   const activeTruths = truths.filter((c) => c.answeredAt === null);
   const historyTruths = useMemo(
-    () =>
-      truths
-        .filter((c) => c.answeredAt !== null)
-        .sort((a, b) => b.answeredAt!.getTime() - a.answeredAt!.getTime()),
+    () => truths.filter((c) => c.answeredAt !== null).sort(byAnsweredAtDesc),
     [truths],
   );
   const rankedDares = useMemo(
@@ -102,6 +158,9 @@ export default function ManageDashboard({
         <button onClick={() => setFormCard("new")} className="btn">
           + Add card
         </button>
+        <button onClick={() => setShowAiGenerateModal(true)} className="btn-ghost">
+          🤖 Generate with AI
+        </button>
       </div>
 
       <div className="tabs mb-6" role="group" aria-label="Manage section">
@@ -121,28 +180,19 @@ export default function ManageDashboard({
         >
           Dares
         </button>
+        <button
+          type="button"
+          className={`tab ${topTab === "ai" ? "active-all" : ""}`}
+          aria-pressed={topTab === "ai"}
+          onClick={() => setTopTab("ai")}
+        >
+          IA
+        </button>
       </div>
 
       {topTab === "truths" ? (
         <>
-          <div className="tabs mb-6" role="group" aria-label="Truths filter">
-            <button
-              type="button"
-              className={`tab ${truthSubTab === "active" ? "active-all" : ""}`}
-              aria-pressed={truthSubTab === "active"}
-              onClick={() => setTruthSubTab("active")}
-            >
-              Active
-            </button>
-            <button
-              type="button"
-              className={`tab ${truthSubTab === "history" ? "active-all" : ""}`}
-              aria-pressed={truthSubTab === "history"}
-              onClick={() => setTruthSubTab("history")}
-            >
-              History
-            </button>
-          </div>
+          <SubTabToggle value={truthSubTab} onChange={setTruthSubTab} label="Truths filter" />
 
           {(truthSubTab === "active" ? activeTruths : historyTruths).map((card) => {
             const meta = LEVEL_META[card.level];
@@ -175,7 +225,7 @@ export default function ManageDashboard({
             );
           })}
         </>
-      ) : (
+      ) : topTab === "dares" ? (
         rankedDares.map((card, index) => (
           <div key={card.id} className="dashboard-card-row">
             <p className="dashboard-card-question">
@@ -192,6 +242,28 @@ export default function ManageDashboard({
             </div>
           </div>
         ))
+      ) : (
+        <>
+          <SubTabToggle value={aiSubTab} onChange={setAiSubTab} label="AI questions filter" />
+
+          {(aiSubTab === "active" ? activeAiCards : historyAiCards).map((card) => {
+            const meta = LEVEL_META[card.level];
+            return (
+              <div key={card.id} className="dashboard-card-row">
+                <div>
+                  <p className="dashboard-card-question">
+                    {meta.emoji} {card.question}
+                  </p>
+                  <p className="text-xs text-muted">
+                    {card.answeredAt
+                      ? `Answered on ${formatAnsweredAtManila(card.answeredAt)}`
+                      : `Generated by ${card.model}`}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </>
       )}
 
       {formCard !== null && (
@@ -201,6 +273,10 @@ export default function ManageDashboard({
           onClose={() => setFormCard(null)}
           onSubmit={handleFormSubmit}
         />
+      )}
+
+      {showAiGenerateModal && (
+        <AIGenerateModal onClose={() => setShowAiGenerateModal(false)} onGenerate={handleGenerateAi} />
       )}
 
       <ConfirmationModal
