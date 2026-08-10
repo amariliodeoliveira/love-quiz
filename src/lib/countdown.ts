@@ -24,6 +24,16 @@ export function msUntil(targetAt: Date, now: Date = new Date()): number {
   return targetAt.getTime() - now.getTime();
 }
 
+/**
+ * Re-derives "ms remaining" at time `now` from a baseline `msRemaining` recorded at
+ * `anchoredAt`. Every ticking display of the same countdown must share the same
+ * `anchoredAt` — that's what keeps two independently-mounted displays (e.g. a header
+ * ticker and a modal opened later) in sync instead of drifting apart.
+ */
+export function remainingMsAt(msRemaining: number, anchoredAt: number, now: number): number {
+  return msRemaining - (now - anchoredAt);
+}
+
 export interface CountdownDisplay {
   msRemaining: number;
   label: string;

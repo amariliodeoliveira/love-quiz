@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   breakdownDuration,
   msUntil,
+  remainingMsAt,
   toCountdownDisplay,
   utcToZonedParts,
   zonedTimeToUtc,
@@ -138,5 +139,32 @@ describe("utcToZonedParts", () => {
       hour: 9,
       minute: 30,
     });
+  });
+});
+
+describe("remainingMsAt", () => {
+  it("counts down as time passes since the anchor", () => {
+    const anchoredAt = 1_000_000;
+    const msRemaining = 60_000;
+    expect(remainingMsAt(msRemaining, anchoredAt, anchoredAt)).toBe(60_000);
+    expect(remainingMsAt(msRemaining, anchoredAt, anchoredAt + 10_000)).toBe(50_000);
+  });
+
+  it("gives the same result regardless of when the caller mounted, as long as anchoredAt matches", () => {
+    const anchoredAt = 1_000_000;
+    const msRemaining = 5 * 60_000;
+    const now = anchoredAt + 3 * 60_000;
+
+    const headerMountedAtLoad = remainingMsAt(msRemaining, anchoredAt, now);
+    const modalMountedLater = remainingMsAt(msRemaining, anchoredAt, now);
+
+    expect(modalMountedLater).toBe(headerMountedAtLoad);
+  });
+
+  it("goes negative past the target, consistent with breakdownDuration treating <= 0 as past", () => {
+    const anchoredAt = 1_000_000;
+    const result = remainingMsAt(60_000, anchoredAt, anchoredAt + 90_000);
+    expect(result).toBe(-30_000);
+    expect(breakdownDuration(result).isPast).toBe(true);
   });
 });
