@@ -9,6 +9,7 @@ export default function RoundCard({
   children,
   skipLabel,
   onSkip,
+  badge,
 }: {
   meta: LevelMeta;
   question: string;
@@ -16,9 +17,16 @@ export default function RoundCard({
   /** Smaller underlined link below the main actions — only truths have a "skip" of this kind. */
   skipLabel?: string;
   onSkip?: () => void;
+  /** Small pill shown above the level — e.g. flagging an AI-generated card. */
+  badge?: string;
 }) {
   return (
     <>
+      {badge && (
+        <span className="inline-block rounded-full border border-purple bg-purple-dim px-2 py-0.5 text-xs font-medium text-purple">
+          {badge}
+        </span>
+      )}
       <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">
         {meta.emoji} {meta.label}
       </p>
