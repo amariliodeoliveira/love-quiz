@@ -46,6 +46,6 @@
   .tab.active-all {
     border-color: var(--muted);
     color: var(--text);
-    background: #1e1e2c;
+    background: var(--surface);
   }
 }

@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 
 import { getSession } from "@/lib/auth";
 import { type CountdownDisplay, toCountdownDisplay } from "@/lib/countdown";
@@ -22,6 +23,17 @@ const getCachedCountdownDisplay = unstable_cache(
 );
 
 /**
+ * The signed-in user's full row, deduped per request with React's `cache()` — both
+ * RootLayout (for the `<html data-theme>` it needs before anything else renders) and
+ * getAppHeaderData below (for the header) call this, and this way they only cost one
+ * Postgres round-trip between them instead of one each.
+ */
+export const getSessionUser = cache(async (): Promise<DbUser | null> => {
+  const session = await getSession();
+  return session ? await getUserById(session.userId) : null;
+});
+
+/**
  * Fetches the (user, countdown) pair every AppHeader-rendering layout needs. Centralized
  * here so no call site can shortcut/skip fetching the real countdown for a given route —
  * that shortcut previously caused /truth-or-dare/game to hardcode countdown=null, which
@@ -30,11 +42,10 @@ const getCachedCountdownDisplay = unstable_cache(
  * itself, even if it doesn't render the countdown ticker.
  */
 export async function getAppHeaderData(): Promise<{
-  user: Pick<DbUser, "username" | "avatarColor"> | null;
+  user: Pick<DbUser, "username" | "avatarColor" | "theme"> | null;
   countdown: CountdownDisplay | null;
 }> {
-  const session = await getSession();
-  const user = session ? await getUserById(session.userId) : null;
-  const countdown = session ? await getCachedCountdownDisplay() : null;
+  const user = await getSessionUser();
+  const countdown = user ? await getCachedCountdownDisplay() : null;
   return { user, countdown };
 }

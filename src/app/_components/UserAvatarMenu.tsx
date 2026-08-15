@@ -11,6 +11,7 @@ import {
 } from "@/lib/avatar";
 import { patchJson } from "@/lib/http";
 import { LOGIN_PATH, MANAGE_PATH } from "@/lib/routes";
+import { type ThemeName, THEMES } from "@/lib/theme";
 import { useClickOutside } from "@/lib/useClickOutside";
 
 function capitalize(value: string): string {
@@ -20,11 +21,13 @@ function capitalize(value: string): string {
 export default function UserAvatarMenu({
   username,
   avatarColor,
+  theme,
   hasCountdown,
   onEditCountdown,
 }: {
   username: string;
   avatarColor: string;
+  theme: ThemeName;
   hasCountdown: boolean;
   onEditCountdown: () => void;
 }) {
@@ -38,6 +41,14 @@ export default function UserAvatarMenu({
   async function handlePickColor(name: AvatarColorName) {
     setColor(name);
     await patchJson("/api/profile/me", { avatarColor: name });
+  }
+
+  async function handlePickTheme(name: ThemeName) {
+    await patchJson("/api/profile/me", { theme: name });
+    // The theme is applied via <html data-theme> in the root layout (server-rendered,
+    // so a page refresh never flashes the old theme) — a client-only state update
+    // wouldn't touch that attribute, so re-render from the server instead.
+    router.refresh();
   }
 
   async function handleLogout() {
@@ -78,6 +89,19 @@ export default function UserAvatarMenu({
                 style={{ backgroundColor: c.hex }}
                 aria-label={`Use ${c.name} avatar color`}
                 onClick={() => handlePickColor(c.name)}
+              />
+            ))}
+          </div>
+          <p className="avatar-popover-label">Theme</p>
+          <div className="avatar-swatches">
+            {THEMES.map((t) => (
+              <button
+                key={t.name}
+                type="button"
+                className={`avatar-swatch ${t.name === theme ? "selected" : ""}`}
+                style={{ backgroundColor: t.swatchHex }}
+                aria-label={`Use ${t.label} theme`}
+                onClick={() => handlePickTheme(t.name)}
               />
             ))}
           </div>

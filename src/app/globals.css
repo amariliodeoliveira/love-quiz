@@ -20,24 +20,34 @@
 /* ============================================================
    DESIGN TOKENS
    ============================================================ */
+
+/* THEME TOKENS — see src/lib/theme.ts, the source of truth for which themes exist.
+   Every theme must redefine exactly this set of variables, nothing more, nothing less:
+     --bg --surface --border --muted --text --subtext --purple --purple-dim
+   `:root` below is the "dark" theme's values (the default, applied when no
+   `data-theme` is set or `data-theme="dark"` is explicit). Adding a new theme means
+   adding one `[data-theme="<name>"]` block that redefines this same list — see
+   `[data-theme="pink"]` further down for the second one. Level accent colors
+   (green/yellow/red) and everything below the THEME TOKENS block are intentionally
+   NOT themed — they're either semantic (level difficulty) or structural (spacing,
+   radius, shadow) and should look and mean the same thing in every theme. */
 :root {
-  /* Core palette */
   --bg: #0d0d14;
   --surface: #16161f;
   --border: #2a2a38;
   --muted: #4a4a60;
   --text: #e8e8f0;
   --subtext: #9090a8;
+  --purple: #c084fc;
+  --purple-dim: #2a1a3a;
 
-  /* Level accent colors */
+  /* Level accent colors — same in every theme, see the THEME TOKENS comment above. */
   --green: #4ade80;
   --green-dim: #1a3a26;
   --yellow: #facc15;
   --yellow-dim: #3a3010;
   --red: #f87171;
   --red-dim: #3a1a1a;
-  --purple: #c084fc;
-  --purple-dim: #2a1a3a;
 
   /* Spacing scale (4px base unit) */
   --space-1: 4px;
@@ -56,6 +66,20 @@
   --radius-full: 999px;
 
   --shadow-popover: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* "Pink" theme — see src/lib/theme.ts. Light, blush background; the accent moves from
+   purple to a warmer rose/magenta so it still reads clearly against a light surface
+   (the dark theme's --purple is too light itself to have contrast on a light --bg). */
+[data-theme="pink"] {
+  --bg: #fdf2f6;
+  --surface: #ffffff;
+  --border: #f3d1e0;
+  --muted: #c98ba8;
+  --text: #3d1f2c;
+  --subtext: #8a5a72;
+  --purple: #d6336c;
+  --purple-dim: #fce7f1;
 }
 
 /* Tailwind-native tokens: literal values live here (not :root) so Tailwind

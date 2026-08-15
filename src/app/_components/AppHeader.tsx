@@ -27,7 +27,7 @@ export default function AppHeader({
   /** The floating countdown bubble is global by default (every logged-in route) —
    * set false only for the /manage settings screens, where it'd be a distraction. */
   showCountdownBubble?: boolean;
-  user: Pick<DbUser, "username" | "avatarColor"> | null;
+  user: Pick<DbUser, "username" | "avatarColor" | "theme"> | null;
   countdown: CountdownDisplay | null;
 }) {
   const [countdown, setCountdown] = useState(initialCountdown);
@@ -59,6 +59,7 @@ export default function AppHeader({
           <UserAvatarMenu
             username={user.username}
             avatarColor={user.avatarColor}
+            theme={user.theme}
             hasCountdown={countdown !== null}
             onEditCountdown={() => setEditingCountdown(true)}
           />
