@@ -12,6 +12,18 @@ import type { Role, Session } from "@/lib/db";
 const COOKIE_NAME = "admin_session";
 const SCRYPT_KEYLEN = 64;
 
+/** How long an account with no password (freshly provisioned by an admin, username
+ * shared out-of-band) can be "claimed" by whoever submits a password first. Past this
+ * window, first-login claiming is blocked — narrows the window in which a guessed
+ * username could be hijacked before its real owner ever logs in. */
+export const CLAIM_WINDOW_HOURS = 48;
+
+export function isClaimWindowExpired(createdAt: Date, now: Date): boolean {
+  return (
+    now.getTime() - createdAt.getTime() >= CLAIM_WINDOW_HOURS * 60 * 60 * 1000
+  );
+}
+
 function getSecret(): string {
   const secret = process.env.ADMIN_SESSION_SECRET;
   if (!secret) {
