@@ -58,6 +58,37 @@ Tailwind v4 setup and fall back to the `1.5` default. Keep the bracketed form an
 suppress the rule on that line with a comment pointing here. Full incident log in
 `docs/lint-plugins-report.md`.
 
+## Typography
+
+Researched and adopted 2026-08-15.
+
+### Rules
+
+1. **Never use Light/Thin weights for UI text.** 300 and below reads as faint/hard to
+   read, especially at the small sizes most labels and buttons use. This project's
+   `body` sets `font-weight: 400` (Regular) as the floor — every element either
+   inherits that or explicitly opts into something heavier (buttons/tabs use 500). Do
+   not add `font-weight: 300` (or Tailwind's `font-light`/`font-thin`) anywhere.
+2. **14px (`0.875rem`) is the practical floor for interactive text** (buttons, links,
+   tabs); 12px (`0.75rem`) is acceptable only for genuinely secondary
+   captions/footers/hints a user doesn't need to act on. Never go below 12px.
+3. **Every button needs an explicit `font-weight`.** Don't let a button/link fall back
+   to the body default by omission — `.btn`/`.btn-ghost`/`.tab` in
+   `src/app/styles/primitives.css` and `tabs.css` all set `font-weight: 500`
+   deliberately; a new button-like class should too.
+4. **Line height ≈ 1.4–1.6× font size for body copy** (already the case here — see
+   `leading-1.6` on description paragraphs); tighter is fine for large display
+   headings (`GameWordmark` deliberately uses ~1.05, see that file's comment) where
+   the type itself is large enough that cramped-feeling lines aren't a readability
+   problem the way they'd be at body-text sizes.
+
+### Applying this
+
+Same rule as spacing/copy: fix the typography you're already touching. A `font-weight`
+inherited from `body` isn't automatically wrong — it only becomes a bug if the text is
+small/low-contrast enough that the Light-reads-as-faint problem actually shows up (as
+it did for `.btn-ghost` before this was written).
+
 ## Copy / UX writing
 
 Researched and adopted 2026-08-15.
