@@ -6,11 +6,12 @@ import { useState } from "react";
 import type { CountdownDisplay } from "@/lib/countdown";
 import type { DbUser } from "@/lib/db";
 
+import CountdownBubble from "./countdown/CountdownBubble";
 import CountdownForm, {
   type CountdownFormInitial,
 } from "./countdown/CountdownForm";
-import CountdownTicker from "./countdown/CountdownTicker";
 import CountdownView from "./countdown/CountdownView";
+import Logo from "./Logo";
 import Modal from "./Modal";
 import UserAvatarMenu from "./UserAvatarMenu";
 
@@ -44,39 +45,43 @@ export default function AppHeader({
     : null;
 
   return (
-    <header className="profile-header">
-      {backHref && backLabel && (
-        <Link
-          href={backHref}
-          className={
-            variant === "game"
-              ? "profile-back-link font-semibold"
-              : "profile-back-link"
-          }
-        >
-          {backLabel}
-        </Link>
-      )}
+    <>
+      <header className="profile-header">
+        {backHref && backLabel && (
+          <Link
+            href={backHref}
+            className={
+              variant === "game"
+                ? "profile-back-link font-semibold"
+                : "profile-back-link"
+            }
+          >
+            {backLabel}
+          </Link>
+        )}
 
-      {variant === "game" ? (
-        <p className="text-text font-serif text-base">Couples Card Deck</p>
-      ) : (
-        countdown && (
-          <CountdownTicker
-            msRemaining={countdown.msRemaining}
-            anchoredAt={anchoredAt}
-            label={countdown.label}
-            onClick={() => setViewingCountdown(true)}
+        {variant === "game" ? (
+          <p className="text-text font-serif text-base">Couples Card Deck</p>
+        ) : (
+          !backHref && <Logo />
+        )}
+
+        {user && (
+          <UserAvatarMenu
+            username={user.username}
+            avatarColor={user.avatarColor}
+            hasCountdown={countdown !== null}
+            onEditCountdown={() => setEditingCountdown(true)}
           />
-        )
-      )}
+        )}
+      </header>
 
-      {user && (
-        <UserAvatarMenu
-          username={user.username}
-          avatarColor={user.avatarColor}
-          hasCountdown={countdown !== null}
-          onEditCountdown={() => setEditingCountdown(true)}
+      {variant !== "game" && countdown && (
+        <CountdownBubble
+          msRemaining={countdown.msRemaining}
+          anchoredAt={anchoredAt}
+          label={countdown.label}
+          onExpandedClick={() => setViewingCountdown(true)}
         />
       )}
 
@@ -118,6 +123,6 @@ export default function AppHeader({
           }}
         />
       </Modal>
-    </header>
+    </>
   );
 }

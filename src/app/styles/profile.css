@@ -4,8 +4,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-5) var(--space-6);
-    border-bottom: 1px solid var(--border);
+    padding: var(--space-3) var(--space-6);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   }
   .profile-back-link {
     display: inline-flex;
