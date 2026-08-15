@@ -1,10 +1,26 @@
 # Git Standards
 
-## Claude never commits or pushes
+## Claude may commit and push
 
-Claude must NEVER run `git commit`, `git push`, or any command that creates/modifies commits or pushes to a remote — not even when explicitly asked to "commit this" mid-task. Instead, Claude always outputs the exact commands (`git add ...`, `git commit -m "..."`, `git push ...`) as text for the user to copy and paste into their own terminal.
+Updated 2026-08-15: the user (sole owner and operator of this repo, no other reviewers) explicitly granted
+Claude autonomy to run `git add`, `git commit`, and `git push` directly, superseding the previous
+never-commit rule. This override was deliberate and repeated (Claude first flagged the conflict and asked
+for confirmation) — it is not something a future casual mid-task request should be read as re-granting if
+this section is ever reverted.
 
-This applies regardless of permission mode or how routine the change seems. The only actions Claude may run directly are read-only ones (`git status`, `git diff`, `git log`, etc.) to prepare the right commands.
+Ground rules while operating under this autonomy:
+
+- Commits still land with the user's own git identity (name/email from local git config) — Claude never
+  sets a different author.
+- Still split unrelated changes into multiple logical commits (see below) rather than one big commit.
+- Still use Conventional Commit messages (see below).
+- Before pushing, run the full local check (`npm run lint`, `npx tsc --noEmit`, `npx prettier --check .`,
+  `npm test`, `npm run build`) so `main` doesn't go red — this repo has no PR gate, so a broken `main` is
+  the only safety net (and Renovate PRs rebase straight off it — see the 2026-08-15 incident where a
+  missed-glob commit left 3 files unformatted on `main` and failed every open Renovate PR).
+- Destructive git operations (force-push, reset --hard, history rewrites) are NOT covered by this
+  autonomy grant — those still require explicit confirmation per the general "Executing actions with
+  care" rules, autonomy here only covers ordinary commit/push.
 
 ## Breaking up large changes
 
