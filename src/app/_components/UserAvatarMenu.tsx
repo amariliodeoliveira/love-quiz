@@ -68,28 +68,30 @@ export default function UserAvatarMenu({
 
       {open && (
         <div className="avatar-popover">
-          <p className="avatar-popover-label">Signed in as {displayName}</p>
-
-          <p className="avatar-popover-label">Theme</p>
-          <div className="avatar-swatches mb-1">
-            {THEMES.map((t) => (
-              <button
-                key={t.name}
-                type="button"
-                className={`avatar-swatch ${t.name === theme ? "selected" : ""}`}
-                style={{ backgroundColor: t.swatchHex }}
-                aria-label={`Use ${t.label} theme`}
-                onClick={() => handlePickTheme(t.name)}
-              />
-            ))}
+          <div className="avatar-menu-row">
+            <p className="avatar-popover-label mb-0">Theme</p>
+            <div className="avatar-swatches mb-0">
+              {THEMES.map((t) => (
+                <button
+                  key={t.name}
+                  type="button"
+                  className={`avatar-swatch ${t.name === theme ? "selected" : ""}`}
+                  style={{ backgroundColor: t.swatchHex }}
+                  aria-label={`Use ${t.label} theme`}
+                  onClick={() => handlePickTheme(t.name)}
+                />
+              ))}
+            </div>
           </div>
+          <div className="avatar-menu-divider" />
 
-          {/* "Edit profile" belongs with the account/appearance controls above it
-              (theme) — tight gap, no divider. "Edit countdown" and "Deck Studio" are
-              shared couple content, a distinct group, so they get a divider (same
-              treatment as the one before Log out) instead of reading as one flat list.
-              The divider is its own plain element, not a border on the item itself —
-              a border-radius'd button with just a border-top curves at the ends. */}
+          {/* "Edit profile" is a distinct concern from the theme swatches above it
+              (appearance vs. account identity), so it gets its own divider rather than
+              reading as one flat group. "Edit countdown" and "Deck Studio" are shared
+              couple content, a separate group again, so they get the same treatment
+              before Log out. The divider is its own plain element, not a border on the
+              item itself — a border-radius'd button with just a border-top curves at
+              the ends. */}
           <button
             type="button"
             className="avatar-menu-item"

@@ -72,6 +72,11 @@
     color: var(--subtext);
     margin-bottom: var(--space-3);
   }
+  .avatar-menu-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
   .avatar-swatches {
     display: flex;
     gap: var(--space-2);
