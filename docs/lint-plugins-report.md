@@ -75,3 +75,9 @@ happen; the verdicts above get updated if a plugin's track record changes.
   (`RANK_BADGES[index]`, similar patterns in `CountdownView.tsx`, `draw.ts`, `ai/generate.ts`) — no
   user-controlled key involved in any of them. Left as `warn` (the plugin's own recommended default);
   no fix applied, logged here as a known false-positive class for this rule in this codebase.
+- **2026-08-15** — **False positive**: `tailwindcss/no-unnecessary-arbitrary-value` suggested replacing
+  `leading-[0.95]` with a bare `leading-0.95` in `src/app/page.tsx`. Verified empirically (computed
+  `line-height` via a headless-browser check) that the bare form silently falls back to Tailwind's
+  default `1.5` in this project's Tailwind v4 setup — it doesn't generate the utility at all, unlike
+  `leading-1.1` elsewhere in the same file, which does work bare. Kept the bracket form and suppressed
+  the rule on that one line with a comment explaining why, rather than trusting the rule's fix.

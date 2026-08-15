@@ -19,7 +19,11 @@ export default async function Home() {
           <p className="text-muted mb-5 text-xs font-medium tracking-[0.18em] uppercase">
             Interactive Game
           </p>
-          <h1 className="leading-1.1 text-text mb-4 font-serif text-[clamp(2.2rem,6vw,3.8rem)] font-normal">
+          {/* The suggested bare `leading-0.95` doesn't actually generate the utility in
+           this Tailwind v4 setup (computed line-height silently falls back to the 1.5
+           default) — verified empirically, see docs/lint-plugins-report.md. */}
+          {/* eslint-disable-next-line tailwindcss/no-unnecessary-arbitrary-value */}
+          <h1 className="text-text mb-4 font-serif text-[clamp(2.2rem,6vw,3.8rem)] leading-[0.95] font-normal">
             Couples
             <br />
             <em className="text-subtext italic">Card Deck</em>
