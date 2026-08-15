@@ -18,17 +18,12 @@ import UserAvatarMenu from "./UserAvatarMenu";
 export default function AppHeader({
   backHref,
   backLabel,
-  variant = "default",
   showCountdownBubble = true,
   user,
   countdown: initialCountdown,
 }: {
   backHref?: string;
   backLabel?: string;
-  /** "game" swaps the header's wordmark slot for a plain (non-link) label and styles
-   * the back link as an exit action — used only on the immersive /truth-or-dare/game
-   * screen. Doesn't affect the countdown bubble (see showCountdownBubble). */
-  variant?: "default" | "game";
   /** The floating countdown bubble is global by default (every logged-in route) —
    * set false only for the /manage settings screens, where it'd be a distraction. */
   showCountdownBubble?: boolean;
@@ -53,23 +48,12 @@ export default function AppHeader({
     <>
       <header className="profile-header">
         {backHref && backLabel && (
-          <Link
-            href={backHref}
-            className={
-              variant === "game"
-                ? "profile-back-link font-semibold"
-                : "profile-back-link"
-            }
-          >
+          <Link href={backHref} className="profile-back-link">
             {backLabel}
           </Link>
         )}
 
-        {variant === "game" ? (
-          <p className="text-text font-serif text-base">Couples Card Deck</p>
-        ) : (
-          !backHref && <Logo />
-        )}
+        {!backHref && <Logo />}
 
         {user && (
           <UserAvatarMenu

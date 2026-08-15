@@ -7,7 +7,7 @@ import { type Card, LEVEL_META } from "@/data/cards";
 import { pickNextDare, pickRandomItem } from "@/lib/draw";
 import { getJson, patchJson, postJson } from "@/lib/http";
 import { parseCardRef } from "@/lib/id";
-import { MANAGE_PATH } from "@/lib/routes";
+import { GAME_PATH, MANAGE_PATH } from "@/lib/routes";
 
 import RoundCard from "./RoundCard";
 
@@ -285,6 +285,9 @@ export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
         onDrawTruth={() => drawTruth()}
         onGenerateAi={handleGenerateAi}
       />
+      <Link href={GAME_PATH} className="profile-back-link">
+        ➔ Exit Game
+      </Link>
     </div>
   );
 }
