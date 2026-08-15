@@ -55,7 +55,7 @@ export default function AIGenerateModal({
             onClick={handleGenerate}
             disabled={generating}
           >
-            {generating ? "Generating..." : "Generate"}
+            {generating ? "Generating..." : "Generate question"}
           </button>
         </div>
       </div>

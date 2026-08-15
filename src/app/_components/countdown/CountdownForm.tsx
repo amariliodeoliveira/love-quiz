@@ -61,6 +61,9 @@ export default function CountdownForm({
   const [error, setError] = useState<string | null>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  let submitLabel = initial ? "Save changes" : "Create countdown";
+  if (saving) submitLabel = "Saving...";
+
   function handleLocationInput(query: string) {
     setLocationQuery(query);
     setTimeZone(null); // a fresh pick is required before this can be saved again
@@ -113,7 +116,10 @@ export default function CountdownForm({
     setSaving(false);
 
     if (!ok) {
-      setError(data?.error ?? "Couldn't save — try again.");
+      setError(
+        data?.error ??
+          "Couldn't save the countdown — check your connection and try again.",
+      );
       return;
     }
 
@@ -214,7 +220,7 @@ export default function CountdownForm({
           Cancel
         </button>
         <button type="submit" className="btn" disabled={saving}>
-          {saving ? "Saving..." : "Save"}
+          {submitLabel}
         </button>
       </div>
     </form>

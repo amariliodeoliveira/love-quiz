@@ -9,10 +9,10 @@ export default function TruthOrDareLanding() {
     <LandingHero description="On a call together? Draw a card and read it out loud.">
       <div className="flex flex-wrap justify-center gap-3">
         <Link href={GAME_ROUND_PATH} className="btn">
-          Play 🚀
+          🚀 Play
         </Link>
         <button type="button" className="btn-ghost" disabled>
-          View Rules 📖
+          📖 View rules
         </button>
       </div>
     </LandingHero>

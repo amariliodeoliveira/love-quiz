@@ -23,7 +23,7 @@ function byAnsweredAtDesc<T extends { answeredAt: Date | null }>(
   return b.answeredAt!.getTime() - a.answeredAt!.getTime();
 }
 
-/** Active/History toggle shared by the Truths and IA tabs. */
+/** Active/History toggle shared by the Truths and AI tabs. */
 function SubTabToggle({
   value,
   onChange,
@@ -315,7 +315,7 @@ export default function ManageDashboard({
           aria-pressed={topTab === "ai"}
           onClick={() => setTopTab("ai")}
         >
-          IA
+          AI
         </button>
       </div>
 

@@ -56,10 +56,10 @@ function RoundContent({
         badge={isAiCardId(currentDare.id) ? "🤖 AI generated" : undefined}
       >
         <button type="button" className="btn" onClick={onDareDone}>
-          Done 🔥
+          🔥 Done
         </button>
         <button type="button" className="btn-ghost" onClick={onSkipDare}>
-          Skip 🔄
+          🔄 Skip
         </button>
         {dareError && (
           <p className="form-error w-full basis-full text-center">
