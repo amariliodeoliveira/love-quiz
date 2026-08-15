@@ -16,8 +16,10 @@ CREATE TABLE users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   avatar_color TEXT NOT NULL DEFAULT 'pink',
   failed_attempts INTEGER NOT NULL DEFAULT 0,
-  locked_until TIMESTAMPTZ
+  locked_until TIMESTAMPTZ,
+  theme TEXT NOT NULL DEFAULT 'dark'
   -- role is app-validated as 'admin' | 'user' (src/lib/db.ts Role type) — no DB check constraint today.
+  -- theme is app-validated as 'dark' | 'pink' (src/lib/db.ts Theme type) — no DB check constraint today.
 );
 
 CREATE TABLE cards (
@@ -50,7 +52,7 @@ CREATE INDEX cards_user_id_idx ON cards(user_id);
 -- (see src/lib/countdown.ts zonedTimeToUtc) and to re-populate the edit form correctly.
 -- location is a free-text label only (e.g. "Lisbon, Portugal") — never used in the math.
 -- Questions generated on-demand by an LLM (via the Vercel AI Gateway) when the manual
--- deck runs dry, or manually from the Manage screen's "IA" tab. Kept separate from
+-- deck runs dry, or manually from the Manage screen's "AI" tab. Kept separate from
 -- `cards` because it has no `position` (no manual ordering — it's drawn like the rest
 -- of the deck) and no `user_id` (nobody "owns" an AI-generated question), and because it
 -- carries its own metadata (`model`) that has no meaning for a manually-written card.

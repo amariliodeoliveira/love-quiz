@@ -3,6 +3,7 @@ import { neon } from "@neondatabase/serverless";
 import type { Card, Level } from "@/data/cards";
 import type { AvatarColorName } from "@/lib/avatar";
 import type { CardRef } from "@/lib/id";
+import type { ThemeName } from "@/lib/theme";
 
 // @vercel/postgres is deprecated (Vercel Postgres was discontinued in favor of the
 // Marketplace's native Neon integration) — this project's database is Neon directly, so
@@ -46,6 +47,7 @@ export interface DbUser {
   failedAttempts: number;
   lockedUntil: Date | null;
   createdAt: Date;
+  theme: ThemeName;
 }
 
 export const MAX_LOGIN_ATTEMPTS = 5;
@@ -105,6 +107,7 @@ interface UserRow {
   failed_attempts: number;
   locked_until: RawTimestamp;
   created_at: RawTimestamp;
+  theme: ThemeName;
 }
 
 function mapUserRow(row: UserRow): DbUser {
@@ -117,6 +120,7 @@ function mapUserRow(row: UserRow): DbUser {
     failedAttempts: row.failed_attempts,
     lockedUntil: row.locked_until ? new Date(row.locked_until) : null,
     createdAt: new Date(row.created_at ?? 0),
+    theme: row.theme,
   };
 }
 
@@ -124,7 +128,7 @@ export async function findUserByUsername(
   username: string,
 ): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until, created_at
+    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until, created_at, theme
     FROM users
     WHERE username = ${username};
   `;
@@ -134,7 +138,7 @@ export async function findUserByUsername(
 
 export async function getUserById(id: number): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until, created_at
+    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until, created_at, theme
     FROM users
     WHERE id = ${id};
   `;
@@ -177,6 +181,15 @@ export async function updateAvatarColor(
 ): Promise<void> {
   await sql`
     UPDATE users SET avatar_color = ${color} WHERE id = ${userId};
+  `;
+}
+
+export async function updateTheme(
+  userId: number,
+  theme: ThemeName,
+): Promise<void> {
+  await sql`
+    UPDATE users SET theme = ${theme} WHERE id = ${userId};
   `;
 }
 
