@@ -8,7 +8,6 @@ import { formatAnsweredAtManila } from "@/lib/datetime";
 import type { DbAiCard, DbCard, Session } from "@/lib/db";
 import { patchJson, postJson } from "@/lib/http";
 
-import AIGenerateModal from "./AIGenerateModal";
 import CardFormModal from "./CardFormModal";
 
 type TopTab = "truths" | "dares" | "ai";
@@ -217,11 +216,13 @@ export default function ManageDashboard({
   session: Session;
 }) {
   const [cards, setCards] = useState<DbCard[]>(initialCards);
-  const [aiCards, setAiCards] = useState<DbAiCard[]>(initialAiCards);
+  // AI-drafted cards are created through the same manual Add Card flow now (see
+  // CardFormModal), so nothing here ever adds to this list after the initial load —
+  // it only needs to be read, not set.
+  const aiCards = initialAiCards;
   const [topTab, setTopTab] = useState<TopTab>("truths");
   const [truthSubTab, setTruthSubTab] = useState<SubTab>("active");
   const [aiSubTab, setAiSubTab] = useState<SubTab>("active");
-  const [showAiGenerateModal, setShowAiGenerateModal] = useState(false);
   const [formCard, setFormCard] = useState<DbCard | "new" | null>(null);
   const [pendingDelete, setPendingDelete] = useState<DbCard | null>(null);
   const [pendingReactivate, setPendingReactivate] = useState<DbCard | null>(
@@ -281,17 +282,6 @@ export default function ManageDashboard({
       );
     }
     setPendingReactivate(null);
-  }
-
-  async function handleGenerateAi(level: Level) {
-    const { ok, data } = await postJson<{ card: DbAiCard }>(
-      "/api/ai-cards/generate",
-      { level },
-    );
-    if (ok && data) {
-      setAiCards((prev) => [data.card, ...prev]);
-    }
-    return ok;
   }
 
   const activeAiCards = useMemo(
@@ -359,19 +349,13 @@ export default function ManageDashboard({
           <h1 className="page-title">Deck Studio</h1>
           <p className="dashboard-subtitle text-subtext">
             {session.role === "admin"
-              ? "Add, edit, or generate every question and dare in the deck."
-              : "Add, edit, or generate your own questions and dares."}
+              ? "Add or edit every question and dare in the deck."
+              : "Add or edit your own questions and dares."}
           </p>
         </div>
         <div className="flex flex-wrap justify-end gap-3">
           <button onClick={() => setFormCard("new")} className="btn">
             + Add card
-          </button>
-          <button
-            onClick={() => setShowAiGenerateModal(true)}
-            className="btn-ghost"
-          >
-            🤖 Generate with AI
           </button>
         </div>
       </div>
@@ -411,13 +395,6 @@ export default function ManageDashboard({
           card={formCard === "new" ? undefined : formCard}
           onClose={() => setFormCard(null)}
           onSubmit={handleFormSubmit}
-        />
-      )}
-
-      {showAiGenerateModal && (
-        <AIGenerateModal
-          onClose={() => setShowAiGenerateModal(false)}
-          onGenerate={handleGenerateAi}
         />
       )}
 
