@@ -210,6 +210,9 @@
     display: flex;
     justify-content: flex-end;
     gap: var(--space-2);
-    margin-top: var(--space-1);
+    /* >= .modal-form's own field gap (--space-3) — proximity: the actions row is the
+       least related to the field above it, so it must never sit closer than fields
+       sit to each other (see .claude/design-guidelines.md). */
+    margin-top: var(--space-4);
   }
 }
