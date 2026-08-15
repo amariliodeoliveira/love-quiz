@@ -15,6 +15,12 @@
     {
       "matchUpdateTypes": ["major"],
       "automerge": false
+    },
+    {
+      "matchPackageNames": ["eslint", "eslint-plugin-unicorn"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false,
+      "description": "eslint-plugin-unicorn is pinned to ^61.0.2 because later majors require eslint>=10.4, and this repo is intentionally on eslint@^9 — see docs/lint-plugins-report.md. Bumping either major requires re-verifying the whole eslint.config.mjs plugin set by hand, not an automated PR. Re-enable once that migration is deliberately done."
     }
   ],
   "vulnerabilityAlerts": {
