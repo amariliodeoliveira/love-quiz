@@ -2,18 +2,11 @@ import Link from "next/link";
 
 import { GAME_ROUND_PATH } from "@/lib/routes";
 
-import GameWordmark from "../GameWordmark";
+import LandingHero from "../LandingHero";
 
 export default function TruthOrDareLanding() {
   return (
-    <div className="px-6 pt-18 pb-14 text-center">
-      <p className="text-muted mb-5 text-xs font-medium tracking-[0.18em] uppercase">
-        Interactive Game
-      </p>
-      <GameWordmark />
-      <p className="leading-1.6 text-subtext mx-auto mb-9 max-w-100 text-[0.95rem]">
-        On a call together? Draw a card and read it out loud.
-      </p>
+    <LandingHero description="On a call together? Draw a card and read it out loud.">
       <div className="flex flex-wrap justify-center gap-3">
         <Link href={GAME_ROUND_PATH} className="btn">
           Play 🚀
@@ -22,6 +15,6 @@ export default function TruthOrDareLanding() {
           View Rules 📖
         </button>
       </div>
-    </div>
+    </LandingHero>
   );
 }
