@@ -5,8 +5,9 @@ import { NextResponse } from "next/server";
 import { ALL_LEVELS } from "@/data/cards";
 import { maybeRefreshSummary } from "@/lib/ai/context";
 import { generateAiQuestion, pickRandomTruthLevel } from "@/lib/ai/generate";
+import { isAiGenerateRateLimited } from "@/lib/ai/rateLimit";
 import { withSession } from "@/lib/api";
-import { createAiCard } from "@/lib/db";
+import { createAiCard, getLastAiCardCreatedAt } from "@/lib/db";
 import { GAME_PATH } from "@/lib/routes";
 
 export const POST = withSession(async (_session, request: Request) => {
@@ -15,6 +16,14 @@ export const POST = withSession(async (_session, request: Request) => {
 
   if (level !== undefined && !ALL_LEVELS.includes(level)) {
     return NextResponse.json({ error: "Invalid level" }, { status: 400 });
+  }
+
+  const lastGeneratedAt = await getLastAiCardCreatedAt();
+  if (isAiGenerateRateLimited(lastGeneratedAt, new Date())) {
+    return NextResponse.json(
+      { error: "Generating too fast — wait a few seconds and try again." },
+      { status: 429 },
+    );
   }
 
   const targetLevel = level ?? pickRandomTruthLevel();
