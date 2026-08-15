@@ -2,7 +2,7 @@
 
 A small private site for two — a Truth or Dare card deck, and a live countdown to when
 we next see each other. Built with Next.js (App Router), React, TypeScript, Tailwind
-CSS v4, and Postgres (Neon) via `@vercel/postgres`.
+CSS v4, and Postgres (Neon) via `@neondatabase/serverless`.
 
 ## Getting started
 

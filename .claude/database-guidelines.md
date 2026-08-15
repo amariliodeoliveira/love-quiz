@@ -4,7 +4,7 @@ Written for a frontend-leaning team: assume no deep Postgres background, spell o
 
 ## What's here
 
-- Postgres hosted on **Neon** (serverless). No ORM — raw SQL via `@vercel/postgres`'s `sql` tagged template, in `src/lib/db.ts`.
+- Postgres hosted on **Neon** (serverless). No ORM — raw SQL via `@neondatabase/serverless`'s `sql` tagged template, in `src/lib/db.ts`.
 - Two tables: `users`, `cards`. The exact shape (columns, types, constraints, FKs) is snapshotted in [`db/schema.sql`](../db/schema.sql).
 - `db/schema.sql` is **documentation, not a migration runner** — nothing applies it automatically. It exists so the DB shape is readable in the repo instead of living only in the Neon console.
 
@@ -47,7 +47,7 @@ If you're not sure the file still matches reality, ask to have it regenerated fr
 
 `.env.local` has several connection strings because Neon/Vercel provide the same database through different URLs for different needs — they're not different databases:
 
-- `POSTGRES_URL` — pooled connection (via PgBouncer). What `@vercel/postgres` uses by default. Use this for anything request-scoped (API routes).
+- `POSTGRES_URL` — pooled connection (via PgBouncer). What `src/lib/db.ts` passes to `neon()`. Use this for anything request-scoped (API routes).
 - `POSTGRES_URL_NON_POOLING` / `DATABASE_URL_UNPOOLED` — direct connection, no pooler. Needed for long-lived scripts or session-level features a pooler can break (rare here).
 - `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` — the same credentials broken into parts, for tools that want discrete params instead of a URL.
 - `POSTGRES_PRISMA_URL` — pre-formatted for Prisma. Unused (no Prisma in this project).

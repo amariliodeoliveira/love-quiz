@@ -11,7 +11,9 @@
 
 import { createHmac } from "node:crypto";
 
-import { sql } from "@vercel/postgres";
+import { neon } from "@neondatabase/serverless";
+
+const sql = neon(process.env.POSTGRES_URL, { fullResults: true });
 
 const USERNAME = "_qa_visual_test";
 
