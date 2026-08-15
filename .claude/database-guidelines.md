@@ -19,10 +19,12 @@ If you ever need an isolated copy (to try a risky migration, load fake data, etc
 Don't create throwaway accounts through the real signup/login flow — it leaves permanent rows and (if you ever do set a real password) a credential to worry about.
 
 Instead, use the checked-in script:
+
 ```
 node --env-file=.env.local scripts/qa-test-user.mjs create   # prints {userId, username, cookie}
 node --env-file=.env.local scripts/qa-test-user.mjs cleanup  # deletes it and any cards it owns
 ```
+
 `create` inserts a disposable `_qa_visual_test` user directly and prints a ready-to-use `admin_session` cookie value (signed the same way `src/lib/auth.ts` does it) — no password is ever set, so there's nothing to protect or remember. Always run `cleanup` when done.
 
 ## Changing the schema
@@ -44,6 +46,7 @@ If you're not sure the file still matches reality, ask to have it regenerated fr
 ## Env var quick reference
 
 `.env.local` has several connection strings because Neon/Vercel provide the same database through different URLs for different needs — they're not different databases:
+
 - `POSTGRES_URL` — pooled connection (via PgBouncer). What `@vercel/postgres` uses by default. Use this for anything request-scoped (API routes).
 - `POSTGRES_URL_NON_POOLING` / `DATABASE_URL_UNPOOLED` — direct connection, no pooler. Needed for long-lived scripts or session-level features a pooler can break (rare here).
 - `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` — the same credentials broken into parts, for tools that want discrete params instead of a URL.

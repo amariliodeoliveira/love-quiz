@@ -1,10 +1,12 @@
 "use client";
 
-import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { GAME_PATH } from "@/lib/routes";
+import { Suspense, useState } from "react";
+
 import { postJson } from "@/lib/http";
+import { GAME_PATH } from "@/lib/routes";
 import { isSafeRedirectTarget } from "@/lib/url";
+
 import FormField from "../_components/FormField";
 
 function LoginForm() {

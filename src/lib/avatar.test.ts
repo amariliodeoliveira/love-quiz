@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { AVATAR_COLORS, avatarColorHex, isAvatarColorName } from "./avatar";
 
 describe("isAvatarColorName", () => {

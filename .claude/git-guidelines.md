@@ -31,6 +31,7 @@ Use Conventional Commits:
 ```
 
 Common types:
+
 - `feat`: new feature
 - `fix`: bug fix
 - `refactor`: code change that is neither a fix nor a feature
@@ -40,6 +41,7 @@ Common types:
 - `style`: formatting, no logic change
 
 Examples:
+
 ```
 feat(tax): commit description
 fix(auth): commit description
@@ -47,14 +49,16 @@ refactor(payment): commit description
 ```
 
 Rules:
+
 - Description in the imperative mood (`add`, `fix`, `update` — not `added`, `fixed`).
 - Scope in parentheses referencing the affected module/area (`auth`, `profile`, `deck`, etc).
-- The commit body (if needed) explains *why*, not *what*.
+- The commit body (if needed) explains _why_, not _what_.
 - Don't mix unrelated types in one commit (e.g. a `fix` and a `feat` together) — split them.
 
 ## Git Flow
 
 Branches:
+
 - `main`: always stable, reflects production.
 - `develop`: integration branch (if the project adopts one), where features land before going to `main`.
 - `feature/<short-name>`: one branch per feature, created from `develop` (or `main` if there's no `develop`).
@@ -63,6 +67,7 @@ Branches:
 - `release/<version>`: when it makes sense to stage a release before the final merge into `main`.
 
 General rules:
+
 - Never commit directly to `main`. Always via branch + PR/merge.
 - Branch names in English, lowercase, hyphen-separated (`feature/user-avatar-menu`, not `feature/UserAvatarMenu`).
 - Prefer several small, focused branches over one giant branch mixing multiple features.

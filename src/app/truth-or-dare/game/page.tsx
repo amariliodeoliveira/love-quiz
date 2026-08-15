@@ -1,6 +1,7 @@
-import GameRound from "../../_components/game/GameRound";
-import DeckFooter from "../../_components/deck/DeckFooter";
 import { getGameCards } from "@/lib/db";
+
+import DeckFooter from "../../_components/deck/DeckFooter";
+import GameRound from "../../_components/game/GameRound";
 
 export const dynamic = "force-dynamic";
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import {
   breakdownDuration,
   msUntil,
@@ -93,7 +94,10 @@ describe("toCountdownDisplay", () => {
 
 describe("zonedTimeToUtc", () => {
   it("converts noon in UTC as a no-op", () => {
-    const result = zonedTimeToUtc({ year: 2026, month: 1, day: 15, hour: 12, minute: 0 }, "UTC");
+    const result = zonedTimeToUtc(
+      { year: 2026, month: 1, day: 15, hour: 12, minute: 0 },
+      "UTC",
+    );
     expect(result.toISOString()).toBe("2026-01-15T12:00:00.000Z");
   });
 
@@ -147,7 +151,9 @@ describe("remainingMsAt", () => {
     const anchoredAt = 1_000_000;
     const msRemaining = 60_000;
     expect(remainingMsAt(msRemaining, anchoredAt, anchoredAt)).toBe(60_000);
-    expect(remainingMsAt(msRemaining, anchoredAt, anchoredAt + 10_000)).toBe(50_000);
+    expect(remainingMsAt(msRemaining, anchoredAt, anchoredAt + 10_000)).toBe(
+      50_000,
+    );
   });
 
   it("gives the same result regardless of when the caller mounted, as long as anchoredAt matches", () => {

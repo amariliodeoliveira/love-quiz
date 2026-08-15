@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import { waitUntil } from "@vercel/functions";
+import { revalidatePath } from "next/cache";
+import { NextResponse } from "next/server";
+
 import { ALL_LEVELS } from "@/data/cards";
-import { createAiCard } from "@/lib/db";
-import { withSession } from "@/lib/api";
 import { maybeRefreshSummary } from "@/lib/ai/context";
 import { generateAiQuestion, pickRandomTruthLevel } from "@/lib/ai/generate";
+import { withSession } from "@/lib/api";
+import { createAiCard } from "@/lib/db";
 import { GAME_PATH } from "@/lib/routes";
 
 export const POST = withSession(async (_session, request: Request) => {

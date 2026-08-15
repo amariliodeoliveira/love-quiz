@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { updateAvatarColor } from "@/lib/db";
+
 import { withSession } from "@/lib/api";
 import { isAvatarColorName } from "@/lib/avatar";
+import { updateAvatarColor } from "@/lib/db";
 
 export const PATCH = withSession(async (session, request: Request) => {
   const { avatarColor } = await request.json();

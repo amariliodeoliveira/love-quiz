@@ -8,5 +8,10 @@ export default function EmojiText({
   text: string;
   className?: string;
 }) {
-  return <span className={className} dangerouslySetInnerHTML={{ __html: emojiHtml(text) }} />;
+  return (
+    <span
+      className={className}
+      dangerouslySetInnerHTML={{ __html: emojiHtml(text) }}
+    />
+  );
 }

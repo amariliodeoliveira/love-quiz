@@ -1,6 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { parseSessionCookie, COOKIE_NAME } from "@/lib/auth";
-import { LOGIN_PATH, MANAGE_PATH, GAME_PATH } from "@/lib/routes";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { COOKIE_NAME, parseSessionCookie } from "@/lib/auth";
+import { GAME_PATH, LOGIN_PATH, MANAGE_PATH } from "@/lib/routes";
 
 const PROTECTED_PREFIXES = [MANAGE_PATH, GAME_PATH];
 

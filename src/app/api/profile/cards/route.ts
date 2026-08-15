@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { getCardsForUser, createCard } from "@/lib/db";
-import { withSession } from "@/lib/api";
+import { NextResponse } from "next/server";
+
 import { ALL_LEVELS } from "@/data/cards";
+import { withSession } from "@/lib/api";
+import { createCard, getCardsForUser } from "@/lib/db";
 import { GAME_PATH } from "@/lib/routes";
 
 export const GET = withSession(async (session) => {

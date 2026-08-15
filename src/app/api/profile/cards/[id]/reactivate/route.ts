@@ -1,12 +1,17 @@
-import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { reactivateCard } from "@/lib/db";
+import { NextResponse } from "next/server";
+
 import { withSession } from "@/lib/api";
-import { GAME_PATH } from "@/lib/routes";
+import { reactivateCard } from "@/lib/db";
 import { parseId } from "@/lib/id";
+import { GAME_PATH } from "@/lib/routes";
 
 export const PATCH = withSession(
-  async (session, _request: Request, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    session,
+    _request: Request,
+    { params }: { params: Promise<{ id: string }> },
+  ) => {
     const { id } = await params;
     const cardId = parseId(id);
     if (cardId === null) {

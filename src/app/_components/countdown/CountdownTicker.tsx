@@ -1,6 +1,7 @@
 "use client";
 
 import { useCountdownTick } from "@/lib/useCountdownTick";
+
 import EmojiText from "../EmojiText";
 
 function pad(n: number): string {
@@ -25,7 +26,7 @@ export default function CountdownTicker({
   return (
     <button
       type="button"
-      className="flex cursor-pointer flex-col items-center gap-0.5 text-subtext hover:text-text"
+      className="text-subtext hover:text-text flex cursor-pointer flex-col items-center gap-0.5"
       onClick={onClick}
     >
       <span className="text-base font-medium tracking-[0.02em] tabular-nums">
@@ -33,7 +34,7 @@ export default function CountdownTicker({
           ? "today!"
           : `${breakdown.days}d ${pad(breakdown.hours)}h ${pad(breakdown.minutes)}m ${pad(breakdown.seconds)}s`}
       </span>
-      <EmojiText text={label} className="text-xs text-muted" />
+      <EmojiText text={label} className="text-muted text-xs" />
     </button>
   );
 }

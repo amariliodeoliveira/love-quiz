@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { getSession } from "@/lib/auth";
 import type { Session } from "@/lib/db";
 

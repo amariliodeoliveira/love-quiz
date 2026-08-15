@@ -1,8 +1,9 @@
-import AppHeader from "../_components/AppHeader";
-import TruthOrDareLanding from "../_components/deck/TruthOrDareLanding";
-import DeckFooter from "../_components/deck/DeckFooter";
 import { getAppHeaderData } from "@/lib/appHeaderData";
 import { getGameCards } from "@/lib/db";
+
+import AppHeader from "../_components/AppHeader";
+import DeckFooter from "../_components/deck/DeckFooter";
+import TruthOrDareLanding from "../_components/deck/TruthOrDareLanding";
 
 export const dynamic = "force-dynamic";
 

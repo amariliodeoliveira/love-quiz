@@ -2,9 +2,11 @@
 
 import { useRef, useState } from "react";
 import { DayPicker } from "react-day-picker";
-import { useClickOutside } from "@/lib/useClickOutside";
-import Select from "../Select";
+
 import type { WallClockParts } from "@/lib/countdown";
+import { useClickOutside } from "@/lib/useClickOutside";
+
+import Select from "../Select";
 
 const HOUR_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1).map((h) => ({
   value: String(h),
@@ -45,7 +47,10 @@ export default function DateTimePicker({
   describedBy?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [popoverPos, setPopoverPos] = useState<{ top: number; left: number } | null>(null);
+  const [popoverPos, setPopoverPos] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   useClickOutside(rootRef, open, () => setOpen(false));
@@ -58,11 +63,17 @@ export default function DateTimePicker({
     setOpen((o) => !o);
   }
 
-  const selectedDate = value ? new Date(value.year, value.month - 1, value.day) : undefined;
-  const { hour12, period } = value ? to12Hour(value.hour) : { hour12: 12, period: "PM" as const };
+  const selectedDate = value
+    ? new Date(value.year, value.month - 1, value.day)
+    : undefined;
+  const { hour12, period } = value
+    ? to12Hour(value.hour)
+    : { hour12: 12, period: "PM" as const };
   const minute = value?.minute ?? 0;
 
-  function commit(next: Partial<WallClockParts & { period: "AM" | "PM"; hour12: number }>) {
+  function commit(
+    next: Partial<WallClockParts & { period: "AM" | "PM"; hour12: number }>,
+  ) {
     const base = value ?? {
       year: selectedDate?.getFullYear() ?? new Date().getFullYear(),
       month: (selectedDate?.getMonth() ?? new Date().getMonth()) + 1,
@@ -82,8 +93,17 @@ export default function DateTimePicker({
   }
 
   const displayText = value
-    ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(
-        new Date(value.year, value.month - 1, value.day, value.hour, value.minute),
+    ? new Intl.DateTimeFormat("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(
+        new Date(
+          value.year,
+          value.month - 1,
+          value.day,
+          value.hour,
+          value.minute,
+        ),
       )
     : "Pick a date and time";
 
@@ -104,15 +124,24 @@ export default function DateTimePicker({
 
       {open && popoverPos && (
         <div
-          className="select-menu w-max max-h-none p-3"
-          style={{ position: "fixed", top: popoverPos.top, left: popoverPos.left, zIndex: 70 }}
+          className="select-menu max-h-none w-max p-3"
+          style={{
+            position: "fixed",
+            top: popoverPos.top,
+            left: popoverPos.left,
+            zIndex: 70,
+          }}
         >
           <DayPicker
             mode="single"
             selected={selectedDate}
             onSelect={(date) => {
               if (!date) return;
-              commit({ year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() });
+              commit({
+                year: date.getFullYear(),
+                month: date.getMonth() + 1,
+                day: date.getDate(),
+              });
             }}
           />
           <div className="mt-2 flex items-center justify-center gap-2">

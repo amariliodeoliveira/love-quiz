@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { pickNextDare, pickRandomItem } from "./draw";
 
 describe("pickRandomItem", () => {

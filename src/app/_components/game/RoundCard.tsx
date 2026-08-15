@@ -23,21 +23,21 @@ export default function RoundCard({
   return (
     <>
       {badge && (
-        <span className="inline-block rounded-full border border-purple bg-purple-dim px-2 py-0.5 text-xs font-medium text-purple">
+        <span className="border-purple bg-purple-dim text-purple inline-block rounded-full border px-2 py-0.5 text-xs font-medium">
           {badge}
         </span>
       )}
-      <p className="text-xs font-medium tracking-[0.18em] text-muted uppercase">
+      <p className="text-muted text-xs font-medium tracking-[0.18em] uppercase">
         {meta.emoji} {meta.label}
       </p>
-      <p className="mx-auto max-w-lg font-serif text-2xl leading-snug text-text">
+      <p className="text-text mx-auto max-w-lg font-serif text-2xl leading-snug">
         {question}
       </p>
       <div className="flex flex-wrap justify-center gap-2">{children}</div>
       {skipLabel && onSkip && (
         <button
           type="button"
-          className="cursor-pointer text-xs text-muted underline underline-offset-2 hover:text-subtext"
+          className="text-muted hover:text-subtext cursor-pointer text-xs underline underline-offset-2"
           onClick={onSkip}
         >
           {skipLabel}

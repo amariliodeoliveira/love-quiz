@@ -24,8 +24,8 @@ existing game, predates this vision).
 Today there's exactly one feature (Truth or Dare) plus card management, so there's no
 nav beyond the profile header. Once a second real feature area (most likely the photo
 feed) exists, add a dedicated **feature nav** — a separate icon/menu button in the header,
-next to the avatar circle but distinct from it (the avatar menu is for *account* actions —
-avatar color, log out; a features menu is for *navigating content*, a different concern).
+next to the avatar circle but distinct from it (the avatar menu is for _account_ actions —
+avatar color, log out; a features menu is for _navigating content_, a different concern).
 Don't fold feature navigation into the avatar dropdown long-term — that's only where the
 countdown's "set for the first time" entry point lives for now, as a stand-in until this
 real nav exists.

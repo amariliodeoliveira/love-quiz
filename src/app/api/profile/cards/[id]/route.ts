@@ -1,13 +1,18 @@
-import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { deleteCard, updateCard } from "@/lib/db";
-import { withSession } from "@/lib/api";
+import { NextResponse } from "next/server";
+
 import { ALL_LEVELS } from "@/data/cards";
-import { GAME_PATH } from "@/lib/routes";
+import { withSession } from "@/lib/api";
+import { deleteCard, updateCard } from "@/lib/db";
 import { parseId } from "@/lib/id";
+import { GAME_PATH } from "@/lib/routes";
 
 export const PATCH = withSession(
-  async (session, request: Request, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    session,
+    request: Request,
+    { params }: { params: Promise<{ id: string }> },
+  ) => {
     const { id } = await params;
     const cardId = parseId(id);
     if (cardId === null) {
@@ -34,7 +39,11 @@ export const PATCH = withSession(
 );
 
 export const DELETE = withSession(
-  async (session, request: Request, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    session,
+    request: Request,
+    { params }: { params: Promise<{ id: string }> },
+  ) => {
     const { id } = await params;
     const cardId = parseId(id);
     if (cardId === null) {

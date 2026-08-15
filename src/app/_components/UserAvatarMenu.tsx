@@ -1,12 +1,17 @@
 "use client";
 
-import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AVATAR_COLORS, avatarColorHex, type AvatarColorName } from "@/lib/avatar";
-import { useClickOutside } from "@/lib/useClickOutside";
-import { LOGIN_PATH, MANAGE_PATH } from "@/lib/routes";
+import { useRef, useState } from "react";
+
+import {
+  AVATAR_COLORS,
+  avatarColorHex,
+  type AvatarColorName,
+} from "@/lib/avatar";
 import { patchJson } from "@/lib/http";
+import { LOGIN_PATH, MANAGE_PATH } from "@/lib/routes";
+import { useClickOutside } from "@/lib/useClickOutside";
 
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -61,7 +66,9 @@ export default function UserAvatarMenu({
 
       {open && (
         <div className="avatar-popover">
-          <p className="avatar-popover-label">Signed in as {capitalize(username)}</p>
+          <p className="avatar-popover-label">
+            Signed in as {capitalize(username)}
+          </p>
           <div className="avatar-swatches">
             {AVATAR_COLORS.map((c) => (
               <button
@@ -76,7 +83,7 @@ export default function UserAvatarMenu({
           </div>
           <button
             type="button"
-            className="mb-2 w-full cursor-pointer text-left text-xs text-subtext hover:text-text"
+            className="text-subtext hover:text-text mb-2 w-full cursor-pointer text-left text-xs"
             onClick={() => {
               setOpen(false);
               onEditCountdown();
@@ -86,12 +93,16 @@ export default function UserAvatarMenu({
           </button>
           <Link
             href={MANAGE_PATH}
-            className="mb-2 block w-full cursor-pointer text-left text-xs text-subtext hover:text-text"
+            className="text-subtext hover:text-text mb-2 block w-full cursor-pointer text-left text-xs"
             onClick={() => setOpen(false)}
           >
             Edit couple card deck
           </Link>
-          <button type="button" className="avatar-logout" onClick={handleLogout}>
+          <button
+            type="button"
+            className="avatar-logout"
+            onClick={handleLogout}
+          >
             Log out
           </button>
         </div>

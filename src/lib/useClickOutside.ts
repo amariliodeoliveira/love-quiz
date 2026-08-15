@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from "react";
+import { type RefObject, useEffect } from "react";
 
 /** Calls `onOutside` on any pointerdown outside `ref`, while `active` is true. */
 export function useClickOutside(

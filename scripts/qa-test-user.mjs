@@ -9,8 +9,9 @@
 // `create` prints a JSON line with the new user id and a ready-to-use session
 // cookie value (for the `admin_session` cookie) — no login flow involved.
 
+import { createHmac } from "node:crypto";
+
 import { sql } from "@vercel/postgres";
-import { createHmac } from "crypto";
 
 const USERNAME = "_qa_visual_test";
 
@@ -25,7 +26,10 @@ function createSessionCookieValue(session, secret) {
 
 async function create() {
   const secret = process.env.ADMIN_SESSION_SECRET;
-  if (!secret) throw new Error("ADMIN_SESSION_SECRET is not set (run with --env-file=.env.local)");
+  if (!secret)
+    throw new Error(
+      "ADMIN_SESSION_SECRET is not set (run with --env-file=.env.local)",
+    );
 
   await sql`DELETE FROM users WHERE username = ${USERNAME};`;
 
@@ -35,13 +39,17 @@ async function create() {
     RETURNING id;
   `;
   const userId = rows[0].id;
-  const cookie = createSessionCookieValue({ userId, username: USERNAME, role: "user" }, secret);
+  const cookie = createSessionCookieValue(
+    { userId, username: USERNAME, role: "user" },
+    secret,
+  );
 
   console.log(JSON.stringify({ userId, username: USERNAME, cookie }));
 }
 
 async function cleanup() {
-  const { rows } = await sql`SELECT id FROM users WHERE username = ${USERNAME};`;
+  const { rows } =
+    await sql`SELECT id FROM users WHERE username = ${USERNAME};`;
   if (rows.length === 0) {
     console.log("no test user found, nothing to clean up");
     return;
@@ -56,6 +64,8 @@ const command = process.argv[2];
 if (command === "create") await create();
 else if (command === "cleanup") await cleanup();
 else {
-  console.error("Usage: node --env-file=.env.local scripts/qa-test-user.mjs <create|cleanup>");
+  console.error(
+    "Usage: node --env-file=.env.local scripts/qa-test-user.mjs <create|cleanup>",
+  );
   process.exit(1);
 }

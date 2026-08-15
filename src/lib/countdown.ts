@@ -30,7 +30,11 @@ export function msUntil(targetAt: Date, now: Date = new Date()): number {
  * `anchoredAt` — that's what keeps two independently-mounted displays (e.g. a header
  * ticker and a modal opened later) in sync instead of drifting apart.
  */
-export function remainingMsAt(msRemaining: number, anchoredAt: number, now: number): number {
+export function remainingMsAt(
+  msRemaining: number,
+  anchoredAt: number,
+  now: number,
+): number {
   return msRemaining - (now - anchoredAt);
 }
 
@@ -45,7 +49,9 @@ export interface CountdownDisplay {
 /** Shapes a DB countdown row into what the client Countdown component needs — computing
  * `msRemaining` from the server's own clock, and serializing the target as an ISO string
  * for the server/client boundary. */
-export function toCountdownDisplay(countdown: Countdown | null): CountdownDisplay | null {
+export function toCountdownDisplay(
+  countdown: Countdown | null,
+): CountdownDisplay | null {
   if (!countdown) return null;
   return {
     msRemaining: msUntil(countdown.targetAt),
@@ -112,7 +118,9 @@ export function utcToZonedParts(date: Date, timeZone: string): WallClockParts {
     minute: "2-digit",
     hourCycle: "h23",
   });
-  const parts = Object.fromEntries(formatter.formatToParts(date).map((p) => [p.type, p.value]));
+  const parts = Object.fromEntries(
+    formatter.formatToParts(date).map((p) => [p.type, p.value]),
+  );
   return {
     year: Number(parts.year),
     month: Number(parts.month),

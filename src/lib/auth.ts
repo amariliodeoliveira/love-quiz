@@ -1,5 +1,12 @@
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "crypto";
+import {
+  createHmac,
+  randomBytes,
+  scryptSync,
+  timingSafeEqual,
+} from "node:crypto";
+
 import { cookies } from "next/headers";
+
 import type { Role, Session } from "@/lib/db";
 
 const COOKIE_NAME = "admin_session";
@@ -34,7 +41,9 @@ export function verifyPassword(password: string, storedHash: string): boolean {
   if (!salt || !key) return false;
   const keyBuffer = Buffer.from(key, "hex");
   const derived = scryptSync(password, salt, keyBuffer.length);
-  return derived.length === keyBuffer.length && timingSafeEqual(derived, keyBuffer);
+  return (
+    derived.length === keyBuffer.length && timingSafeEqual(derived, keyBuffer)
+  );
 }
 
 export function createSessionCookieValue(session: Session): string {
@@ -51,7 +60,9 @@ export function parseSessionCookie(
     return null;
   }
   try {
-    const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
+    const payload = JSON.parse(
+      Buffer.from(encoded, "base64url").toString("utf8"),
+    );
     if (
       typeof payload?.userId !== "number" ||
       typeof payload?.username !== "string" ||

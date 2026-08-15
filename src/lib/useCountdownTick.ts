@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { breakdownDuration, remainingMsAt, type CountdownBreakdown } from "@/lib/countdown";
+
+import {
+  breakdownDuration,
+  type CountdownBreakdown,
+  remainingMsAt,
+} from "@/lib/countdown";
 
 /**
  * Ticks a countdown once a second from a baseline "ms remaining" as of `anchoredAt`
@@ -12,8 +17,13 @@ import { breakdownDuration, remainingMsAt, type CountdownBreakdown } from "@/lib
  * reads the same in-sync value instead of restarting from the stale `msRemaining` as if
  * it had just been fetched.
  */
-export function useCountdownTick(msRemaining: number, anchoredAt: number): CountdownBreakdown {
-  const [displayMs, setDisplayMs] = useState(() => remainingMsAt(msRemaining, anchoredAt, Date.now()));
+export function useCountdownTick(
+  msRemaining: number,
+  anchoredAt: number,
+): CountdownBreakdown {
+  const [displayMs, setDisplayMs] = useState(() =>
+    remainingMsAt(msRemaining, anchoredAt, Date.now()),
+  );
 
   useEffect(() => {
     function tick() {

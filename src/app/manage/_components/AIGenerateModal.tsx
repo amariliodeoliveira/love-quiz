@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { LEVEL_META, type Level } from "@/data/cards";
+
 import Modal from "@/app/_components/Modal";
 import Select from "@/app/_components/Select";
+import { type Level, LEVEL_META } from "@/data/cards";
 
 const LEVEL_OPTIONS = Object.entries(LEVEL_META).map(([value, meta]) => ({
   value,
@@ -29,20 +30,31 @@ export default function AIGenerateModal({
     if (ok) {
       onClose();
     } else {
-      setError("Couldn't generate a question — check your connection and try again.");
+      setError(
+        "Couldn't generate a question — check your connection and try again.",
+      );
     }
   }
 
   return (
     <Modal open onClose={onClose} title="Generate with AI">
       <div className="modal-form">
-        <Select value={level} onChange={(v) => setLevel(v as Level)} options={LEVEL_OPTIONS} />
+        <Select
+          value={level}
+          onChange={(v) => setLevel(v as Level)}
+          options={LEVEL_OPTIONS}
+        />
         {error && <p className="form-error">{error}</p>}
         <div className="modal-actions">
           <button type="button" className="btn-ghost" onClick={onClose}>
             Cancel
           </button>
-          <button type="button" className="btn" onClick={handleGenerate} disabled={generating}>
+          <button
+            type="button"
+            className="btn"
+            onClick={handleGenerate}
+            disabled={generating}
+          >
             {generating ? "Generating..." : "Generate"}
           </button>
         </div>

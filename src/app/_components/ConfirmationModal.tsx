@@ -29,7 +29,9 @@ export default function ConfirmationModal({
         </button>
         <button
           type="button"
-          className={variant === "success" ? "btn-success-solid" : "btn-danger-solid"}
+          className={
+            variant === "success" ? "btn-success-solid" : "btn-danger-solid"
+          }
           onClick={onConfirm}
         >
           {confirmLabel}

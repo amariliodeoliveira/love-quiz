@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
+
 import {
+  COOKIE_NAME,
   createSessionCookieValue,
   hashPassword,
   verifyPassword,
-  COOKIE_NAME,
 } from "@/lib/auth";
 import {
   findUserByUsername,
-  setUserPassword,
   registerFailedLogin,
   resetFailedLogins,
+  setUserPassword,
 } from "@/lib/db";
 
 export async function POST(request: Request) {
@@ -34,7 +35,9 @@ export async function POST(request: Request) {
   }
 
   if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
-    const minutes = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
+    const minutes = Math.ceil(
+      (user.lockedUntil.getTime() - Date.now()) / 60_000,
+    );
     return NextResponse.json(
       {
         error: `Too many failed attempts. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`,

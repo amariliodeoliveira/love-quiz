@@ -21,4 +21,3 @@ export const LEVEL_META: Record<Level, LevelMeta> = {
 };
 
 export const ALL_LEVELS: Level[] = ["1", "2", "3", "dare"];
-

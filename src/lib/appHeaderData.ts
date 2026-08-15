@@ -1,7 +1,8 @@
 import { unstable_cache } from "next/cache";
+
 import { getSession } from "@/lib/auth";
-import { getUserById, getCountdown, type DbUser } from "@/lib/db";
-import { toCountdownDisplay, type CountdownDisplay } from "@/lib/countdown";
+import { type CountdownDisplay, toCountdownDisplay } from "@/lib/countdown";
+import { type DbUser, getCountdown, getUserById } from "@/lib/db";
 
 /**
  * Countdown reads happen on every page load/refresh but writes are rare (an occasional

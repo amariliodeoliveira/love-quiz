@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
-import { setCardAnsweredByRef } from "@/lib/db";
+
 import { withSession } from "@/lib/api";
+import { setCardAnsweredByRef } from "@/lib/db";
 import { parseCardRef } from "@/lib/id";
 
 export const PATCH = withSession(
-  async (_session, request: Request, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    _session,
+    request: Request,
+    { params }: { params: Promise<{ id: string }> },
+  ) => {
     const { id } = await params;
     const ref = parseCardRef(id);
     if (ref === null) {
@@ -13,7 +18,10 @@ export const PATCH = withSession(
 
     const { answered } = await request.json();
     if (typeof answered !== "boolean") {
-      return NextResponse.json({ error: "Invalid answered value" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid answered value" },
+        { status: 400 },
+      );
     }
 
     await setCardAnsweredByRef(ref, answered);

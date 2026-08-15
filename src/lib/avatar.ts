@@ -17,7 +17,6 @@ export function isAvatarColorName(value: unknown): value is AvatarColorName {
 
 export function avatarColorHex(name: string): string {
   return (
-    AVATAR_COLORS.find((c) => c.name === name)?.hex ??
-    AVATAR_COLORS[0].hex
+    AVATAR_COLORS.find((c) => c.name === name)?.hex ?? AVATAR_COLORS[0].hex
   );
 }

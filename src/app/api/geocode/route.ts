@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { withSession } from "@/lib/api";
 
 interface OpenMeteoResult {

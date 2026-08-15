@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { setCountdown } from "@/lib/db";
+import { NextResponse } from "next/server";
+
 import { withSession } from "@/lib/api";
 import { zonedTimeToUtc } from "@/lib/countdown";
+import { setCountdown } from "@/lib/db";
 
 function isValidTimeZone(value: unknown): value is string {
   if (typeof value !== "string" || !value) return false;
@@ -15,7 +16,8 @@ function isValidTimeZone(value: unknown): value is string {
 }
 
 export const PATCH = withSession(async (_session, request: Request) => {
-  const { year, month, day, hour, minute, timeZone, location, label } = await request.json();
+  const { year, month, day, hour, minute, timeZone, location, label } =
+    await request.json();
 
   const parts = { year, month, day, hour, minute };
   const allPartsAreNumbers = Object.values(parts).every(
@@ -39,7 +41,12 @@ export const PATCH = withSession(async (_session, request: Request) => {
     return NextResponse.json({ error: "Invalid date/time" }, { status: 400 });
   }
 
-  await setCountdown(targetAt, timeZone, location?.trim() || null, label.trim());
+  await setCountdown(
+    targetAt,
+    timeZone,
+    location?.trim() || null,
+    label.trim(),
+  );
   // { expire: 0 }, not the "max" stale-while-revalidate profile: a Route Handler responding
   // to this exact save needs the countdown to read fresh on the very next request, not after
   // one more stale serve — see Next's revalidateTag docs on immediate-expiration Route Handlers.

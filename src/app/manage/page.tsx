@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
-import { getAiCards, getCardsForUser } from "@/lib/db";
+
 import { getSession } from "@/lib/auth";
+import { getAiCards, getCardsForUser } from "@/lib/db";
 import { LOGIN_PATH } from "@/lib/routes";
+
 import ManageDashboard from "./_components/ManageDashboard";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +14,15 @@ export default async function ManagePage() {
     redirect(LOGIN_PATH);
   }
 
-  const [cards, aiCards] = await Promise.all([getCardsForUser(session), getAiCards()]);
-  return <ManageDashboard initialCards={cards} initialAiCards={aiCards} session={session} />;
+  const [cards, aiCards] = await Promise.all([
+    getCardsForUser(session),
+    getAiCards(),
+  ]);
+  return (
+    <ManageDashboard
+      initialCards={cards}
+      initialAiCards={aiCards}
+      session={session}
+    />
+  );
 }

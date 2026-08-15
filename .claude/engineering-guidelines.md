@@ -26,6 +26,7 @@ This project uses **Tailwind v4** (`@import "tailwindcss"`, no `tailwind.config.
 - **Exception** — state/variant styling (`.open`, `.active`) is a small modifier class or a conditional Tailwind class applied in JSX, not a parallel class hierarchy.
 
 Practical rules:
+
 - Before adding a new custom CSS class, check whether Tailwind utilities already cover it. Most one-off styling should never touch a `.css` file.
 - Design tokens (colors, spacing scale) live in `@theme` in `src/app/globals.css`, not hand-rolled `:root` variables — that's what makes them usable as Tailwind utilities (`bg-bg`, `text-muted`, etc.) instead of only via `var(--x)`.
 - Split feature-specific Block styles into partials under `src/app/styles/` (e.g. `hero.css`, `cards.css`, `profile.css`) and `@import` them from `globals.css`, instead of appending to one file. `globals.css` itself should only hold `@import`s, `@theme`, and true resets.

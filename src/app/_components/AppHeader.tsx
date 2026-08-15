@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import type { DbUser } from "@/lib/db";
+import { useState } from "react";
+
 import type { CountdownDisplay } from "@/lib/countdown";
-import UserAvatarMenu from "./UserAvatarMenu";
+import type { DbUser } from "@/lib/db";
+
+import CountdownForm, {
+  type CountdownFormInitial,
+} from "./countdown/CountdownForm";
 import CountdownTicker from "./countdown/CountdownTicker";
 import CountdownView from "./countdown/CountdownView";
 import Modal from "./Modal";
-import CountdownForm, { type CountdownFormInitial } from "./countdown/CountdownForm";
+import UserAvatarMenu from "./UserAvatarMenu";
 
 export default function AppHeader({
   backHref,
@@ -44,14 +48,18 @@ export default function AppHeader({
       {backHref && backLabel && (
         <Link
           href={backHref}
-          className={variant === "game" ? "profile-back-link font-semibold" : "profile-back-link"}
+          className={
+            variant === "game"
+              ? "profile-back-link font-semibold"
+              : "profile-back-link"
+          }
         >
           {backLabel}
         </Link>
       )}
 
       {variant === "game" ? (
-        <p className="font-serif text-base text-text">Couples Card Deck</p>
+        <p className="text-text font-serif text-base">Couples Card Deck</p>
       ) : (
         countdown && (
           <CountdownTicker

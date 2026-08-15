@@ -25,7 +25,9 @@ export function patchJson<T = unknown>(url: string, body: unknown) {
   return sendJson<T>("PATCH", url, body);
 }
 
-export async function getJson<T = unknown>(url: string): Promise<JsonResponse<T>> {
+export async function getJson<T = unknown>(
+  url: string,
+): Promise<JsonResponse<T>> {
   const res = await fetch(url);
   const data = await res.json().catch(() => null);
   return { ok: res.ok, data };

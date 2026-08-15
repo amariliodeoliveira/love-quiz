@@ -1,9 +1,15 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { utcToZonedParts, zonedTimeToUtc, type WallClockParts } from "@/lib/countdown";
-import { getJson, patchJson } from "@/lib/http";
+
 import type { GeocodeResult } from "@/app/api/geocode/route";
+import {
+  utcToZonedParts,
+  type WallClockParts,
+  zonedTimeToUtc,
+} from "@/lib/countdown";
+import { getJson, patchJson } from "@/lib/http";
+
 import DateTimePicker from "./DateTimePicker";
 
 export const DEFAULT_COUNTDOWN_LABEL = "Together again in";
@@ -41,9 +47,13 @@ export default function CountdownForm({
 
   const [label, setLabel] = useState(initial?.label ?? "");
   const [locationQuery, setLocationQuery] = useState(initial?.location ?? "");
-  const [timeZone, setTimeZone] = useState<string | null>(initial?.timeZone ?? null);
+  const [timeZone, setTimeZone] = useState<string | null>(
+    initial?.timeZone ?? null,
+  );
   const [dateParts, setDateParts] = useState<WallClockParts | null>(
-    initial ? utcToZonedParts(new Date(initial.targetAtIso), initial.timeZone) : null,
+    initial
+      ? utcToZonedParts(new Date(initial.targetAtIso), initial.timeZone)
+      : null,
   );
   const [suggestions, setSuggestions] = useState<GeocodeResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -86,7 +96,9 @@ export default function CountdownForm({
       return;
     }
     if (!timeZone) {
-      setError("Pick a city from the suggestions below, so the time zone is known.");
+      setError(
+        "Pick a city from the suggestions below, so the time zone is known.",
+      );
       return;
     }
     setError(null);
@@ -155,7 +167,11 @@ export default function CountdownForm({
           {!searching && suggestions.length > 0 && (
             <ul id={cityListId} className="select-menu" role="listbox">
               {suggestions.map((s) => (
-                <li key={`${s.label}-${s.timeZone}`} role="option" aria-selected={false}>
+                <li
+                  key={`${s.label}-${s.timeZone}`}
+                  role="option"
+                  aria-selected={false}
+                >
                   <button
                     type="button"
                     className="select-option"

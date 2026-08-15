@@ -1,5 +1,6 @@
 import { getAppHeaderData } from "@/lib/appHeaderData";
 import { GAME_PATH } from "@/lib/routes";
+
 import AppHeader from "../../_components/AppHeader";
 
 export default async function GameLayout({

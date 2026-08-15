@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+
 import { useClickOutside } from "@/lib/useClickOutside";
 
 export default function Select({
@@ -36,7 +37,11 @@ export default function Select({
       {open && (
         <ul className="select-menu" role="listbox">
           {options.map((option) => (
-            <li key={option.value} role="option" aria-selected={option.value === value}>
+            <li
+              key={option.value}
+              role="option"
+              aria-selected={option.value === value}
+            >
               <button
                 type="button"
                 className={`select-option ${option.value === value ? "selected" : ""}`}

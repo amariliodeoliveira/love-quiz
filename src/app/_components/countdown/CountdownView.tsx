@@ -1,6 +1,7 @@
 "use client";
 
 import { useCountdownTick } from "@/lib/useCountdownTick";
+
 import EmojiText from "../EmojiText";
 
 function pad(n: number): string {
@@ -42,18 +43,18 @@ export default function CountdownView({
 
   return (
     <div className="flex flex-col items-center gap-6 py-2 text-center">
-      <EmojiText text={label} className="font-serif text-2xl text-text" />
+      <EmojiText text={label} className="text-text font-serif text-2xl" />
 
       {breakdown.isPast ? (
-        <p className="font-serif text-3xl text-text">Today! 🎉</p>
+        <p className="text-text font-serif text-3xl">Today! 🎉</p>
       ) : (
         <div className="grid grid-cols-4 gap-3 sm:gap-6">
           {STAT_ORDER.map((unit) => (
             <div key={unit} className="flex flex-col items-center">
-              <span className="font-serif text-4xl text-text tabular-nums sm:text-5xl">
+              <span className="text-text font-serif text-4xl tabular-nums sm:text-5xl">
                 {pad(breakdown[unit])}
               </span>
-              <span className="mt-1 text-xs tracking-[0.08em] text-muted uppercase">
+              <span className="text-muted mt-1 text-xs tracking-[0.08em] uppercase">
                 {STAT_LABEL[unit]}
               </span>
             </div>

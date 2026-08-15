@@ -18,7 +18,7 @@ For everything else in `src/lib/`, use judgment: a one-line wrapper around `fetc
 
 ## Bug fixes: reproduce first
 
-When fixing a bug in anything covered above, write the failing test that reproduces it *before* fixing the code — confirm it fails for the right reason, then fix, then confirm it passes. This is the one place a TDD-style loop earns its keep here: it's cheap, and it's the difference between "fixed" and "fixed until it quietly comes back."
+When fixing a bug in anything covered above, write the failing test that reproduces it _before_ fixing the code — confirm it fails for the right reason, then fix, then confirm it passes. This is the one place a TDD-style loop earns its keep here: it's cheap, and it's the difference between "fixed" and "fixed until it quietly comes back."
 
 ## Before calling something done
 
