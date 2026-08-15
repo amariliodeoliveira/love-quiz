@@ -81,7 +81,7 @@ export default function AppHeader({
           msRemaining={countdown.msRemaining}
           anchoredAt={anchoredAt}
           label={countdown.label}
-          onExpandedClick={() => setViewingCountdown(true)}
+          onClick={() => setViewingCountdown(true)}
         />
       )}
 

@@ -1,39 +1,24 @@
 /* Floating countdown bubble (bottom-right, chat-widget style) — see CountdownBubble.tsx */
 @layer components {
-  .countdown-bubble-anchor {
+  .countdown-bubble {
     position: fixed;
     right: var(--space-6);
     bottom: var(--space-6);
     z-index: 30;
-  }
-  .countdown-bubble {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-popover);
-    cursor: pointer;
-    transition:
-      transform 0.15s ease,
-      border-radius 0.15s ease;
-  }
-  .countdown-bubble-collapsed {
     width: 48px;
     height: 48px;
     border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-popover);
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: transform 0.15s ease;
   }
-  .countdown-bubble-collapsed:hover {
+  .countdown-bubble:hover {
     transform: scale(1.06);
-  }
-  .countdown-bubble-expanded {
-    flex-direction: column;
-    gap: 2px;
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-md);
-    font-size: 0.85rem;
   }
 }
