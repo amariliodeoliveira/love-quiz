@@ -41,6 +41,7 @@ type RawTimestamp = string | Date | null;
 export interface DbUser {
   id: number;
   username: string;
+  displayName: string;
   passwordHash: string | null;
   role: Role;
   avatarColor: string;
@@ -101,6 +102,7 @@ export interface Session {
 interface UserRow {
   id: number;
   username: string;
+  display_name: string;
   password_hash: string | null;
   role: Role;
   avatar_color: string;
@@ -114,6 +116,7 @@ function mapUserRow(row: UserRow): DbUser {
   return {
     id: row.id,
     username: row.username,
+    displayName: row.display_name,
     passwordHash: row.password_hash,
     role: row.role,
     avatarColor: row.avatar_color,
@@ -128,7 +131,7 @@ export async function findUserByUsername(
   username: string,
 ): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until, created_at, theme
+    SELECT id, username, display_name, password_hash, role, avatar_color, failed_attempts, locked_until, created_at, theme
     FROM users
     WHERE username = ${username};
   `;
@@ -138,7 +141,7 @@ export async function findUserByUsername(
 
 export async function getUserById(id: number): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until, created_at, theme
+    SELECT id, username, display_name, password_hash, role, avatar_color, failed_attempts, locked_until, created_at, theme
     FROM users
     WHERE id = ${id};
   `;
@@ -172,6 +175,15 @@ export async function registerFailedLogin(userId: number): Promise<void> {
 export async function resetFailedLogins(userId: number): Promise<void> {
   await sql`
     UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = ${userId};
+  `;
+}
+
+export async function updateDisplayName(
+  userId: number,
+  displayName: string,
+): Promise<void> {
+  await sql`
+    UPDATE users SET display_name = ${displayName} WHERE id = ${userId};
   `;
 }
 

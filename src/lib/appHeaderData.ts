@@ -42,7 +42,10 @@ export const getSessionUser = cache(async (): Promise<DbUser | null> => {
  * itself, even if it doesn't render the countdown ticker.
  */
 export async function getAppHeaderData(): Promise<{
-  user: Pick<DbUser, "username" | "avatarColor" | "theme"> | null;
+  user: Pick<
+    DbUser,
+    "username" | "displayName" | "avatarColor" | "theme"
+  > | null;
   countdown: CountdownDisplay | null;
 }> {
   const user = await getSessionUser();

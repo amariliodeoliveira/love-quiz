@@ -17,9 +17,13 @@ CREATE TABLE users (
   avatar_color TEXT NOT NULL DEFAULT 'pink',
   failed_attempts INTEGER NOT NULL DEFAULT 0,
   locked_until TIMESTAMPTZ,
-  theme TEXT NOT NULL DEFAULT 'dark'
+  theme TEXT NOT NULL DEFAULT 'dark',
+  display_name TEXT NOT NULL
   -- role is app-validated as 'admin' | 'user' (src/lib/db.ts Role type) — no DB check constraint today.
   -- theme is app-validated as 'dark' | 'pink' (src/lib/db.ts Theme type) — no DB check constraint today.
+  -- display_name is the editable "shown as" name (see UserAvatarMenu's profile-edit
+  -- flow) — username stays fixed (it's the login credential); display_name is what
+  -- the UI shows everywhere else. Backfilled from username when this column was added.
 );
 
 CREATE TABLE cards (

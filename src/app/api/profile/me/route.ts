@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 
 import { withSession } from "@/lib/api";
 import { isAvatarColorName } from "@/lib/avatar";
-import { updateAvatarColor, updateTheme } from "@/lib/db";
+import { updateAvatarColor, updateDisplayName, updateTheme } from "@/lib/db";
 import { isThemeName } from "@/lib/theme";
 
+const MAX_DISPLAY_NAME_LENGTH = 40;
+
 export const PATCH = withSession(async (session, request: Request) => {
-  const { avatarColor, theme } = await request.json();
+  const { avatarColor, theme, displayName } = await request.json();
 
   if (avatarColor !== undefined) {
     if (!isAvatarColorName(avatarColor)) {
@@ -20,6 +22,17 @@ export const PATCH = withSession(async (session, request: Request) => {
       return NextResponse.json({ error: "Invalid theme" }, { status: 400 });
     }
     await updateTheme(session.userId, theme);
+  }
+
+  if (displayName !== undefined) {
+    const trimmed = typeof displayName === "string" ? displayName.trim() : "";
+    if (!trimmed || trimmed.length > MAX_DISPLAY_NAME_LENGTH) {
+      return NextResponse.json(
+        { error: "Invalid display name" },
+        { status: 400 },
+      );
+    }
+    await updateDisplayName(session.userId, trimmed);
   }
 
   return NextResponse.json({ ok: true });

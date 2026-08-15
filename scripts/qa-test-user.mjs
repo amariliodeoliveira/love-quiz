@@ -36,8 +36,8 @@ async function create() {
   await sql`DELETE FROM users WHERE username = ${USERNAME};`;
 
   const { rows } = await sql`
-    INSERT INTO users (username, password_hash, role, avatar_color, failed_attempts, locked_until)
-    VALUES (${USERNAME}, NULL, 'user', 'pink', 0, NULL)
+    INSERT INTO users (username, display_name, password_hash, role, avatar_color, failed_attempts, locked_until)
+    VALUES (${USERNAME}, ${USERNAME}, NULL, 'user', 'pink', 0, NULL)
     RETURNING id;
   `;
   const userId = rows[0].id;
