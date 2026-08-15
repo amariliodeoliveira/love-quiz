@@ -1,20 +1,25 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { LEVEL_META, type Level } from "@/data/cards";
-import type { DbAiCard, DbCard, Session } from "@/lib/db";
-import { formatAnsweredAtManila } from "@/lib/datetime";
-import { postJson, patchJson } from "@/lib/http";
+
 import ConfirmationModal from "@/app/_components/ConfirmationModal";
-import CardFormModal from "./CardFormModal";
+import { type Level, LEVEL_META } from "@/data/cards";
+import { formatAnsweredAtManila } from "@/lib/datetime";
+import type { DbAiCard, DbCard, Session } from "@/lib/db";
+import { patchJson, postJson } from "@/lib/http";
+
 import AIGenerateModal from "./AIGenerateModal";
+import CardFormModal from "./CardFormModal";
 
 type TopTab = "truths" | "dares" | "ai";
 type SubTab = "active" | "history";
 
 const RANK_BADGES = ["🥇", "🥈", "🥉"];
 
-function byAnsweredAtDesc<T extends { answeredAt: Date | null }>(a: T, b: T): number {
+function byAnsweredAtDesc<T extends { answeredAt: Date | null }>(
+  a: T,
+  b: T,
+): number {
   return b.answeredAt!.getTime() - a.answeredAt!.getTime();
 }
 
@@ -67,14 +72,19 @@ export default function ManageDashboard({
   const [showAiGenerateModal, setShowAiGenerateModal] = useState(false);
   const [formCard, setFormCard] = useState<DbCard | "new" | null>(null);
   const [pendingDelete, setPendingDelete] = useState<DbCard | null>(null);
-  const [pendingReactivate, setPendingReactivate] = useState<DbCard | null>(null);
+  const [pendingReactivate, setPendingReactivate] = useState<DbCard | null>(
+    null,
+  );
 
   async function handleFormSubmit(level: Level, question: string) {
     if (formCard === "new") {
-      const { ok, data } = await postJson<{ card: DbCard }>("/api/profile/cards", {
-        level,
-        question,
-      });
+      const { ok, data } = await postJson<{ card: DbCard }>(
+        "/api/profile/cards",
+        {
+          level,
+          question,
+        },
+      );
       if (ok && data) {
         setCards((prev) => [...prev, data.card]);
       }
@@ -85,7 +95,9 @@ export default function ManageDashboard({
       });
       if (ok) {
         setCards((prev) =>
-          prev.map((c) => (c.id === formCard.id ? { ...c, level, question } : c)),
+          prev.map((c) =>
+            c.id === formCard.id ? { ...c, level, question } : c,
+          ),
         );
       }
     }
@@ -111,14 +123,19 @@ export default function ManageDashboard({
     );
     if (ok) {
       setCards((prev) =>
-        prev.map((c) => (c.id === pendingReactivate.id ? { ...c, answeredAt: null } : c)),
+        prev.map((c) =>
+          c.id === pendingReactivate.id ? { ...c, answeredAt: null } : c,
+        ),
       );
     }
     setPendingReactivate(null);
   }
 
   async function handleGenerateAi(level: Level) {
-    const { ok, data } = await postJson<{ card: DbAiCard }>("/api/ai-cards/generate", { level });
+    const { ok, data } = await postJson<{ card: DbAiCard }>(
+      "/api/ai-cards/generate",
+      { level },
+    );
     if (ok && data) {
       setAiCards((prev) => [data.card, ...prev]);
     }
@@ -130,35 +147,147 @@ export default function ManageDashboard({
     [aiCards],
   );
   const historyAiCards = useMemo(
-    () => aiCards.filter((c) => c.answeredAt !== null).sort(byAnsweredAtDesc),
+    () =>
+      aiCards.filter((c) => c.answeredAt !== null).toSorted(byAnsweredAtDesc),
     [aiCards],
   );
 
-  const truths = useMemo(() => cards.filter((c) => c.level !== "dare"), [cards]);
+  const truths = useMemo(
+    () => cards.filter((c) => c.level !== "dare"),
+    [cards],
+  );
   const activeTruths = truths.filter((c) => c.answeredAt === null);
   const historyTruths = useMemo(
-    () => truths.filter((c) => c.answeredAt !== null).sort(byAnsweredAtDesc),
+    () =>
+      truths.filter((c) => c.answeredAt !== null).toSorted(byAnsweredAtDesc),
     [truths],
   );
   const rankedDares = useMemo(
     () =>
       cards
         .filter((c) => c.level === "dare")
-        .sort((a, b) => b.timesCompleted - a.timesCompleted),
+        .toSorted((a, b) => b.timesCompleted - a.timesCompleted),
     [cards],
   );
+
+  let tabContent: React.ReactNode;
+  if (topTab === "truths") {
+    tabContent = (
+      <>
+        <SubTabToggle
+          value={truthSubTab}
+          onChange={setTruthSubTab}
+          label="Truths filter"
+        />
+
+        {(truthSubTab === "active" ? activeTruths : historyTruths).map(
+          (card) => {
+            const meta = LEVEL_META[card.level];
+            return (
+              <div key={card.id} className="dashboard-card-row">
+                <div>
+                  <p className="dashboard-card-question">
+                    {meta.emoji} {card.question}
+                  </p>
+                  {card.answeredAt && (
+                    <p className="text-muted text-xs">
+                      Answered on {formatAnsweredAtManila(card.answeredAt)}
+                    </p>
+                  )}
+                </div>
+                <div className="dashboard-card-actions">
+                  {truthSubTab === "history" && (
+                    <button
+                      onClick={() => setPendingReactivate(card)}
+                      className="btn-ghost"
+                    >
+                      Reactivate
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setFormCard(card)}
+                    className="btn-ghost"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => setPendingDelete(card)}
+                    className="btn-danger"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            );
+          },
+        )}
+      </>
+    );
+  } else if (topTab === "dares") {
+    tabContent = rankedDares.map((card, index) => (
+      <div key={card.id} className="dashboard-card-row">
+        <p className="dashboard-card-question">
+          {index < 3 ? `${RANK_BADGES[index]} ` : ""}
+          {card.question} · {card.timesCompleted}x
+        </p>
+        <div className="dashboard-card-actions">
+          <button onClick={() => setFormCard(card)} className="btn-ghost">
+            Edit
+          </button>
+          <button onClick={() => setPendingDelete(card)} className="btn-danger">
+            Delete
+          </button>
+        </div>
+      </div>
+    ));
+  } else {
+    tabContent = (
+      <>
+        <SubTabToggle
+          value={aiSubTab}
+          onChange={setAiSubTab}
+          label="AI questions filter"
+        />
+
+        {(aiSubTab === "active" ? activeAiCards : historyAiCards).map(
+          (card) => {
+            const meta = LEVEL_META[card.level];
+            return (
+              <div key={card.id} className="dashboard-card-row">
+                <div>
+                  <p className="dashboard-card-question">
+                    {meta.emoji} {card.question}
+                  </p>
+                  <p className="text-muted text-xs">
+                    {card.answeredAt
+                      ? `Answered on ${formatAnsweredAtManila(card.answeredAt)}`
+                      : `Generated by ${card.model}`}
+                  </p>
+                </div>
+              </div>
+            );
+          },
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="page-container">
       <div className="dashboard-header">
         <h1 className="page-title">Deck Studio</h1>
-        <p className="text-subtext dashboard-subtitle">
-          {session.role === "admin" ? "Seeing all cards" : "Seeing only your cards"}
+        <p className="dashboard-subtitle text-subtext">
+          {session.role === "admin"
+            ? "Seeing all cards"
+            : "Seeing only your cards"}
         </p>
         <button onClick={() => setFormCard("new")} className="btn">
           + Add card
         </button>
-        <button onClick={() => setShowAiGenerateModal(true)} className="btn-ghost">
+        <button
+          onClick={() => setShowAiGenerateModal(true)}
+          className="btn-ghost"
+        >
           🤖 Generate with AI
         </button>
       </div>
@@ -190,81 +319,7 @@ export default function ManageDashboard({
         </button>
       </div>
 
-      {topTab === "truths" ? (
-        <>
-          <SubTabToggle value={truthSubTab} onChange={setTruthSubTab} label="Truths filter" />
-
-          {(truthSubTab === "active" ? activeTruths : historyTruths).map((card) => {
-            const meta = LEVEL_META[card.level];
-            return (
-              <div key={card.id} className="dashboard-card-row">
-                <div>
-                  <p className="dashboard-card-question">
-                    {meta.emoji} {card.question}
-                  </p>
-                  {card.answeredAt && (
-                    <p className="text-xs text-muted">
-                      Answered on {formatAnsweredAtManila(card.answeredAt)}
-                    </p>
-                  )}
-                </div>
-                <div className="dashboard-card-actions">
-                  {truthSubTab === "history" && (
-                    <button onClick={() => setPendingReactivate(card)} className="btn-ghost">
-                      Reactivate
-                    </button>
-                  )}
-                  <button onClick={() => setFormCard(card)} className="btn-ghost">
-                    Edit
-                  </button>
-                  <button onClick={() => setPendingDelete(card)} className="btn-danger">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </>
-      ) : topTab === "dares" ? (
-        rankedDares.map((card, index) => (
-          <div key={card.id} className="dashboard-card-row">
-            <p className="dashboard-card-question">
-              {index < 3 ? `${RANK_BADGES[index]} ` : ""}
-              {card.question} · {card.timesCompleted}x
-            </p>
-            <div className="dashboard-card-actions">
-              <button onClick={() => setFormCard(card)} className="btn-ghost">
-                Edit
-              </button>
-              <button onClick={() => setPendingDelete(card)} className="btn-danger">
-                Delete
-              </button>
-            </div>
-          </div>
-        ))
-      ) : (
-        <>
-          <SubTabToggle value={aiSubTab} onChange={setAiSubTab} label="AI questions filter" />
-
-          {(aiSubTab === "active" ? activeAiCards : historyAiCards).map((card) => {
-            const meta = LEVEL_META[card.level];
-            return (
-              <div key={card.id} className="dashboard-card-row">
-                <div>
-                  <p className="dashboard-card-question">
-                    {meta.emoji} {card.question}
-                  </p>
-                  <p className="text-xs text-muted">
-                    {card.answeredAt
-                      ? `Answered on ${formatAnsweredAtManila(card.answeredAt)}`
-                      : `Generated by ${card.model}`}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </>
-      )}
+      {tabContent}
 
       {formCard !== null && (
         <CardFormModal
@@ -276,7 +331,10 @@ export default function ManageDashboard({
       )}
 
       {showAiGenerateModal && (
-        <AIGenerateModal onClose={() => setShowAiGenerateModal(false)} onGenerate={handleGenerateAi} />
+        <AIGenerateModal
+          onClose={() => setShowAiGenerateModal(false)}
+          onGenerate={handleGenerateAi}
+        />
       )}
 
       <ConfirmationModal

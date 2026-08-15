@@ -1,5 +1,7 @@
 import { generateText } from "ai";
-import { LEVEL_META, type Level } from "@/data/cards";
+
+import { type Level, LEVEL_META } from "@/data/cards";
+
 import { buildPromptContext, type PromptContext } from "./context";
 import { AI_MODEL_ID, aiModel } from "./model";
 
@@ -15,12 +17,13 @@ export function buildPrompt(context: PromptContext, level: Level): string {
   const meta = LEVEL_META[level];
   const kind = level === "dare" ? "a dare" : "a truth question";
   const avoid = [context.summary, ...context.recentQuestions].filter(Boolean);
+  const avoidList = avoid.map((item) => `- ${item}`).join("\n");
 
   return [
     `Generate ${kind} for a couple's "truth or dare" game.`,
     `Intensity level: ${meta.label}.`,
     avoid.length > 0
-      ? `Do not repeat these topics or questions already used:\n${avoid.map((item) => `- ${item}`).join("\n")}`
+      ? `Do not repeat these topics or questions already used:\n${avoidList}`
       : null,
     "Reply in English, with only the question/dare text — no quotes, no numbering, no explanation.",
   ]

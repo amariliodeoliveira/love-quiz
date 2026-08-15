@@ -1,9 +1,14 @@
 import { sql } from "@vercel/postgres";
+
 import type { Card, Level } from "@/data/cards";
 import type { AvatarColorName } from "@/lib/avatar";
 import type { CardRef } from "@/lib/id";
 
 export type Role = "admin" | "user";
+
+// Postgres timestamp columns come back as strings from the driver but are normalized to Date via
+// mapCardRow/mapAiCardRow/mapUserRow before leaving this module.
+type RawTimestamp = string | Date | null;
 
 export interface DbUser {
   id: number;
@@ -34,7 +39,7 @@ interface CardRow {
   question: string;
   position: number;
   user_id: number | null;
-  answered_at: string | Date | null;
+  answered_at: RawTimestamp;
   times_completed: number;
 }
 
@@ -70,7 +75,7 @@ interface UserRow {
   role: Role;
   avatar_color: string;
   failed_attempts: number;
-  locked_until: string | Date | null;
+  locked_until: RawTimestamp;
 }
 
 function mapUserRow(row: UserRow): DbUser {
@@ -151,7 +156,7 @@ export async function getAllCards(): Promise<DbCard[]> {
     FROM cards
     ORDER BY level, position;
   `;
-  return rows.map(mapCardRow);
+  return rows.map((row) => mapCardRow(row));
 }
 
 export async function getCardsForUser(session: Session): Promise<DbCard[]> {
@@ -164,7 +169,7 @@ export async function getCardsForUser(session: Session): Promise<DbCard[]> {
     WHERE user_id = ${session.userId}
     ORDER BY level, position;
   `;
-  return rows.map(mapCardRow);
+  return rows.map((row) => mapCardRow(row));
 }
 
 export async function createCard(
@@ -192,7 +197,10 @@ export async function createCard(
  * "unanswered", both flip, second flip cancels the first). Setting an explicit value
  * is idempotent: both requests land on the same end state no matter which arrives last.
  */
-export async function setCardAnswered(id: number, answered: boolean): Promise<void> {
+export async function setCardAnswered(
+  id: number,
+  answered: boolean,
+): Promise<void> {
   await sql`
     UPDATE cards SET answered_at = ${answered ? new Date().toISOString() : null}
     WHERE id = ${id};
@@ -219,7 +227,10 @@ export async function incrementDareCompleted(id: number): Promise<void> {
  * management action — a user should only be able to reactivate their own cards.
  * Returns whether a row was changed.
  */
-export async function reactivateCard(id: number, requester: Session): Promise<boolean> {
+export async function reactivateCard(
+  id: number,
+  requester: Session,
+): Promise<boolean> {
   const isAdmin = requester.role === "admin";
   const { rowCount } = await sql`
     UPDATE cards SET answered_at = NULL
@@ -271,7 +282,7 @@ interface AiCardRow {
   question: string;
   model: string;
   created_at: string | Date;
-  answered_at: string | Date | null;
+  answered_at: RawTimestamp;
   times_completed: number;
 }
 
@@ -294,7 +305,7 @@ export async function getAiCards(): Promise<DbAiCard[]> {
     FROM ai_cards
     ORDER BY created_at DESC;
   `;
-  return rows.map(mapAiCardRow);
+  return rows.map((row) => mapAiCardRow(row));
 }
 
 export async function createAiCard(
@@ -311,7 +322,10 @@ export async function createAiCard(
 }
 
 /** Mirrors setCardAnswered — same explicit-value, no-toggle reasoning applies. */
-export async function setAiCardAnswered(id: number, answered: boolean): Promise<void> {
+export async function setAiCardAnswered(
+  id: number,
+  answered: boolean,
+): Promise<void> {
   await sql`
     UPDATE ai_cards SET answered_at = ${answered ? new Date().toISOString() : null}
     WHERE id = ${id};
@@ -372,7 +386,10 @@ export async function countAiCardsSinceContextUpdate(): Promise<number> {
  */
 export async function getGameCards(): Promise<Card[]> {
   const [manual, ai] = await Promise.all([getAllCards(), getAiCards()]);
-  const toCard = (id: string, c: { level: Level; question: string; answeredAt: Date | null }): Card => ({
+  const toCard = (
+    id: string,
+    c: { level: Level; question: string; answeredAt: Date | null },
+  ): Card => ({
     id,
     level: c.level,
     question: c.question,
@@ -387,21 +404,20 @@ export async function getGameCards(): Promise<Card[]> {
 
 /** Routes "mark answered" to the right table for a card id of either source — the one
  * place outside getGameCards that needs to know both tables exist. */
-export async function setCardAnsweredByRef(ref: CardRef, answered: boolean): Promise<void> {
-  if (ref.source === "ai") {
-    await setAiCardAnswered(ref.id, answered);
-  } else {
-    await setCardAnswered(ref.id, answered);
-  }
+export async function setCardAnsweredByRef(
+  ref: CardRef,
+  answered: boolean,
+): Promise<void> {
+  await (ref.source === "ai"
+    ? setAiCardAnswered(ref.id, answered)
+    : setCardAnswered(ref.id, answered));
 }
 
 /** Routes "increment dare completion" to the right table for a card id of either source. */
 export async function incrementCardCompletedByRef(ref: CardRef): Promise<void> {
-  if (ref.source === "ai") {
-    await incrementAiDareCompleted(ref.id);
-  } else {
-    await incrementDareCompleted(ref.id);
-  }
+  await (ref.source === "ai"
+    ? incrementAiDareCompleted(ref.id)
+    : incrementDareCompleted(ref.id));
 }
 
 /**
@@ -419,7 +435,12 @@ export async function getRandomUnansweredManualTruth(): Promise<Card | null> {
   `;
   const row = rows[0];
   return row
-    ? { id: String(row.id), level: row.level, question: row.question, answered: false }
+    ? {
+        id: String(row.id),
+        level: row.level,
+        question: row.question,
+        answered: false,
+      }
     : null;
 }
 

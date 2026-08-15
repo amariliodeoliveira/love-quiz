@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { LEVEL_META, type Card } from "@/data/cards";
+import { useState } from "react";
+
+import { type Card, LEVEL_META } from "@/data/cards";
 import { pickNextDare, pickRandomItem } from "@/lib/draw";
 import { getJson, patchJson, postJson } from "@/lib/http";
 import { parseCardRef } from "@/lib/id";
 import { MANAGE_PATH } from "@/lib/routes";
+
 import RoundCard from "./RoundCard";
 
 type Screen = "idle" | "truth" | "dare" | "finished";
@@ -15,10 +17,127 @@ function isAiCardId(id: string): boolean {
   return parseCardRef(id)?.source === "ai";
 }
 
+function RoundContent({
+  screen,
+  currentDare,
+  currentTruth,
+  hasDares,
+  aiLoading,
+  dareError,
+  aiError,
+  onDareDone,
+  onSkipDare,
+  onDrawDareInstead,
+  onSkipTruth,
+  onConfirmRound,
+  onDrawTruth,
+  onGenerateAi,
+}: {
+  screen: Screen;
+  currentDare: Card | null;
+  currentTruth: Card | null;
+  hasDares: boolean;
+  aiLoading: boolean;
+  dareError: string | null;
+  aiError: string | null;
+  onDareDone: () => void;
+  onSkipDare: () => void;
+  onDrawDareInstead: () => void;
+  onSkipTruth: () => void;
+  onConfirmRound: () => void;
+  onDrawTruth: () => void;
+  onGenerateAi: () => void;
+}): React.ReactNode {
+  if (screen === "dare" && currentDare) {
+    return (
+      <RoundCard
+        meta={LEVEL_META.dare}
+        question={currentDare.question}
+        badge={isAiCardId(currentDare.id) ? "🤖 AI generated" : undefined}
+      >
+        <button type="button" className="btn" onClick={onDareDone}>
+          Done 🔥
+        </button>
+        <button type="button" className="btn-ghost" onClick={onSkipDare}>
+          Skip 🔄
+        </button>
+        {dareError && (
+          <p className="form-error w-full basis-full text-center">
+            {dareError}
+          </p>
+        )}
+      </RoundCard>
+    );
+  }
+
+  if (screen === "truth" && currentTruth) {
+    return (
+      <RoundCard
+        meta={LEVEL_META[currentTruth.level]}
+        question={currentTruth.question}
+        skipLabel="Skip this one"
+        onSkip={onSkipTruth}
+        badge={isAiCardId(currentTruth.id) ? "🤖 AI generated" : undefined}
+      >
+        {hasDares && (
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={onDrawDareInstead}
+            disabled={aiLoading}
+          >
+            😈 Draw a dare instead
+          </button>
+        )}
+        <button
+          type="button"
+          className="btn"
+          onClick={onConfirmRound}
+          disabled={aiLoading}
+        >
+          {aiLoading ? "Finding your next question..." : "Confirm & next"}
+        </button>
+      </RoundCard>
+    );
+  }
+
+  if (screen === "finished") {
+    return (
+      <>
+        <p className="text-text font-serif text-xl">
+          You&apos;ve answered every question in the deck!
+        </p>
+        <Link href={MANAGE_PATH} className="btn">
+          Add new questions
+        </Link>
+        <button
+          type="button"
+          className="btn-ghost"
+          onClick={onGenerateAi}
+          disabled={aiLoading}
+        >
+          {aiLoading ? "Generating..." : "🤖 Ask AI for one"}
+        </button>
+        {aiError && (
+          <p className="form-error w-full basis-full text-center">{aiError}</p>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <button type="button" className="btn" onClick={onDrawTruth}>
+      Draw a Truth
+    </button>
+  );
+}
+
 export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [screen, setScreen] = useState<Screen>(() =>
-    initialCards.some((c) => c.level !== "dare" && !c.answered) ? "idle" : "finished",
+    initialCards.some((c) => c.level !== "dare" && !c.answered)
+      ? "idle"
+      : "finished",
   );
   const [truthId, setTruthId] = useState<string | null>(null);
   const [dareId, setDareId] = useState<string | null>(null);
@@ -55,14 +174,15 @@ export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
   async function handleGenerateAi() {
     setAiLoading(true);
     setAiError(null);
-    const { ok, data } = await postJson<{ card: { id: number; level: Card["level"]; question: string } }>(
-      "/api/ai-cards/generate",
-      {},
-    );
+    const { ok, data } = await postJson<{
+      card: { id: number; level: Card["level"]; question: string };
+    }>("/api/ai-cards/generate", {});
     setAiLoading(false);
 
     if (!ok || !data) {
-      setAiError("Couldn't generate a question — check your connection and try again.");
+      setAiError(
+        "Couldn't generate a question — check your connection and try again.",
+      );
       return;
     }
 
@@ -82,7 +202,9 @@ export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
    * partner added one mid-session) before falling back to generating another AI one. */
   async function drawAfterAi() {
     setAiLoading(true);
-    const { ok, data } = await getJson<{ card: Card | null }>("/api/cards/next-truth");
+    const { ok, data } = await getJson<{ card: Card | null }>(
+      "/api/cards/next-truth",
+    );
     if (ok && data?.card) {
       const card = data.card;
       setAiLoading(false);
@@ -95,7 +217,9 @@ export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
   }
 
   async function markTruthAnswered(id: string) {
-    setCards((prev) => prev.map((c) => (c.id === id ? { ...c, answered: true } : c)));
+    setCards((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, answered: true } : c)),
+    );
     await patchJson(`/api/cards/${id}/answered`, { answered: true });
   }
 
@@ -111,7 +235,7 @@ export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
 
   async function handleConfirmRound() {
     if (!truthId || aiLoading) return;
-    markTruthAnswered(truthId);
+    await markTruthAnswered(truthId);
     await advanceFromTruth(truthId);
   }
 
@@ -136,77 +260,31 @@ export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
     drawDare(dareId);
   }
 
-  const currentTruth = truthId ? (cards.find((c) => c.id === truthId) ?? null) : null;
-  const currentDare = dareId ? (cards.find((c) => c.id === dareId) ?? null) : null;
-
-  let content: React.ReactNode;
-
-  if (screen === "dare" && currentDare) {
-    content = (
-      <RoundCard
-        meta={LEVEL_META.dare}
-        question={currentDare.question}
-        badge={isAiCardId(currentDare.id) ? "🤖 AI generated" : undefined}
-      >
-        <button type="button" className="btn" onClick={handleDareDone}>
-          Done 🔥
-        </button>
-        <button type="button" className="btn-ghost" onClick={handleSkipDare}>
-          Skip 🔄
-        </button>
-        {dareError && <p className="form-error w-full basis-full text-center">{dareError}</p>}
-      </RoundCard>
-    );
-  } else if (screen === "truth" && currentTruth) {
-    content = (
-      <RoundCard
-        meta={LEVEL_META[currentTruth.level]}
-        question={currentTruth.question}
-        skipLabel="Skip this one"
-        onSkip={handleSkipTruth}
-        badge={isAiCardId(currentTruth.id) ? "🤖 AI generated" : undefined}
-      >
-        {hasDares && (
-          <button
-            type="button"
-            className="btn-ghost"
-            onClick={() => drawDare()}
-            disabled={aiLoading}
-          >
-            😈 Draw a dare instead
-          </button>
-        )}
-        <button type="button" className="btn" onClick={handleConfirmRound} disabled={aiLoading}>
-          {aiLoading ? "Finding your next question..." : "Confirm & next"}
-        </button>
-      </RoundCard>
-    );
-  } else if (screen === "finished") {
-    content = (
-      <>
-        <p className="font-serif text-xl text-text">
-          You&apos;ve answered every question in the deck!
-        </p>
-        <Link href={MANAGE_PATH} className="btn">
-          Add new questions
-        </Link>
-        <button type="button" className="btn-ghost" onClick={handleGenerateAi} disabled={aiLoading}>
-          {aiLoading ? "Generating..." : "🤖 Ask AI for one"}
-        </button>
-        {aiError && <p className="form-error w-full basis-full text-center">{aiError}</p>}
-      </>
-    );
-  } else {
-    content = (
-      <button type="button" className="btn" onClick={() => drawTruth()}>
-        Draw a Truth
-      </button>
-    );
-  }
+  const currentTruth = truthId
+    ? (cards.find((c) => c.id === truthId) ?? null)
+    : null;
+  const currentDare = dareId
+    ? (cards.find((c) => c.id === dareId) ?? null)
+    : null;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-16 text-center">
-      {content}
+      <RoundContent
+        screen={screen}
+        currentDare={currentDare}
+        currentTruth={currentTruth}
+        hasDares={hasDares}
+        aiLoading={aiLoading}
+        dareError={dareError}
+        aiError={aiError}
+        onDareDone={handleDareDone}
+        onSkipDare={handleSkipDare}
+        onDrawDareInstead={() => drawDare()}
+        onSkipTruth={handleSkipTruth}
+        onConfirmRound={handleConfirmRound}
+        onDrawTruth={() => drawTruth()}
+        onGenerateAi={handleGenerateAi}
+      />
     </div>
   );
 }

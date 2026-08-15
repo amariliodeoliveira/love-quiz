@@ -41,10 +41,13 @@ export default function Modal({
       }
       if (e.key !== "Tab" || !panel) return;
 
-      const nodes = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+      const nodes = [
+        ...panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
+      ];
       if (nodes.length === 0) return;
       const first = nodes[0];
-      const last = nodes[nodes.length - 1];
+      const last = nodes.at(-1);
+      if (!last) return;
 
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
@@ -54,10 +57,10 @@ export default function Modal({
         first.focus();
       }
     }
-    window.addEventListener("keydown", onKeyDown);
+    globalThis.addEventListener("keydown", onKeyDown);
 
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
+      globalThis.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
       previouslyFocused.current?.focus();
     };

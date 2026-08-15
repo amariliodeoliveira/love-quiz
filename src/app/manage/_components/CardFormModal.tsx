@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { LEVEL_META, type Level } from "@/data/cards";
-import type { DbCard } from "@/lib/db";
+
 import Modal from "@/app/_components/Modal";
 import Select from "@/app/_components/Select";
+import { type Level, LEVEL_META } from "@/data/cards";
+import type { DbCard } from "@/lib/db";
 
 const LEVEL_OPTIONS = Object.entries(LEVEL_META).map(([value, meta]) => ({
   value,
@@ -24,6 +25,8 @@ export default function CardFormModal({
   const [level, setLevel] = useState<Level>(card?.level ?? "1");
   const [question, setQuestion] = useState(card?.question ?? "");
   const [saving, setSaving] = useState(false);
+  let submitLabel = card ? "Save changes" : "Add card";
+  if (saving) submitLabel = "Saving...";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,7 +58,7 @@ export default function CardFormModal({
             Cancel
           </button>
           <button type="submit" className="btn" disabled={saving}>
-            {saving ? "Saving..." : card ? "Save changes" : "Add card"}
+            {submitLabel}
           </button>
         </div>
       </form>

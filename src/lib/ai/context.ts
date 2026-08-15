@@ -1,10 +1,12 @@
 import { generateText } from "ai";
+
 import {
   countAiCardsSinceContextUpdate,
   getAiContextSummary,
   getAnsweredQuestions,
   upsertAiContextSummary,
 } from "@/lib/db";
+
 import { aiModel } from "./model";
 
 const SUMMARY_REFRESH_THRESHOLD = 10;
@@ -28,13 +30,17 @@ export async function buildPromptContext(): Promise<PromptContext> {
   return { summary, recentQuestions };
 }
 
-export function buildSummaryPrompt(previousSummary: string, recentQuestions: string[]): string {
+export function buildSummaryPrompt(
+  previousSummary: string,
+  recentQuestions: string[],
+): string {
+  const questionList = recentQuestions.map((q) => `- ${q}`).join("\n");
   return [
     "You maintain a short summary of the topics already used in a couple's truth-or-dare game, so future questions don't repeat them.",
     previousSummary
       ? `Current summary:\n${previousSummary}`
       : "There is no summary yet — write one from scratch.",
-    `Recently answered questions:\n${recentQuestions.map((q) => `- ${q}`).join("\n")}`,
+    `Recently answered questions:\n${questionList}`,
     "Rewrite the summary incorporating these new topics. Reply with only the updated summary, in English, in at most 5 lines, with no introduction.",
   ].join("\n\n");
 }
@@ -43,7 +49,9 @@ export function buildSummaryPrompt(previousSummary: string, recentQuestions: str
  * last refresh, so the prompt context stays useful without growing without bound.
  * Takes the context the caller already built for its generation request, instead of
  * re-querying both tables again for the same data a few lines later. */
-export async function maybeRefreshSummary(context: PromptContext): Promise<void> {
+export async function maybeRefreshSummary(
+  context: PromptContext,
+): Promise<void> {
   const newCardCount = await countAiCardsSinceContextUpdate();
   if (newCardCount < SUMMARY_REFRESH_THRESHOLD) return;
   if (context.recentQuestions.length === 0) return;
