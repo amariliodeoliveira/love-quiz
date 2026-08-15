@@ -1,6 +1,10 @@
 # Testing Guidelines
 
-No strict TDD here (write-test-first for everything) — that's a process discipline that pays off more in larger teams than in a small project like this one. Instead, this codifies the coverage split that's already in place: pure logic in `src/lib/` is tested; components, API route wiring, and the DB layer deliberately aren't (yet).
+**TDD is the default for everything in `src/lib/`**: write the failing test first, watch it fail for the
+right reason, then write the code that makes it pass. This applies to new logic and to fixes alike —
+"Bug fixes: reproduce first" below is just TDD applied to an existing bug. The scope this applies to is
+still deliberately narrow (see the coverage split below): components, API route wiring, and the DB layer
+are out of scope for now, for the reasons documented in each section.
 
 ## Required: pure logic in `src/lib/`
 
