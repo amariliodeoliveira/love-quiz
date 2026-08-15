@@ -24,7 +24,7 @@ export default function Home() {
           </Link>
         </div>
       </div>
-      <footer className="border-border border-t">
+      <footer>
         <p>© {new Date().getFullYear()} Couples Card Deck</p>
       </footer>
     </>
