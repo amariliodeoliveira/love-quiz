@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-import { avatarColorHex } from "@/lib/avatar";
+import { avatarColorHex, avatarInitial } from "@/lib/avatar";
 import { patchJson } from "@/lib/http";
 import { LOGIN_PATH, MANAGE_PATH } from "@/lib/routes";
 import { type ThemeName, THEMES } from "@/lib/theme";
@@ -61,7 +61,7 @@ export default function UserAvatarMenu({
           className="avatar-badge"
           style={{ backgroundColor: avatarColorHex(color) }}
         >
-          {displayName.charAt(0).toUpperCase()}
+          {avatarInitial(displayName)}
         </span>
         <span className="avatar-username">{displayName}</span>
       </button>
@@ -87,7 +87,9 @@ export default function UserAvatarMenu({
           {/* "Edit profile" belongs with the account/appearance controls above it
               (theme) — tight gap, no divider. "Edit countdown" and "Deck Studio" are
               shared couple content, a distinct group, so they get a divider (same
-              treatment as the one before Log out) instead of reading as one flat list. */}
+              treatment as the one before Log out) instead of reading as one flat list.
+              The divider is its own plain element, not a border on the item itself —
+              a border-radius'd button with just a border-top curves at the ends. */}
           <button
             type="button"
             className="avatar-menu-item"
@@ -96,31 +98,33 @@ export default function UserAvatarMenu({
               setEditingProfile(true);
             }}
           >
-            👤 Edit profile
+            Edit profile
           </button>
+          <div className="avatar-menu-divider" />
           <button
             type="button"
-            className="avatar-menu-item avatar-menu-item-divider"
+            className="avatar-menu-item"
             onClick={() => {
               setOpen(false);
               onEditCountdown();
             }}
           >
-            ⏳ {hasCountdown ? "Edit countdown" : "Create a countdown"}
+            {hasCountdown ? "Edit countdown" : "Create a countdown"}
           </button>
           <Link
             href={MANAGE_PATH}
             className="avatar-menu-item"
             onClick={() => setOpen(false)}
           >
-            🎴 Deck Studio
+            Deck Studio
           </Link>
+          <div className="avatar-menu-divider" />
           <button
             type="button"
-            className="avatar-menu-item avatar-menu-item-divider avatar-menu-item-danger"
+            className="avatar-menu-item avatar-menu-item-danger"
             onClick={handleLogout}
           >
-            🚪 Log out
+            Log out
           </button>
         </div>
       )}

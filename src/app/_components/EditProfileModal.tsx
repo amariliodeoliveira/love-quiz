@@ -51,31 +51,35 @@ export default function EditProfileModal({
   return (
     <Modal open onClose={onClose} title="Edit profile">
       <form onSubmit={handleSubmit} className="modal-form">
-        <label htmlFor="display-name" className="login-hint">
-          Display name
-        </label>
-        <input
-          id="display-name"
-          type="text"
-          className="input"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          maxLength={40}
-          autoFocus
-        />
+        <div className="flex flex-col gap-1">
+          <label htmlFor="display-name" className="login-hint">
+            Display name
+          </label>
+          <input
+            id="display-name"
+            type="text"
+            className="input"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            maxLength={40}
+            autoFocus
+          />
+        </div>
 
-        <p className="login-hint">Avatar color</p>
-        <div className="avatar-swatches">
-          {AVATAR_COLORS.map((c) => (
-            <button
-              key={c.name}
-              type="button"
-              className={`avatar-swatch ${c.name === avatarColor ? "selected" : ""}`}
-              style={{ backgroundColor: c.hex }}
-              aria-label={`Use ${c.name} avatar color`}
-              onClick={() => setAvatarColor(c.name)}
-            />
-          ))}
+        <div className="flex flex-col gap-2">
+          <p className="login-hint">Avatar color</p>
+          <div className="avatar-swatches mb-0">
+            {AVATAR_COLORS.map((c) => (
+              <button
+                key={c.name}
+                type="button"
+                className={`avatar-swatch ${c.name === avatarColor ? "selected" : ""}`}
+                style={{ backgroundColor: c.hex }}
+                aria-label={`Use ${c.name} avatar color`}
+                onClick={() => setAvatarColor(c.name)}
+              />
+            ))}
+          </div>
         </div>
 
         {error && <p className="form-error">{error}</p>}

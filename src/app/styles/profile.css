@@ -113,8 +113,10 @@
     background: var(--border);
     color: var(--text);
   }
-  .avatar-menu-item-divider {
-    margin-top: var(--space-3);
+  /* A plain rule, not a border on a menu item — an item's own border-radius would
+     curve a border-top at its ends instead of drawing a straight line. */
+  .avatar-menu-divider {
+    margin: var(--space-2) 0;
     border-top: 1px solid var(--border);
   }
   .avatar-menu-item-danger {
