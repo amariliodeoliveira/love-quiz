@@ -14,18 +14,16 @@ import { LOGIN_PATH, MANAGE_PATH } from "@/lib/routes";
 import { type ThemeName, THEMES } from "@/lib/theme";
 import { useClickOutside } from "@/lib/useClickOutside";
 
-function capitalize(value: string): string {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
+import EditProfileModal from "./EditProfileModal";
 
 export default function UserAvatarMenu({
-  username,
+  displayName: initialDisplayName,
   avatarColor,
   theme,
   hasCountdown,
   onEditCountdown,
 }: {
-  username: string;
+  displayName: string;
   avatarColor: string;
   theme: ThemeName;
   hasCountdown: boolean;
@@ -34,6 +32,8 @@ export default function UserAvatarMenu({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [color, setColor] = useState(avatarColor);
+  const [displayName, setDisplayName] = useState(initialDisplayName);
+  const [editingProfile, setEditingProfile] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(rootRef, open, () => setOpen(false));
@@ -70,16 +70,14 @@ export default function UserAvatarMenu({
           className="avatar-badge"
           style={{ backgroundColor: avatarColorHex(color) }}
         >
-          {username.charAt(0).toUpperCase()}
+          {displayName.charAt(0).toUpperCase()}
         </span>
-        <span className="avatar-username">{capitalize(username)}</span>
+        <span className="avatar-username">{displayName}</span>
       </button>
 
       {open && (
         <div className="avatar-popover">
-          <p className="avatar-popover-label">
-            Signed in as {capitalize(username)}
-          </p>
+          <p className="avatar-popover-label">Signed in as {displayName}</p>
           <div className="avatar-swatches">
             {AVATAR_COLORS.map((c) => (
               <button
@@ -105,9 +103,24 @@ export default function UserAvatarMenu({
               />
             ))}
           </div>
+          {/* "Edit profile" belongs with the account/appearance controls above it
+              (avatar color, theme) — tight gap, no divider. "Edit countdown" and
+              "Deck Studio" are shared couple content, a distinct group, so they get a
+              divider (same treatment as the one before Log out) instead of just
+              another mb-2 that would read as "all five of these are one flat list". */}
           <button
             type="button"
-            className="text-subtext hover:text-text mb-2 w-full cursor-pointer text-left text-xs"
+            className="text-subtext hover:text-text mb-3 w-full cursor-pointer text-left text-xs"
+            onClick={() => {
+              setOpen(false);
+              setEditingProfile(true);
+            }}
+          >
+            Edit profile
+          </button>
+          <button
+            type="button"
+            className="text-subtext hover:text-text border-border mb-2 w-full cursor-pointer border-t pt-3 text-left text-xs"
             onClick={() => {
               setOpen(false);
               onEditCountdown();
@@ -120,7 +133,7 @@ export default function UserAvatarMenu({
             className="text-subtext hover:text-text mb-2 block w-full cursor-pointer text-left text-xs"
             onClick={() => setOpen(false)}
           >
-            Edit couple card deck
+            Deck Studio
           </Link>
           <button
             type="button"
@@ -130,6 +143,17 @@ export default function UserAvatarMenu({
             Log out
           </button>
         </div>
+      )}
+
+      {editingProfile && (
+        <EditProfileModal
+          initialDisplayName={displayName}
+          onClose={() => setEditingProfile(false)}
+          onSaved={(newName) => {
+            setDisplayName(newName);
+            setEditingProfile(false);
+          }}
+        />
       )}
     </div>
   );

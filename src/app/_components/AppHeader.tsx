@@ -27,7 +27,10 @@ export default function AppHeader({
   /** The floating countdown bubble is global by default (every logged-in route) —
    * set false only for the /manage settings screens, where it'd be a distraction. */
   showCountdownBubble?: boolean;
-  user: Pick<DbUser, "username" | "avatarColor" | "theme"> | null;
+  user: Pick<
+    DbUser,
+    "username" | "displayName" | "avatarColor" | "theme"
+  > | null;
   countdown: CountdownDisplay | null;
 }) {
   const [countdown, setCountdown] = useState(initialCountdown);
@@ -57,7 +60,7 @@ export default function AppHeader({
 
         {user && (
           <UserAvatarMenu
-            username={user.username}
+            displayName={user.displayName}
             avatarColor={user.avatarColor}
             theme={user.theme}
             hasCountdown={countdown !== null}
