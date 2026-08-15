@@ -1,6 +1,12 @@
 /* PROFILE DASHBOARD */
 @layer components {
   .page-container {
+    /* `width: 100%` is load-bearing, not decorative: this is a flex item (parent is
+       .profile-main, display:flex) and auto margins on a flex item's cross axis
+       disable stretch — without an explicit width, the box silently shrinks to fit
+       its content instead of filling up to max-width, varying with content on every
+       tab. See .claude/design-guidelines.md. */
+    width: 100%;
     max-width: 720px;
     margin: 0 auto;
     padding: var(--space-12) var(--space-6);
