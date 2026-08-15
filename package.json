@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "db:qa-user:create": "node --env-file=.env.local scripts/qa-test-user.mjs create",
-    "db:qa-user:cleanup": "node --env-file=.env.local scripts/qa-test-user.mjs cleanup"
+    "db:qa-user:cleanup": "node --env-file=.env.local scripts/qa-test-user.mjs cleanup",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.39",
@@ -30,6 +32,10 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
     "typescript": "6.0.3",
     "vitest": "^4.1.10"
