@@ -4,11 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-import {
-  AVATAR_COLORS,
-  avatarColorHex,
-  type AvatarColorName,
-} from "@/lib/avatar";
+import { avatarColorHex } from "@/lib/avatar";
 import { patchJson } from "@/lib/http";
 import { LOGIN_PATH, MANAGE_PATH } from "@/lib/routes";
 import { type ThemeName, THEMES } from "@/lib/theme";
@@ -37,11 +33,6 @@ export default function UserAvatarMenu({
   const rootRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(rootRef, open, () => setOpen(false));
-
-  async function handlePickColor(name: AvatarColorName) {
-    setColor(name);
-    await patchJson("/api/profile/me", { avatarColor: name });
-  }
 
   async function handlePickTheme(name: ThemeName) {
     await patchJson("/api/profile/me", { theme: name });
@@ -78,20 +69,9 @@ export default function UserAvatarMenu({
       {open && (
         <div className="avatar-popover">
           <p className="avatar-popover-label">Signed in as {displayName}</p>
-          <div className="avatar-swatches">
-            {AVATAR_COLORS.map((c) => (
-              <button
-                key={c.name}
-                type="button"
-                className={`avatar-swatch ${c.name === color ? "selected" : ""}`}
-                style={{ backgroundColor: c.hex }}
-                aria-label={`Use ${c.name} avatar color`}
-                onClick={() => handlePickColor(c.name)}
-              />
-            ))}
-          </div>
+
           <p className="avatar-popover-label">Theme</p>
-          <div className="avatar-swatches">
+          <div className="avatar-swatches mb-1">
             {THEMES.map((t) => (
               <button
                 key={t.name}
@@ -103,44 +83,44 @@ export default function UserAvatarMenu({
               />
             ))}
           </div>
+
           {/* "Edit profile" belongs with the account/appearance controls above it
-              (avatar color, theme) — tight gap, no divider. "Edit countdown" and
-              "Deck Studio" are shared couple content, a distinct group, so they get a
-              divider (same treatment as the one before Log out) instead of just
-              another mb-2 that would read as "all five of these are one flat list". */}
+              (theme) — tight gap, no divider. "Edit countdown" and "Deck Studio" are
+              shared couple content, a distinct group, so they get a divider (same
+              treatment as the one before Log out) instead of reading as one flat list. */}
           <button
             type="button"
-            className="text-subtext hover:text-text mb-3 w-full cursor-pointer text-left text-xs"
+            className="avatar-menu-item"
             onClick={() => {
               setOpen(false);
               setEditingProfile(true);
             }}
           >
-            Edit profile
+            👤 Edit profile
           </button>
           <button
             type="button"
-            className="text-subtext hover:text-text border-border mb-2 w-full cursor-pointer border-t pt-3 text-left text-xs"
+            className="avatar-menu-item avatar-menu-item-divider"
             onClick={() => {
               setOpen(false);
               onEditCountdown();
             }}
           >
-            {hasCountdown ? "Edit countdown" : "Create a countdown"}
+            ⏳ {hasCountdown ? "Edit countdown" : "Create a countdown"}
           </button>
           <Link
             href={MANAGE_PATH}
-            className="text-subtext hover:text-text mb-2 block w-full cursor-pointer text-left text-xs"
+            className="avatar-menu-item"
             onClick={() => setOpen(false)}
           >
-            Deck Studio
+            🎴 Deck Studio
           </Link>
           <button
             type="button"
-            className="avatar-logout"
+            className="avatar-menu-item avatar-menu-item-divider avatar-menu-item-danger"
             onClick={handleLogout}
           >
-            Log out
+            🚪 Log out
           </button>
         </div>
       )}
@@ -148,9 +128,11 @@ export default function UserAvatarMenu({
       {editingProfile && (
         <EditProfileModal
           initialDisplayName={displayName}
+          initialAvatarColor={color}
           onClose={() => setEditingProfile(false)}
-          onSaved={(newName) => {
-            setDisplayName(newName);
+          onSaved={(result) => {
+            setDisplayName(result.displayName);
+            setColor(result.avatarColor);
             setEditingProfile(false);
           }}
         />
