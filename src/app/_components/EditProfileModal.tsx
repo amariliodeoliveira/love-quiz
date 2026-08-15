@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import Modal from "@/app/_components/Modal";
-import { AVATAR_COLORS, AVATAR_EMOJIS, avatarInitial } from "@/lib/avatar";
+import { AVATAR_COLORS, AVATAR_EMOJIS, isAvatarEmoji } from "@/lib/avatar";
 import { patchJson } from "@/lib/http";
 
 /** Editing scope is deliberately narrow: display name, avatar color, and avatar emoji —
@@ -31,8 +31,23 @@ export default function EditProfileModal({
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [avatarColor, setAvatarColor] = useState(initialAvatarColor);
   const [avatarEmoji, setAvatarEmoji] = useState(initialAvatarEmoji);
+  // A picked-via-"+" custom emoji is prepended and bumps the oldest curated option off
+  // the end, so the grid's size never grows unbounded.
+  const [emojiOptions, setEmojiOptions] =
+    useState<readonly string[]>(AVATAR_EMOJIS);
+  const [pickingCustomEmoji, setPickingCustomEmoji] = useState(false);
+  const [customEmojiDraft, setCustomEmojiDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function commitCustomEmoji() {
+    const trimmed = customEmojiDraft.trim();
+    setPickingCustomEmoji(false);
+    setCustomEmojiDraft("");
+    if (!isAvatarEmoji(trimmed)) return;
+    setAvatarEmoji(trimmed);
+    setEmojiOptions((prev) => [trimmed, ...prev.slice(0, -1)]);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -93,15 +108,38 @@ export default function EditProfileModal({
         <div className="flex flex-col gap-2">
           <p className="login-hint">Avatar emoji</p>
           <div className="avatar-emoji-grid">
-            <button
-              type="button"
-              className={`avatar-emoji-option ${avatarEmoji === null ? "selected" : ""}`}
-              aria-label={`Use "${avatarInitial(displayName)}" as the avatar (no emoji)`}
-              onClick={() => setAvatarEmoji(null)}
-            >
-              {avatarInitial(displayName)}
-            </button>
-            {AVATAR_EMOJIS.map((e) => (
+            {pickingCustomEmoji ? (
+              <input
+                type="text"
+                className="avatar-emoji-option avatar-emoji-input"
+                value={customEmojiDraft}
+                onChange={(e) => setCustomEmojiDraft(e.target.value)}
+                onBlur={commitCustomEmoji}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commitCustomEmoji();
+                  }
+                  if (e.key === "Escape") {
+                    setPickingCustomEmoji(false);
+                    setCustomEmojiDraft("");
+                  }
+                }}
+                placeholder="😊"
+                aria-label="Type or paste any emoji"
+                autoFocus
+              />
+            ) : (
+              <button
+                type="button"
+                className="avatar-emoji-option"
+                aria-label="Pick any emoji"
+                onClick={() => setPickingCustomEmoji(true)}
+              >
+                +
+              </button>
+            )}
+            {emojiOptions.map((e) => (
               <button
                 key={e}
                 type="button"
@@ -113,6 +151,12 @@ export default function EditProfileModal({
               </button>
             ))}
           </div>
+          {pickingCustomEmoji && (
+            <p className="avatar-emoji-hint">
+              Open your emoji keyboard (Windows: Win + . — Mac: Cmd + Ctrl +
+              Space), then type or paste one here.
+            </p>
+          )}
         </div>
 
         {error && <p className="form-error">{error}</p>}

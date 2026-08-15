@@ -57,14 +57,25 @@ describe("avatarInitial", () => {
 });
 
 describe("isAvatarEmoji", () => {
-  it("accepts every known emoji", () => {
+  it("accepts every emoji in the curated list", () => {
     for (const emoji of AVATAR_EMOJIS) {
       expect(isAvatarEmoji(emoji)).toBe(true);
     }
   });
 
-  it("rejects an emoji not in the curated list, and non-string values", () => {
-    expect(isAvatarEmoji("🦄")).toBe(false);
+  it("accepts an emoji outside the curated list (picked via the OS emoji picker)", () => {
+    expect(isAvatarEmoji("🦄")).toBe(true);
+  });
+
+  it("rejects plain ASCII text", () => {
+    expect(isAvatarEmoji("ab")).toBe(false);
+    expect(isAvatarEmoji("42")).toBe(false);
+  });
+
+  it("rejects empty/whitespace-only strings, overly long strings, and non-string values", () => {
+    expect(isAvatarEmoji("")).toBe(false);
+    expect(isAvatarEmoji("   ")).toBe(false);
+    expect(isAvatarEmoji("🐶".repeat(9))).toBe(false);
     expect(isAvatarEmoji(undefined)).toBe(false);
     expect(isAvatarEmoji(42)).toBe(false);
   });

@@ -31,7 +31,13 @@ export function avatarInitial(name: string): string {
   return first ? first.toUpperCase() : "?";
 }
 
+// 20 items + the "+" custom-emoji slot fills exactly 3 rows of 7 in the picker grid —
+// see EditProfileModal's .avatar-emoji-grid. Keep it at 20 if you add/remove one.
 export const AVATAR_EMOJIS = [
+  "🐝",
+  "🦩",
+  "🌙",
+  "⭐",
   "😀",
   "😍",
   "😎",
@@ -48,12 +54,17 @@ export const AVATAR_EMOJIS = [
   "🌸",
   "🌵",
   "🍀",
-  "🔥",
-  "⭐",
-  "🎂",
-  "🎮",
 ] as const;
 
+/** Beyond the curated list above, a user can pick any emoji via their OS/browser's own
+ * emoji picker (see EditProfileModal's "+" option) — so this can't be a membership
+ * check against AVATAR_EMOJIS. Instead it's a light sanity check: a handful of Unicode
+ * code points (covers multi-codepoint sequences like skin-tone modifiers or ZWJ
+ * combos), and not plain ASCII text (a stray pasted word shouldn't pass as an emoji). */
 export function isAvatarEmoji(value: unknown): value is string {
-  return (AVATAR_EMOJIS as readonly string[]).includes(value as string);
+  if (typeof value !== "string") return false;
+  const trimmed = value.trim();
+  const codePoints = [...trimmed];
+  if (codePoints.length === 0 || codePoints.length > 8) return false;
+  return codePoints.some((c) => c.codePointAt(0)! > 127);
 }

@@ -112,6 +112,17 @@
   .avatar-emoji-option.selected {
     border-color: var(--text);
   }
+  .avatar-emoji-input {
+    width: 32px;
+    padding: 0;
+    text-align: center;
+    color: var(--text);
+    outline: none;
+  }
+  .avatar-emoji-hint {
+    font-size: 0.75rem;
+    color: var(--subtext);
+  }
   /* Menu links/buttons (Edit profile, Edit countdown, Deck Studio, Log out). A filled,
      rounded hover state — not just an underline/color change — is what makes these
      read as clickable *rows* instead of a flat stack of text. The negative margin lets
