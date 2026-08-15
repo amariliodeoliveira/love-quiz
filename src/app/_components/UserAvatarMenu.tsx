@@ -16,6 +16,7 @@ export default function UserAvatarMenu({
   displayName: initialDisplayName,
   avatarColor,
   avatarEmoji,
+  avatarEmojiOptions,
   theme,
   hasCountdown,
   onEditCountdown,
@@ -23,6 +24,7 @@ export default function UserAvatarMenu({
   displayName: string;
   avatarColor: string;
   avatarEmoji: string | null;
+  avatarEmojiOptions: string[] | null;
   theme: ThemeName;
   hasCountdown: boolean;
   onEditCountdown: () => void;
@@ -31,6 +33,7 @@ export default function UserAvatarMenu({
   const [open, setOpen] = useState(false);
   const [color, setColor] = useState(avatarColor);
   const [emoji, setEmoji] = useState(avatarEmoji);
+  const [emojiOptions, setEmojiOptions] = useState(avatarEmojiOptions);
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [editingProfile, setEditingProfile] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -139,11 +142,13 @@ export default function UserAvatarMenu({
           initialDisplayName={displayName}
           initialAvatarColor={color}
           initialAvatarEmoji={emoji}
+          initialAvatarEmojiOptions={emojiOptions}
           onClose={() => setEditingProfile(false)}
           onSaved={(result) => {
             setDisplayName(result.displayName);
             setColor(result.avatarColor);
             setEmoji(result.avatarEmoji);
+            setEmojiOptions(result.avatarEmojiOptions);
             setEditingProfile(false);
           }}
         />

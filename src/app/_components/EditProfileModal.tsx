@@ -15,26 +15,35 @@ export default function EditProfileModal({
   initialDisplayName,
   initialAvatarColor,
   initialAvatarEmoji,
+  initialAvatarEmojiOptions,
   onClose,
   onSaved,
 }: {
   initialDisplayName: string;
   initialAvatarColor: string;
   initialAvatarEmoji: string | null;
+  /** This user's own personalized emoji-grid ordering (each user builds up their own
+   * as they pick custom emoji) — null means they haven't customized it yet, so fall
+   * back to the shared curated default. */
+  initialAvatarEmojiOptions: string[] | null;
   onClose: () => void;
   onSaved: (result: {
     displayName: string;
     avatarColor: string;
     avatarEmoji: string | null;
+    avatarEmojiOptions: string[] | null;
   }) => void;
 }) {
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [avatarColor, setAvatarColor] = useState(initialAvatarColor);
   const [avatarEmoji, setAvatarEmoji] = useState(initialAvatarEmoji);
-  // A picked-via-"+" custom emoji is prepended and bumps the oldest curated option off
-  // the end, so the grid's size never grows unbounded.
-  const [emojiOptions, setEmojiOptions] =
-    useState<readonly string[]>(AVATAR_EMOJIS);
+  // A picked-via-"+" custom emoji is prepended and bumps the oldest option off the
+  // end, so the grid's size never grows unbounded. Persisted per-user on save (see
+  // handleSubmit) so it's this account's own list next time, not shared/reset.
+  const [emojiOptions, setEmojiOptions] = useState<readonly string[]>(
+    initialAvatarEmojiOptions ?? AVATAR_EMOJIS,
+  );
+  const [emojiOptionsChanged, setEmojiOptionsChanged] = useState(false);
   const [pickingCustomEmoji, setPickingCustomEmoji] = useState(false);
   const [customEmojiDraft, setCustomEmojiDraft] = useState("");
   const [saving, setSaving] = useState(false);
@@ -47,6 +56,7 @@ export default function EditProfileModal({
     if (!isAvatarEmoji(trimmed)) return;
     setAvatarEmoji(trimmed);
     setEmojiOptions((prev) => [trimmed, ...prev.slice(0, -1)]);
+    setEmojiOptionsChanged(true);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -56,14 +66,23 @@ export default function EditProfileModal({
 
     setSaving(true);
     setError(null);
+    const avatarEmojiOptions = emojiOptionsChanged ? [...emojiOptions] : null;
     const { ok } = await patchJson("/api/profile/me", {
       displayName: trimmed,
       avatarColor,
       avatarEmoji,
+      ...(emojiOptionsChanged && { avatarEmojiOptions }),
     });
     setSaving(false);
     if (ok) {
-      onSaved({ displayName: trimmed, avatarColor, avatarEmoji });
+      onSaved({
+        displayName: trimmed,
+        avatarColor,
+        avatarEmoji,
+        avatarEmojiOptions: emojiOptionsChanged
+          ? avatarEmojiOptions
+          : initialAvatarEmojiOptions,
+      });
     } else {
       setError(
         "Couldn't save your profile — check your connection and try again.",

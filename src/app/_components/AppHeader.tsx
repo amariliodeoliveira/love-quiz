@@ -29,7 +29,12 @@ export default function AppHeader({
   showCountdownBubble?: boolean;
   user: Pick<
     DbUser,
-    "username" | "displayName" | "avatarColor" | "avatarEmoji" | "theme"
+    | "username"
+    | "displayName"
+    | "avatarColor"
+    | "avatarEmoji"
+    | "avatarEmojiOptions"
+    | "theme"
   > | null;
   countdown: CountdownDisplay | null;
 }) {
@@ -63,6 +68,7 @@ export default function AppHeader({
             displayName={user.displayName}
             avatarColor={user.avatarColor}
             avatarEmoji={user.avatarEmoji}
+            avatarEmojiOptions={user.avatarEmojiOptions}
             theme={user.theme}
             hasCountdown={countdown !== null}
             onEditCountdown={() => setEditingCountdown(true)}

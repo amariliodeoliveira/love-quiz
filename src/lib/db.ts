@@ -46,6 +46,7 @@ export interface DbUser {
   role: Role;
   avatarColor: string;
   avatarEmoji: string | null;
+  avatarEmojiOptions: string[] | null;
   failedAttempts: number;
   lockedUntil: Date | null;
   createdAt: Date;
@@ -108,6 +109,7 @@ interface UserRow {
   role: Role;
   avatar_color: string;
   avatar_emoji: string | null;
+  avatar_emoji_options: string[] | null;
   failed_attempts: number;
   locked_until: RawTimestamp;
   created_at: RawTimestamp;
@@ -123,6 +125,7 @@ function mapUserRow(row: UserRow): DbUser {
     role: row.role,
     avatarColor: row.avatar_color,
     avatarEmoji: row.avatar_emoji,
+    avatarEmojiOptions: row.avatar_emoji_options,
     failedAttempts: row.failed_attempts,
     lockedUntil: row.locked_until ? new Date(row.locked_until) : null,
     createdAt: new Date(row.created_at ?? 0),
@@ -134,7 +137,7 @@ export async function findUserByUsername(
   username: string,
 ): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, failed_attempts, locked_until, created_at, theme
+    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, avatar_emoji_options, failed_attempts, locked_until, created_at, theme
     FROM users
     WHERE username = ${username};
   `;
@@ -144,7 +147,7 @@ export async function findUserByUsername(
 
 export async function getUserById(id: number): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, failed_attempts, locked_until, created_at, theme
+    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, avatar_emoji_options, failed_attempts, locked_until, created_at, theme
     FROM users
     WHERE id = ${id};
   `;
@@ -181,40 +184,50 @@ export async function resetFailedLogins(userId: number): Promise<void> {
   `;
 }
 
-export async function updateDisplayName(
-  userId: number,
-  displayName: string,
-): Promise<void> {
-  await sql`
-    UPDATE users SET display_name = ${displayName} WHERE id = ${userId};
-  `;
+const PROFILE_FIELD_COLUMNS = new Map<keyof ProfileFieldUpdate, string>([
+  ["displayName", "display_name"],
+  ["avatarColor", "avatar_color"],
+  ["avatarEmoji", "avatar_emoji"],
+  ["avatarEmojiOptions", "avatar_emoji_options"],
+  ["theme", "theme"],
+]);
+
+export interface ProfileFieldUpdate {
+  displayName?: string;
+  avatarColor?: AvatarColorName;
+  avatarEmoji?: string | null;
+  avatarEmojiOptions?: string[] | null;
+  theme?: ThemeName;
 }
 
-export async function updateAvatarColor(
+/** A single UPDATE for however many profile fields changed in one request (Edit
+ * profile's form submits displayName + avatarColor + avatarEmoji + avatarEmojiOptions
+ * together; the theme picker submits theme alone) — one Postgres round trip per
+ * request instead of one per field. Column names come only from the fixed
+ * PROFILE_FIELD_COLUMNS map above, never from request input, so building the SET
+ * clause as a string stays injection-safe; values still go through $-placeholders
+ * (see .query()'s parameterized form — the `sql` tagged-template wrapper can't take a
+ * dynamic column list). */
+export async function updateUserProfile(
   userId: number,
-  color: AvatarColorName,
+  fields: ProfileFieldUpdate,
 ): Promise<void> {
-  await sql`
-    UPDATE users SET avatar_color = ${color} WHERE id = ${userId};
-  `;
-}
+  const entries = Object.entries(fields).filter(
+    ([, value]) => value !== undefined,
+  ) as [keyof ProfileFieldUpdate, unknown][];
+  if (entries.length === 0) return;
 
-export async function updateAvatarEmoji(
-  userId: number,
-  emoji: string | null,
-): Promise<void> {
-  await sql`
-    UPDATE users SET avatar_emoji = ${emoji} WHERE id = ${userId};
-  `;
-}
+  const setClauses = entries.map(
+    ([key], i) => `${PROFILE_FIELD_COLUMNS.get(key)} = $${i + 1}`,
+  );
+  const params = entries.map(([, value]) => value);
+  params.push(userId);
 
-export async function updateTheme(
-  userId: number,
-  theme: ThemeName,
-): Promise<void> {
-  await sql`
-    UPDATE users SET theme = ${theme} WHERE id = ${userId};
-  `;
+  rawSql ??= neon(process.env.POSTGRES_URL!, { fullResults: true });
+  await rawSql.query(
+    `UPDATE users SET ${setClauses.join(", ")} WHERE id = $${params.length};`,
+    params,
+  );
 }
 
 export async function getAllCards(): Promise<DbCard[]> {
