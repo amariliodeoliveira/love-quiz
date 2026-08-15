@@ -1,8 +1,17 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-import { LOGIN_PATH } from "@/lib/routes";
+import { getSession } from "@/lib/auth";
+import { GAME_PATH, LOGIN_PATH } from "@/lib/routes";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const session = await getSession();
+  if (session) {
+    redirect(GAME_PATH);
+  }
+
   return (
     <>
       <div className="flex flex-1 items-center justify-center p-6">
