@@ -18,6 +18,7 @@ export interface DbUser {
   avatarColor: string;
   failedAttempts: number;
   lockedUntil: Date | null;
+  createdAt: Date;
 }
 
 export const MAX_LOGIN_ATTEMPTS = 5;
@@ -76,6 +77,7 @@ interface UserRow {
   avatar_color: string;
   failed_attempts: number;
   locked_until: RawTimestamp;
+  created_at: RawTimestamp;
 }
 
 function mapUserRow(row: UserRow): DbUser {
@@ -87,6 +89,7 @@ function mapUserRow(row: UserRow): DbUser {
     avatarColor: row.avatar_color,
     failedAttempts: row.failed_attempts,
     lockedUntil: row.locked_until ? new Date(row.locked_until) : null,
+    createdAt: new Date(row.created_at ?? 0),
   };
 }
 
@@ -94,7 +97,7 @@ export async function findUserByUsername(
   username: string,
 ): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until
+    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until, created_at
     FROM users
     WHERE username = ${username};
   `;
@@ -104,7 +107,7 @@ export async function findUserByUsername(
 
 export async function getUserById(id: number): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until
+    SELECT id, username, password_hash, role, avatar_color, failed_attempts, locked_until, created_at
     FROM users
     WHERE id = ${id};
   `;
@@ -207,11 +210,6 @@ export async function setCardAnswered(
   `;
 }
 
-/** Clears answered_at for every card — lets the deck be replayed from scratch. */
-export async function resetAllAnswered(): Promise<void> {
-  await sql`UPDATE cards SET answered_at = NULL;`;
-}
-
 /** Increments a dare's completion counter. Scoped to level='dare' — dares never get
  * answered_at set, so this is the only signal for how many times one's been done. */
 export async function incrementDareCompleted(id: number): Promise<void> {
@@ -306,6 +304,16 @@ export async function getAiCards(): Promise<DbAiCard[]> {
     ORDER BY created_at DESC;
   `;
   return rows.map((row) => mapAiCardRow(row));
+}
+
+/** Most recent ai_cards.created_at, or null if none exist yet — used to rate-limit
+ * generation (see src/lib/ai/rateLimit.ts). */
+export async function getLastAiCardCreatedAt(): Promise<Date | null> {
+  const { rows } = await sql<{ created_at: RawTimestamp }>`
+    SELECT created_at FROM ai_cards ORDER BY created_at DESC LIMIT 1;
+  `;
+  const row = rows[0];
+  return row?.created_at ? new Date(row.created_at) : null;
 }
 
 export async function createAiCard(

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { buildSummaryPrompt } from "./context";
 
 describe("buildSummaryPrompt", () => {
@@ -9,7 +10,9 @@ describe("buildSummaryPrompt", () => {
   });
 
   it("includes the previous summary when there is one", () => {
-    const prompt = buildSummaryPrompt("already asked about travel", ["What's your favorite dish?"]);
+    const prompt = buildSummaryPrompt("already asked about travel", [
+      "What's your favorite dish?",
+    ]);
     expect(prompt).toContain("already asked about travel");
     expect(prompt).toContain("What's your favorite dish?");
   });

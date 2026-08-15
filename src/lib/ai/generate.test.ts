@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { buildPrompt, pickRandomTruthLevel } from "./generate";
 
 describe("pickRandomTruthLevel", () => {
@@ -27,7 +28,10 @@ describe("buildPrompt", () => {
 
   it("includes the summary and recent questions in the avoid-list", () => {
     const prompt = buildPrompt(
-      { summary: "already asked about travel", recentQuestions: ["What's your favorite dish?"] },
+      {
+        summary: "already asked about travel",
+        recentQuestions: ["What's your favorite dish?"],
+      },
       "1",
     );
     expect(prompt).toContain("already asked about travel");

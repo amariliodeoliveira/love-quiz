@@ -1,12 +1,43 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
+  CLAIM_WINDOW_HOURS,
   createSessionCookieValue,
   hashPassword,
+  isClaimWindowExpired,
   parseSessionCookie,
   verifyPassword,
 } from "./auth";
 import type { Session } from "./db";
+
+describe("isClaimWindowExpired", () => {
+  const now = new Date("2026-01-10T00:00:00.000Z");
+
+  it("has not expired right after account creation", () => {
+    expect(isClaimWindowExpired(now, now)).toBe(false);
+  });
+
+  it("has not expired one hour before the window closes", () => {
+    const createdAt = new Date(
+      now.getTime() - (CLAIM_WINDOW_HOURS - 1) * 60 * 60 * 1000,
+    );
+    expect(isClaimWindowExpired(createdAt, now)).toBe(false);
+  });
+
+  it("has expired exactly at the window boundary", () => {
+    const createdAt = new Date(
+      now.getTime() - CLAIM_WINDOW_HOURS * 60 * 60 * 1000,
+    );
+    expect(isClaimWindowExpired(createdAt, now)).toBe(true);
+  });
+
+  it("has expired well past the window", () => {
+    const createdAt = new Date(
+      now.getTime() - (CLAIM_WINDOW_HOURS + 100) * 60 * 60 * 1000,
+    );
+    expect(isClaimWindowExpired(createdAt, now)).toBe(true);
+  });
+});
 
 beforeEach(() => {
   process.env.ADMIN_SESSION_SECRET = "test-secret";
