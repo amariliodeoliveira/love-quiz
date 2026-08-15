@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it } from "vitest";
-import { proxy } from "./proxy";
-import { createSessionCookieValue, COOKIE_NAME } from "@/lib/auth";
+
+import { COOKIE_NAME, createSessionCookieValue } from "@/lib/auth";
 import type { Session } from "@/lib/db";
+
+import { proxy } from "./proxy";
 
 const BASE_URL = "http://localhost";
 const session: Session = { userId: 1, username: "alice", role: "user" };
