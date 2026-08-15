@@ -4,6 +4,21 @@ Researched and adopted 2026-08-15 (see `docs/lint-plugins-report.md`'s neighbor 
 this file, not that one — for the actual rules; that one is about lint tooling).
 Applies to every screen, not just the ones it was first applied to.
 
+## Layout pitfall: `max-width` + `margin: auto` inside a flex parent
+
+`max-width: <n>px; margin: 0 auto;` is the classic "constrain and center" container
+pattern — but if the element is a **flex item** (its parent has `display: flex`), auto
+margins on the cross axis silently disable `stretch`, and the box shrinks to fit its
+content instead of filling up to `max-width`. It'll still be centered (auto margins
+still balance evenly), just at an inconsistent width that changes with content —
+`.page-container` had exactly this bug (see the 2026-08-15 incident: identical-looking
+tabs measured 532px vs 480px wide depending on whether the tab had any cards). `.login-
+card` and `.modal-panel` already avoid it by pairing `width: 100%` with their
+`max-width` — do the same for any new `max-width` + `margin: auto` container. If a
+future width bug looks like "it's centered correctly but the size is wrong/inconsistent
+for no visible reason," check for this first — measure the element's actual
+`getBoundingClientRect()` in a headless browser rather than guessing from a screenshot.
+
 ## Spacing
 
 ### The scale
