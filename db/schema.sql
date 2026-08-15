@@ -29,8 +29,6 @@ CREATE TABLE cards (
   answered_at TIMESTAMPTZ,
   times_completed INTEGER NOT NULL DEFAULT 0
   -- level is app-validated against src/data/cards.ts ALL_LEVELS — no DB check constraint today.
-  -- user_id has no index today; getCardsForUser() filters by it on every dashboard load —
-  -- worth an index (CREATE INDEX cards_user_id_idx ON cards(user_id);) if the deck grows a lot.
   -- answered_at: NULL = not answered yet; shared across both users (the deck is a joint
   -- reading guide for a call, not per-user progress). Set via an explicit {answered: bool}
   -- request (never a server-side toggle) so two people marking it around the same time
@@ -39,6 +37,8 @@ CREATE TABLE cards (
   -- leave the draw pool), and instead track completions via times_completed, incremented by
   -- src/app/api/cards/[id]/complete.
 );
+
+CREATE INDEX cards_user_id_idx ON cards(user_id);
 
 -- Single shared row: the live countdown shown to both signed-in users (e.g. "next time
 -- we see each other"). Pinned to id=1 by the check constraint so writes are a plain

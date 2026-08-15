@@ -4,6 +4,7 @@ import {
   COOKIE_NAME,
   createSessionCookieValue,
   hashPassword,
+  isClaimWindowExpired,
   verifyPassword,
 } from "@/lib/auth";
 import {
@@ -12,6 +13,16 @@ import {
   resetFailedLogins,
   setUserPassword,
 } from "@/lib/db";
+
+// A valid-format but unusable hash, hashed once at module load. Used to run
+// verifyPassword's real scrypt work even when no user was found, so an unknown
+// username doesn't return measurably faster than a known one with a wrong password —
+// otherwise response timing would leak which usernames exist.
+const DECOY_HASH = hashPassword(randomDecoyPassword());
+
+function randomDecoyPassword(): string {
+  return Math.random().toString(36);
+}
 
 export async function POST(request: Request) {
   const { username, password } = await request.json();
@@ -31,6 +42,7 @@ export async function POST(request: Request) {
   );
 
   if (!user) {
+    verifyPassword(password, DECOY_HASH);
     return invalidCredentials;
   }
 
@@ -47,6 +59,15 @@ export async function POST(request: Request) {
   }
 
   if (user.passwordHash === null) {
+    if (isClaimWindowExpired(user.createdAt, new Date())) {
+      return NextResponse.json(
+        {
+          error:
+            "This account was never activated in time. Ask an admin to reset it.",
+        },
+        { status: 401 },
+      );
+    }
     // First login: the submitted password becomes the account's password.
     const passwordHash = hashPassword(password);
     await setUserPassword(user.id, passwordHash);
