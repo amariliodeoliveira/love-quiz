@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { AVATAR_COLORS, avatarColorHex, isAvatarColorName } from "./avatar";
+import {
+  AVATAR_COLORS,
+  avatarColorHex,
+  avatarInitial,
+  isAvatarColorName,
+} from "./avatar";
 
 describe("isAvatarColorName", () => {
   it("accepts every known color name", () => {
@@ -25,5 +30,26 @@ describe("avatarColorHex", () => {
 
   it("falls back to the first color for an unknown name", () => {
     expect(avatarColorHex("not-a-color")).toBe(AVATAR_COLORS[0].hex);
+  });
+});
+
+describe("avatarInitial", () => {
+  it("uppercases the first letter of a plain name", () => {
+    expect(avatarInitial("barnes")).toBe("B");
+  });
+
+  it("trims leading whitespace before taking the first character", () => {
+    expect(avatarInitial("  mingo")).toBe("M");
+  });
+
+  it("returns a leading emoji whole, instead of a broken surrogate half", () => {
+    // '🎂' is a surrogate pair — charAt(0) would return an unpaired half that renders
+    // as a broken glyph. This must return the whole emoji.
+    expect(avatarInitial("🎂 Bee")).toBe("🎂");
+  });
+
+  it("falls back to a placeholder for an empty name", () => {
+    expect(avatarInitial("")).toBe("?");
+    expect(avatarInitial("   ")).toBe("?");
   });
 });
