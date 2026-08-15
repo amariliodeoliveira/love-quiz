@@ -3,3 +3,4 @@
 @.claude/engineering-guidelines.md
 @.claude/database-guidelines.md
 @.claude/testing-guidelines.md
+@.claude/design-guidelines.md

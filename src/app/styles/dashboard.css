@@ -33,7 +33,10 @@
     padding: var(--space-3) var(--space-4);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    margin-bottom: var(--space-2);
+    /* internal ≤ external rule (.claude/design-guidelines.md): the row's own vertical
+       padding is --space-3, so the gap to the next row needs to be at least that much,
+       or rows read as merging into each other instead of as separate items. */
+    margin-bottom: var(--space-3);
     background: var(--surface);
   }
   .dashboard-card-question {
