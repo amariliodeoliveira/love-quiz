@@ -2,6 +2,7 @@ import { getAppHeaderData } from "@/lib/appHeaderData";
 import { GAME_PATH } from "@/lib/routes";
 
 import AppHeader from "../_components/AppHeader";
+import Logo from "../_components/Logo";
 
 export default async function ManageLayout({
   children,
@@ -21,7 +22,7 @@ export default async function ManageLayout({
       />
       <main className="profile-main">{children}</main>
       <footer>
-        <p>Couples Card Deck</p>
+        <Logo />
       </footer>
     </>
   );

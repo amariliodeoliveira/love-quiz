@@ -23,7 +23,9 @@ function byAnsweredAtDesc<T extends { answeredAt: Date | null }>(
   return b.answeredAt!.getTime() - a.answeredAt!.getTime();
 }
 
-/** Active/History toggle shared by the Truths and AI tabs. */
+/** Active/History toggle shared by the Truths and AI tabs. Deliberately styled as an
+ * underlined sub-filter (not a pill like the top-level tabs) with a visible caption —
+ * it's a filter *within* the tab above, not a second row of the same kind of choice. */
 function SubTabToggle({
   value,
   onChange,
@@ -34,24 +36,174 @@ function SubTabToggle({
   label: string;
 }) {
   return (
-    <div className="tabs mb-6" role="group" aria-label={label}>
-      <button
-        type="button"
-        className={`tab ${value === "active" ? "active-all" : ""}`}
-        aria-pressed={value === "active"}
-        onClick={() => onChange("active")}
-      >
-        Active
-      </button>
-      <button
-        type="button"
-        className={`tab ${value === "history" ? "active-all" : ""}`}
-        aria-pressed={value === "history"}
-        onClick={() => onChange("history")}
-      >
-        History
-      </button>
+    <div className="mb-6">
+      <p className="tabs-sub-label">Showing</p>
+      <div className="tabs-sub" role="group" aria-label={label}>
+        <button
+          type="button"
+          className={`tab-sub ${value === "active" ? "active-all" : ""}`}
+          aria-pressed={value === "active"}
+          onClick={() => onChange("active")}
+        >
+          Active
+        </button>
+        <button
+          type="button"
+          className={`tab-sub ${value === "history" ? "active-all" : ""}`}
+          aria-pressed={value === "history"}
+          onClick={() => onChange("history")}
+        >
+          History
+        </button>
+      </div>
     </div>
+  );
+}
+
+function TruthsTab({
+  subTab,
+  onSubTabChange,
+  cards,
+  onEdit,
+  onDelete,
+  onReactivate,
+}: {
+  subTab: SubTab;
+  onSubTabChange: (value: SubTab) => void;
+  cards: DbCard[];
+  onEdit: (card: DbCard) => void;
+  onDelete: (card: DbCard) => void;
+  onReactivate: (card: DbCard) => void;
+}) {
+  return (
+    <>
+      <SubTabToggle
+        value={subTab}
+        onChange={onSubTabChange}
+        label="Truths filter"
+      />
+
+      {cards.length === 0 && (
+        <p className="dashboard-empty">
+          {subTab === "active"
+            ? "No unanswered truths left — add one above, or generate one with AI."
+            : "No answered truths yet."}
+        </p>
+      )}
+      {cards.map((card) => {
+        const meta = LEVEL_META[card.level];
+        return (
+          <div key={card.id} className="dashboard-card-row">
+            <div>
+              <p className="dashboard-card-question">
+                {meta.emoji} {card.question}
+              </p>
+              {card.answeredAt && (
+                <p className="text-muted text-xs">
+                  Answered on {formatAnsweredAtManila(card.answeredAt)}
+                </p>
+              )}
+            </div>
+            <div className="dashboard-card-actions">
+              {subTab === "history" && (
+                <button
+                  onClick={() => onReactivate(card)}
+                  className="btn-ghost"
+                >
+                  Reactivate
+                </button>
+              )}
+              <button onClick={() => onEdit(card)} className="btn-ghost">
+                Edit
+              </button>
+              <button onClick={() => onDelete(card)} className="btn-danger">
+                Delete
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+function DaresTab({
+  cards,
+  onEdit,
+  onDelete,
+}: {
+  cards: DbCard[];
+  onEdit: (card: DbCard) => void;
+  onDelete: (card: DbCard) => void;
+}) {
+  if (cards.length === 0) {
+    return (
+      <p className="dashboard-empty">
+        No dares yet — add one above, or generate one with AI.
+      </p>
+    );
+  }
+
+  return cards.map((card, index) => (
+    <div key={card.id} className="dashboard-card-row">
+      <p className="dashboard-card-question">
+        {index < 3 ? `${RANK_BADGES[index]} ` : ""}
+        {card.question} · {card.timesCompleted}x
+      </p>
+      <div className="dashboard-card-actions">
+        <button onClick={() => onEdit(card)} className="btn-ghost">
+          Edit
+        </button>
+        <button onClick={() => onDelete(card)} className="btn-danger">
+          Delete
+        </button>
+      </div>
+    </div>
+  ));
+}
+
+function AiTab({
+  subTab,
+  onSubTabChange,
+  cards,
+}: {
+  subTab: SubTab;
+  onSubTabChange: (value: SubTab) => void;
+  cards: DbAiCard[];
+}) {
+  return (
+    <>
+      <SubTabToggle
+        value={subTab}
+        onChange={onSubTabChange}
+        label="AI questions filter"
+      />
+
+      {cards.length === 0 && (
+        <p className="dashboard-empty">
+          {subTab === "active"
+            ? "No unanswered AI questions — generate one above."
+            : "No answered AI questions yet."}
+        </p>
+      )}
+      {cards.map((card) => {
+        const meta = LEVEL_META[card.level];
+        return (
+          <div key={card.id} className="dashboard-card-row">
+            <div>
+              <p className="dashboard-card-question">
+                {meta.emoji} {card.question}
+              </p>
+              <p className="text-muted text-xs">
+                {card.answeredAt
+                  ? `Answered on ${formatAnsweredAtManila(card.answeredAt)}`
+                  : `Generated by ${card.model}`}
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </>
   );
 }
 
@@ -173,123 +325,55 @@ export default function ManageDashboard({
   let tabContent: React.ReactNode;
   if (topTab === "truths") {
     tabContent = (
-      <>
-        <SubTabToggle
-          value={truthSubTab}
-          onChange={setTruthSubTab}
-          label="Truths filter"
-        />
-
-        {(truthSubTab === "active" ? activeTruths : historyTruths).map(
-          (card) => {
-            const meta = LEVEL_META[card.level];
-            return (
-              <div key={card.id} className="dashboard-card-row">
-                <div>
-                  <p className="dashboard-card-question">
-                    {meta.emoji} {card.question}
-                  </p>
-                  {card.answeredAt && (
-                    <p className="text-muted text-xs">
-                      Answered on {formatAnsweredAtManila(card.answeredAt)}
-                    </p>
-                  )}
-                </div>
-                <div className="dashboard-card-actions">
-                  {truthSubTab === "history" && (
-                    <button
-                      onClick={() => setPendingReactivate(card)}
-                      className="btn-ghost"
-                    >
-                      Reactivate
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setFormCard(card)}
-                    className="btn-ghost"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => setPendingDelete(card)}
-                    className="btn-danger"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            );
-          },
-        )}
-      </>
+      <TruthsTab
+        subTab={truthSubTab}
+        onSubTabChange={setTruthSubTab}
+        cards={truthSubTab === "active" ? activeTruths : historyTruths}
+        onEdit={setFormCard}
+        onDelete={setPendingDelete}
+        onReactivate={setPendingReactivate}
+      />
     );
   } else if (topTab === "dares") {
-    tabContent = rankedDares.map((card, index) => (
-      <div key={card.id} className="dashboard-card-row">
-        <p className="dashboard-card-question">
-          {index < 3 ? `${RANK_BADGES[index]} ` : ""}
-          {card.question} · {card.timesCompleted}x
-        </p>
-        <div className="dashboard-card-actions">
-          <button onClick={() => setFormCard(card)} className="btn-ghost">
-            Edit
-          </button>
-          <button onClick={() => setPendingDelete(card)} className="btn-danger">
-            Delete
-          </button>
-        </div>
-      </div>
-    ));
+    tabContent = (
+      <DaresTab
+        cards={rankedDares}
+        onEdit={setFormCard}
+        onDelete={setPendingDelete}
+      />
+    );
   } else {
     tabContent = (
-      <>
-        <SubTabToggle
-          value={aiSubTab}
-          onChange={setAiSubTab}
-          label="AI questions filter"
-        />
-
-        {(aiSubTab === "active" ? activeAiCards : historyAiCards).map(
-          (card) => {
-            const meta = LEVEL_META[card.level];
-            return (
-              <div key={card.id} className="dashboard-card-row">
-                <div>
-                  <p className="dashboard-card-question">
-                    {meta.emoji} {card.question}
-                  </p>
-                  <p className="text-muted text-xs">
-                    {card.answeredAt
-                      ? `Answered on ${formatAnsweredAtManila(card.answeredAt)}`
-                      : `Generated by ${card.model}`}
-                  </p>
-                </div>
-              </div>
-            );
-          },
-        )}
-      </>
+      <AiTab
+        subTab={aiSubTab}
+        onSubTabChange={setAiSubTab}
+        cards={aiSubTab === "active" ? activeAiCards : historyAiCards}
+      />
     );
   }
 
   return (
     <div className="page-container">
-      <div className="dashboard-header">
-        <h1 className="page-title">Deck Studio</h1>
-        <p className="dashboard-subtitle text-subtext">
-          {session.role === "admin"
-            ? "Seeing all cards"
-            : "Seeing only your cards"}
-        </p>
-        <button onClick={() => setFormCard("new")} className="btn">
-          + Add card
-        </button>
-        <button
-          onClick={() => setShowAiGenerateModal(true)}
-          className="btn-ghost"
-        >
-          🤖 Generate with AI
-        </button>
+      <div className="dashboard-header flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="page-title">Deck Studio</h1>
+          <p className="dashboard-subtitle text-subtext">
+            {session.role === "admin"
+              ? "Add, edit, or generate every question and dare in the deck."
+              : "Add, edit, or generate your own questions and dares."}
+          </p>
+        </div>
+        <div className="flex flex-wrap justify-end gap-3">
+          <button onClick={() => setFormCard("new")} className="btn">
+            + Add card
+          </button>
+          <button
+            onClick={() => setShowAiGenerateModal(true)}
+            className="btn-ghost"
+          >
+            🤖 Generate with AI
+          </button>
+        </div>
       </div>
 
       <div className="tabs mb-6" role="group" aria-label="Manage section">

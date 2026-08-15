@@ -50,4 +50,13 @@
     gap: var(--space-3);
     flex-shrink: 0;
   }
+
+  /* Fills the space a tab/filter with zero results would otherwise leave as bare
+     whitespace, which reads as the whole section suddenly shrinking/breaking. */
+  .dashboard-empty {
+    padding: var(--space-12) var(--space-4);
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
 }

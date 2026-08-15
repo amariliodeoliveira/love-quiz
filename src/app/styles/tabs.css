@@ -48,4 +48,41 @@
     color: var(--text);
     background: var(--surface);
   }
+
+  /* Second-tier filter (Active/History), nested under the pill tabs above — visually
+     distinct on purpose (underline instead of pill, smaller, no border) so it reads as
+     "a sub-filter of the tab above" rather than a second row of the same kind of
+     choice, which read as ambiguous/multi-selectable before this. */
+  .tabs-sub-label {
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-2);
+  }
+  .tabs-sub {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+  .tab-sub {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--subtext);
+    font-family: var(--font-dm-sans), sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: var(--space-1) 0;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-sub:hover {
+    color: var(--text);
+  }
+  .tab-sub.active-all {
+    color: var(--text);
+    border-bottom-color: var(--muted);
+  }
 }
