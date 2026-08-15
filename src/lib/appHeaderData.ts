@@ -44,7 +44,7 @@ export const getSessionUser = cache(async (): Promise<DbUser | null> => {
 export async function getAppHeaderData(): Promise<{
   user: Pick<
     DbUser,
-    "username" | "displayName" | "avatarColor" | "theme"
+    "username" | "displayName" | "avatarColor" | "avatarEmoji" | "theme"
   > | null;
   countdown: CountdownDisplay | null;
 }> {

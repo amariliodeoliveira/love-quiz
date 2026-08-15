@@ -15,12 +15,14 @@ import EditProfileModal from "./EditProfileModal";
 export default function UserAvatarMenu({
   displayName: initialDisplayName,
   avatarColor,
+  avatarEmoji,
   theme,
   hasCountdown,
   onEditCountdown,
 }: {
   displayName: string;
   avatarColor: string;
+  avatarEmoji: string | null;
   theme: ThemeName;
   hasCountdown: boolean;
   onEditCountdown: () => void;
@@ -28,6 +30,7 @@ export default function UserAvatarMenu({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [color, setColor] = useState(avatarColor);
+  const [emoji, setEmoji] = useState(avatarEmoji);
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [editingProfile, setEditingProfile] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -61,7 +64,7 @@ export default function UserAvatarMenu({
           className="avatar-badge"
           style={{ backgroundColor: avatarColorHex(color) }}
         >
-          {avatarInitial(displayName)}
+          {emoji ?? avatarInitial(displayName)}
         </span>
         <span className="avatar-username">{displayName}</span>
       </button>
@@ -135,10 +138,12 @@ export default function UserAvatarMenu({
         <EditProfileModal
           initialDisplayName={displayName}
           initialAvatarColor={color}
+          initialAvatarEmoji={emoji}
           onClose={() => setEditingProfile(false)}
           onSaved={(result) => {
             setDisplayName(result.displayName);
             setColor(result.avatarColor);
+            setEmoji(result.avatarEmoji);
             setEditingProfile(false);
           }}
         />

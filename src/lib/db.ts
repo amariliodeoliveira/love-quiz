@@ -45,6 +45,7 @@ export interface DbUser {
   passwordHash: string | null;
   role: Role;
   avatarColor: string;
+  avatarEmoji: string | null;
   failedAttempts: number;
   lockedUntil: Date | null;
   createdAt: Date;
@@ -106,6 +107,7 @@ interface UserRow {
   password_hash: string | null;
   role: Role;
   avatar_color: string;
+  avatar_emoji: string | null;
   failed_attempts: number;
   locked_until: RawTimestamp;
   created_at: RawTimestamp;
@@ -120,6 +122,7 @@ function mapUserRow(row: UserRow): DbUser {
     passwordHash: row.password_hash,
     role: row.role,
     avatarColor: row.avatar_color,
+    avatarEmoji: row.avatar_emoji,
     failedAttempts: row.failed_attempts,
     lockedUntil: row.locked_until ? new Date(row.locked_until) : null,
     createdAt: new Date(row.created_at ?? 0),
@@ -131,7 +134,7 @@ export async function findUserByUsername(
   username: string,
 ): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, display_name, password_hash, role, avatar_color, failed_attempts, locked_until, created_at, theme
+    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, failed_attempts, locked_until, created_at, theme
     FROM users
     WHERE username = ${username};
   `;
@@ -141,7 +144,7 @@ export async function findUserByUsername(
 
 export async function getUserById(id: number): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, display_name, password_hash, role, avatar_color, failed_attempts, locked_until, created_at, theme
+    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, failed_attempts, locked_until, created_at, theme
     FROM users
     WHERE id = ${id};
   `;
@@ -193,6 +196,15 @@ export async function updateAvatarColor(
 ): Promise<void> {
   await sql`
     UPDATE users SET avatar_color = ${color} WHERE id = ${userId};
+  `;
+}
+
+export async function updateAvatarEmoji(
+  userId: number,
+  emoji: string | null,
+): Promise<void> {
+  await sql`
+    UPDATE users SET avatar_emoji = ${emoji} WHERE id = ${userId};
   `;
 }
 

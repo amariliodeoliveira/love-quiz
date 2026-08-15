@@ -21,11 +21,39 @@ export function avatarColorHex(name: string): string {
   );
 }
 
-/** First displayable character of a name, for the avatar badge's fallback initial.
- * Uses `[...name]` (iterates by Unicode code point) rather than `name.charAt(0)` —
- * most emoji are surrogate pairs in JS strings, so `charAt(0)` grabs only half of one
- * and renders as a broken glyph instead of the whole emoji. */
+/** First displayable character of a name, for the avatar badge's fallback — used only
+ * when the user hasn't picked an avatar emoji. Uses `[...name]` (iterates by Unicode
+ * code point) rather than `name.charAt(0)` — most emoji are surrogate pairs in JS
+ * strings, so `charAt(0)` grabs only half of one and renders as a broken glyph instead
+ * of the whole emoji. */
 export function avatarInitial(name: string): string {
   const [first] = [...name.trim()];
   return first ? first.toUpperCase() : "?";
+}
+
+export const AVATAR_EMOJIS = [
+  "😀",
+  "😍",
+  "😎",
+  "🥰",
+  "🤓",
+  "🐶",
+  "🐱",
+  "🦊",
+  "🐻",
+  "🐼",
+  "🦁",
+  "🐸",
+  "🐙",
+  "🌸",
+  "🌵",
+  "🍀",
+  "🔥",
+  "⭐",
+  "🎂",
+  "🎮",
+] as const;
+
+export function isAvatarEmoji(value: unknown): value is string {
+  return (AVATAR_EMOJIS as readonly string[]).includes(value as string);
 }

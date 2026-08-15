@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   AVATAR_COLORS,
+  AVATAR_EMOJIS,
   avatarColorHex,
   avatarInitial,
   isAvatarColorName,
+  isAvatarEmoji,
 } from "./avatar";
 
 describe("isAvatarColorName", () => {
@@ -51,5 +53,19 @@ describe("avatarInitial", () => {
   it("falls back to a placeholder for an empty name", () => {
     expect(avatarInitial("")).toBe("?");
     expect(avatarInitial("   ")).toBe("?");
+  });
+});
+
+describe("isAvatarEmoji", () => {
+  it("accepts every known emoji", () => {
+    for (const emoji of AVATAR_EMOJIS) {
+      expect(isAvatarEmoji(emoji)).toBe(true);
+    }
+  });
+
+  it("rejects an emoji not in the curated list, and non-string values", () => {
+    expect(isAvatarEmoji("🦄")).toBe(false);
+    expect(isAvatarEmoji(undefined)).toBe(false);
+    expect(isAvatarEmoji(42)).toBe(false);
   });
 });
