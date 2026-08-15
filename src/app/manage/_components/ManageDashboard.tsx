@@ -344,7 +344,7 @@ export default function ManageDashboard({
 
   return (
     <div className="page-container">
-      <div className="dashboard-header flex flex-wrap items-start justify-between gap-4">
+      <div className="dashboard-header flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="page-title">Deck Studio</h1>
           <p className="dashboard-subtitle text-subtext">
