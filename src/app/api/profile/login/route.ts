@@ -5,6 +5,7 @@ import {
   createSessionCookieValue,
   hashPassword,
   isClaimWindowExpired,
+  SESSION_COOKIE_OPTIONS,
   verifyPassword,
 } from "@/lib/auth";
 import {
@@ -85,14 +86,9 @@ export async function POST(request: Request) {
       userId: user.id,
       username: user.username,
       role: user.role,
+      sessionVersion: user.sessionVersion,
     }),
-    {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7,
-    },
+    SESSION_COOKIE_OPTIONS,
   );
   return response;
 }

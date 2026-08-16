@@ -7,7 +7,12 @@ import type { Session } from "@/lib/db";
 import { proxy } from "./proxy";
 
 const BASE_URL = "http://localhost";
-const session: Session = { userId: 1, username: "alice", role: "user" };
+const session: Session = {
+  userId: 1,
+  username: "alice",
+  role: "user",
+  sessionVersion: 0,
+};
 
 beforeEach(() => {
   process.env.ADMIN_SESSION_SECRET = "test-secret";

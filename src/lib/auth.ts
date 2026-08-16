@@ -7,10 +7,18 @@ import {
 
 import { cookies } from "next/headers";
 
-import type { Role, Session } from "@/lib/db";
+import { type DbUser, getUserById, type Role, type Session } from "@/lib/db";
 
 const COOKIE_NAME = "admin_session";
 const SCRYPT_KEYLEN = 64;
+
+export const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: 60 * 60 * 24 * 7,
+};
 
 /** How long an account with no password (freshly provisioned by an admin, username
  * shared out-of-band) can be "claimed" by whoever submits a password first. Past this
@@ -78,6 +86,9 @@ export function parseSessionCookie(
     if (
       typeof payload?.userId !== "number" ||
       typeof payload?.username !== "string" ||
+      typeof payload?.sessionVersion !== "number" ||
+      !Number.isSafeInteger(payload.sessionVersion) ||
+      payload.sessionVersion < 0 ||
       (payload.role !== "admin" && payload.role !== "user")
     ) {
       return null;
@@ -86,6 +97,7 @@ export function parseSessionCookie(
       userId: payload.userId,
       username: payload.username,
       role: payload.role as Role,
+      sessionVersion: payload.sessionVersion,
     };
   } catch {
     return null;
@@ -94,7 +106,20 @@ export function parseSessionCookie(
 
 export async function getSession(): Promise<Session | null> {
   const cookieStore = await cookies();
-  return parseSessionCookie(cookieStore.get(COOKIE_NAME)?.value);
+  const session = parseSessionCookie(cookieStore.get(COOKIE_NAME)?.value);
+  if (!session) return null;
+
+  const user = await getUserById(session.userId);
+  return user && isSessionCurrent(session, user) ? session : null;
+}
+
+/** Invalidates every previously-issued cookie after a password/security change. */
+export function isSessionCurrent(session: Session, user: DbUser): boolean {
+  return (
+    session.sessionVersion === user.sessionVersion &&
+    session.username === user.username &&
+    session.role === user.role
+  );
 }
 
 export { COOKIE_NAME };

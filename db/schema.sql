@@ -17,6 +17,7 @@ CREATE TABLE users (
   avatar_color TEXT NOT NULL DEFAULT 'pink',
   failed_attempts INTEGER NOT NULL DEFAULT 0,
   locked_until TIMESTAMPTZ,
+  session_version INTEGER NOT NULL DEFAULT 0,
   theme TEXT NOT NULL DEFAULT 'dark',
   display_name TEXT NOT NULL,
   avatar_emoji TEXT,
@@ -33,6 +34,7 @@ CREATE TABLE users (
   -- (see EditProfileModal) — each user builds up their own list as they pick custom
   -- emoji via the "+" option; NULL means "hasn't customized it yet", falls back to
   -- src/lib/avatar.ts's shared AVATAR_EMOJIS default.
+  -- session_version increments when a security event invalidates existing sessions.
 );
 
 CREATE TABLE cards (

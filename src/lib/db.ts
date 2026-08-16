@@ -49,6 +49,7 @@ export interface DbUser {
   avatarEmojiOptions: string[] | null;
   failedAttempts: number;
   lockedUntil: Date | null;
+  sessionVersion: number;
   createdAt: Date;
   theme: ThemeName;
 }
@@ -99,6 +100,7 @@ export interface Session {
   userId: number;
   username: string;
   role: Role;
+  sessionVersion: number;
 }
 
 interface UserRow {
@@ -112,6 +114,7 @@ interface UserRow {
   avatar_emoji_options: string[] | null;
   failed_attempts: number;
   locked_until: RawTimestamp;
+  session_version: number;
   created_at: RawTimestamp;
   theme: ThemeName;
 }
@@ -128,6 +131,7 @@ function mapUserRow(row: UserRow): DbUser {
     avatarEmojiOptions: row.avatar_emoji_options,
     failedAttempts: row.failed_attempts,
     lockedUntil: row.locked_until ? new Date(row.locked_until) : null,
+    sessionVersion: row.session_version,
     createdAt: new Date(row.created_at ?? 0),
     theme: row.theme,
   };
@@ -137,7 +141,7 @@ export async function findUserByUsername(
   username: string,
 ): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, avatar_emoji_options, failed_attempts, locked_until, created_at, theme
+    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, avatar_emoji_options, failed_attempts, locked_until, session_version, created_at, theme
     FROM users
     WHERE username = ${username};
   `;
@@ -147,7 +151,7 @@ export async function findUserByUsername(
 
 export async function getUserById(id: number): Promise<DbUser | null> {
   const { rows } = await sql<UserRow>`
-    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, avatar_emoji_options, failed_attempts, locked_until, created_at, theme
+    SELECT id, username, display_name, password_hash, role, avatar_color, avatar_emoji, avatar_emoji_options, failed_attempts, locked_until, session_version, created_at, theme
     FROM users
     WHERE id = ${id};
   `;
@@ -162,6 +166,24 @@ export async function setUserPassword(
   await sql`
     UPDATE users SET password_hash = ${passwordHash} WHERE id = ${userId};
   `;
+}
+
+/** Changes a password only if the hash verified by the caller is still current. This
+ * prevents concurrent password changes from silently overwriting each other and clears
+ * the shared failed-password counter after a successful reauthentication. */
+export async function changeUserPassword(
+  userId: number,
+  currentPasswordHash: string,
+  newPasswordHash: string,
+): Promise<number | null> {
+  const { rows } = await sql<{ session_version: number }>`
+    UPDATE users
+    SET password_hash = ${newPasswordHash}, failed_attempts = 0, locked_until = NULL,
+        session_version = session_version + 1
+    WHERE id = ${userId} AND password_hash = ${currentPasswordHash};
+    RETURNING session_version;
+  `;
+  return rows[0]?.session_version ?? null;
 }
 
 /** Atomically increments failed attempts and locks the account once the threshold is hit. */
