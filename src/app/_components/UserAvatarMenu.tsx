@@ -91,7 +91,7 @@ export default function UserAvatarMenu({
           </div>
           <div className="avatar-menu-divider" />
 
-          {/* "Edit profile" is a distinct concern from the theme swatches above it
+          {/* "Profile settings" is a distinct concern from the theme swatches above it
               (appearance vs. account identity), so it gets its own divider rather than
               reading as one flat group. "Edit countdown" and "Deck Studio" are shared
               couple content, a separate group again, so they get the same treatment
@@ -106,7 +106,7 @@ export default function UserAvatarMenu({
               setEditingProfile(true);
             }}
           >
-            Edit profile
+            Profile settings
           </button>
           <div className="avatar-menu-divider" />
           <button

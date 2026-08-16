@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth";
 import { GAME_PATH, LOGIN_PATH } from "@/lib/routes";
 
 import LandingHero from "./_components/LandingHero";
+import SiteFooter from "./_components/SiteFooter";
 
 export const dynamic = "force-dynamic";
 
@@ -23,9 +24,7 @@ export default async function Home() {
           </Link>
         </LandingHero>
       </div>
-      <footer>
-        <p>© {new Date().getFullYear()} Couples Card Deck</p>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
