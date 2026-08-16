@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { parsePasswordChange, passwordPolicy } from "./password";
+import {
+  isPasswordInputTooLong,
+  parsePasswordChange,
+  passwordInputPolicy,
+  passwordPolicy,
+} from "./password";
 
 const validChange = {
   currentPassword: "current password",
@@ -9,6 +14,15 @@ const validChange = {
 };
 
 describe("parsePasswordChange", () => {
+  it("rejects password input above the shared request limit", () => {
+    expect(
+      isPasswordInputTooLong("a".repeat(passwordInputPolicy.maxLength)),
+    ).toBe(false);
+    expect(
+      isPasswordInputTooLong("a".repeat(passwordInputPolicy.maxLength + 1)),
+    ).toBe(true);
+  });
+
   it.each([null, [], "password", 42])(
     "rejects a non-object request body: %j",
     (body) => {

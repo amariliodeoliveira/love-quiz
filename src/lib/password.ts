@@ -5,7 +5,14 @@ export const passwordPolicy = {
   maxLength: 128,
 } as const;
 
-const MAX_CURRENT_PASSWORD_LENGTH = 1024;
+/** Absolute request limit, including verification of older passwords. */
+export const passwordInputPolicy = {
+  maxLength: 1024,
+} as const;
+
+export function isPasswordInputTooLong(password: string): boolean {
+  return password.length > passwordInputPolicy.maxLength;
+}
 
 /** Password policy for every point where an account first chooses a password. */
 export const newPasswordSchema = z
@@ -28,7 +35,7 @@ export const passwordChangeFormSchema = z
     currentPassword: z
       .string()
       .min(1, "Enter your current password")
-      .max(MAX_CURRENT_PASSWORD_LENGTH, "Current password is too long"),
+      .max(passwordInputPolicy.maxLength, "Current password is too long"),
     newPassword: newPasswordSchema,
     confirmPassword: z.string().min(1, "Confirm your new password"),
   })

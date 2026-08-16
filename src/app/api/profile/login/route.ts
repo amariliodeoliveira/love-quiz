@@ -14,7 +14,11 @@ import {
   resetFailedLogins,
   setUserPassword,
 } from "@/lib/db";
-import { newPasswordSchema, passwordPolicy } from "@/lib/password";
+import {
+  isPasswordInputTooLong,
+  newPasswordSchema,
+  passwordPolicy,
+} from "@/lib/password";
 
 // A valid-format but unusable hash, hashed once at module load. Used to run
 // verifyPassword's real scrypt work even when no user was found, so an unknown
@@ -32,7 +36,8 @@ export async function POST(request: Request) {
   if (
     typeof username !== "string" ||
     typeof password !== "string" ||
-    !password
+    !password ||
+    isPasswordInputTooLong(password)
   ) {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
