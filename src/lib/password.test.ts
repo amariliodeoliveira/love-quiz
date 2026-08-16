@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parsePasswordChange } from "./password";
+import { parsePasswordChange, passwordPolicy } from "./password";
 
 const validChange = {
   currentPassword: "current password",
@@ -69,24 +69,24 @@ describe("parsePasswordChange", () => {
     });
   });
 
-  it.each(["a".repeat(9), "a".repeat(129)])(
-    "enforces the password length policy: %s",
-    (newPassword) => {
-      expect(
-        parsePasswordChange({
-          currentPassword: "current password",
-          newPassword,
-          confirmPassword: newPassword,
-        }),
-      ).toEqual({
-        ok: false,
-        error: "New password must be between 10 and 128 characters",
-      });
-    },
-  );
+  it.each([
+    "a".repeat(passwordPolicy.minLength - 1),
+    "a".repeat(passwordPolicy.maxLength + 1),
+  ])("enforces the password length policy: %s", (newPassword) => {
+    expect(
+      parsePasswordChange({
+        currentPassword: "current password",
+        newPassword,
+        confirmPassword: newPassword,
+      }),
+    ).toEqual({
+      ok: false,
+      error: `New password must be between ${passwordPolicy.minLength} and ${passwordPolicy.maxLength} characters`,
+    });
+  });
 
   it("accepts a new password at the minimum length", () => {
-    const newPassword = "a".repeat(10);
+    const newPassword = "a".repeat(passwordPolicy.minLength);
 
     expect(
       parsePasswordChange({
@@ -101,7 +101,7 @@ describe("parsePasswordChange", () => {
   });
 
   it("rejects a password made only of whitespace", () => {
-    const newPassword = " ".repeat(10);
+    const newPassword = " ".repeat(passwordPolicy.minLength);
     expect(
       parsePasswordChange({
         currentPassword: "current password",

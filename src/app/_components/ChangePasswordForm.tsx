@@ -7,6 +7,7 @@ import { patchJson } from "@/lib/http";
 import {
   passwordChangeFormSchema,
   type PasswordChangeFormValues,
+  passwordPolicy,
 } from "@/lib/password";
 
 import FormField from "./FormField";
@@ -93,7 +94,7 @@ export default function ChangePasswordForm({
       <FormField
         id="new-password"
         label="New password"
-        hint="Use 10 to 128 characters. A memorable passphrase works well."
+        hint={`Use ${passwordPolicy.minLength} to ${passwordPolicy.maxLength} characters. A memorable passphrase works well.`}
         error={errors.newPassword?.message}
       >
         <TextField
@@ -101,8 +102,8 @@ export default function ChangePasswordForm({
           type="password"
           placeholder="Create a new password"
           autoComplete="new-password"
-          minLength={10}
-          maxLength={128}
+          minLength={passwordPolicy.minLength}
+          maxLength={passwordPolicy.maxLength}
           aria-invalid={errors.newPassword ? "true" : undefined}
           aria-describedby={
             errors.newPassword ? "new-password-error" : "new-password-hint"
@@ -121,8 +122,8 @@ export default function ChangePasswordForm({
           type="password"
           placeholder="Repeat your new password"
           autoComplete="new-password"
-          minLength={10}
-          maxLength={128}
+          minLength={passwordPolicy.minLength}
+          maxLength={passwordPolicy.maxLength}
           aria-invalid={errors.confirmPassword ? "true" : undefined}
           aria-describedby={
             errors.confirmPassword ? "confirm-password-error" : undefined

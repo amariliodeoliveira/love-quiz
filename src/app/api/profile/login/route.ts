@@ -14,7 +14,7 @@ import {
   resetFailedLogins,
   setUserPassword,
 } from "@/lib/db";
-import { newPasswordSchema } from "@/lib/password";
+import { newPasswordSchema, passwordPolicy } from "@/lib/password";
 
 // A valid-format but unusable hash, hashed once at module load. Used to run
 // verifyPassword's real scrypt work even when no user was found, so an unknown
@@ -72,7 +72,9 @@ export async function POST(request: Request) {
     }
     if (!newPasswordSchema.safeParse(password).success) {
       return NextResponse.json(
-        { error: "Choose a password between 10 and 128 characters" },
+        {
+          error: `Choose a password between ${passwordPolicy.minLength} and ${passwordPolicy.maxLength} characters`,
+        },
         { status: 400 },
       );
     }

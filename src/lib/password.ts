@@ -1,14 +1,23 @@
 import { z } from "zod";
 
-const MIN_PASSWORD_LENGTH = 10;
-const MAX_PASSWORD_LENGTH = 128;
+export const passwordPolicy = {
+  minLength: 10,
+  maxLength: 128,
+} as const;
+
 const MAX_CURRENT_PASSWORD_LENGTH = 1024;
 
 /** Password policy for every point where an account first chooses a password. */
 export const newPasswordSchema = z
   .string()
-  .min(MIN_PASSWORD_LENGTH, `Use at least ${MIN_PASSWORD_LENGTH} characters`)
-  .max(MAX_PASSWORD_LENGTH, `Use at most ${MAX_PASSWORD_LENGTH} characters`)
+  .min(
+    passwordPolicy.minLength,
+    `Use at least ${passwordPolicy.minLength} characters`,
+  )
+  .max(
+    passwordPolicy.maxLength,
+    `Use at most ${passwordPolicy.maxLength} characters`,
+  )
   .refine((value) => value.trim().length > 0, {
     message: "New password cannot be only whitespace",
   });
@@ -94,7 +103,7 @@ export function parsePasswordChange(body: unknown): PasswordChangeParseResult {
     }
     return {
       ok: false,
-      error: `New password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters`,
+      error: `New password must be between ${passwordPolicy.minLength} and ${passwordPolicy.maxLength} characters`,
     };
   }
 
