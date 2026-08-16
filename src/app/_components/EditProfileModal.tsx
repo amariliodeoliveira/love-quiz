@@ -198,29 +198,37 @@ export default function EditProfileModal({
             )}
           </div>
 
-          <button
-            type="button"
-            className="border-border hover:border-muted flex items-center justify-between rounded-md border p-4 text-left transition-colors"
-            onClick={() => {
-              setPasswordSuccess(false);
-              setView("password");
-            }}
+          <section
+            className="settings-section"
+            aria-labelledby="account-security"
           >
-            <span className="flex flex-col gap-1">
-              <span className="text-text font-medium">Password</span>
-              <span className="text-subtext text-sm">
-                Change your sign-in password.
+            <h3 id="account-security" className="settings-section-title">
+              Account security
+            </h3>
+            <button
+              type="button"
+              className="settings-action"
+              onClick={() => {
+                setPasswordSuccess(false);
+                setView("password");
+              }}
+            >
+              <span className="settings-action-copy">
+                <span className="settings-action-title">Change password</span>
+                <span className="settings-action-description">
+                  Update the password you use to sign in.
+                </span>
               </span>
-            </span>
-            <span className="text-subtext" aria-hidden="true">
-              ›
-            </span>
-          </button>
-          {passwordSuccess && (
-            <p className="text-green text-sm" role="status">
-              Password changed.
-            </p>
-          )}
+              <span className="settings-action-icon" aria-hidden="true">
+                ›
+              </span>
+            </button>
+            {passwordSuccess && (
+              <p className="text-green text-sm" role="status">
+                Password changed.
+              </p>
+            )}
+          </section>
 
           {error && <p className="form-error">{error}</p>}
           <div className="modal-actions">

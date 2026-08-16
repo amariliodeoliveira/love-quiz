@@ -7,7 +7,8 @@ import { postJson } from "@/lib/http";
 import { GAME_PATH } from "@/lib/routes";
 import { isSafeRedirectTarget } from "@/lib/url";
 
-import FormField from "../_components/FormField";
+import FormField from "../../_components/FormField";
+import TextField from "../../_components/TextField";
 
 function LoginForm() {
   const router = useRouter();
@@ -44,18 +45,28 @@ function LoginForm() {
       <div className="login-card">
         <h1 className="page-title">Login</h1>
         <form onSubmit={handleSubmit} className="login-form">
-          <FormField
-            value={username}
-            onChange={setUsername}
-            placeholder="Username"
-            autoFocus
-          />
-          <FormField
-            type="password"
-            value={password}
-            onChange={setPassword}
-            placeholder="Password"
-          />
+          <FormField id="username" label="Username">
+            <TextField
+              id="username"
+              name="username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              placeholder="Enter your username"
+              autoComplete="username"
+              autoFocus
+            />
+          </FormField>
+          <FormField id="password" label="Password">
+            <TextField
+              id="password"
+              type="password"
+              name="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Enter your password"
+              autoComplete="current-password"
+            />
+          </FormField>
           <p className="login-hint">
             First time logging in? The password you enter now will be saved as
             yours.
