@@ -24,6 +24,14 @@ Use Conventional Commits in English:
 
 Use `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, or `style` as appropriate. Explain why in a commit body when one is useful. Use lowercase, hyphenated English branch names such as `feature/user-avatar-menu` or `fix/session-expiry`; avoid WIP commits reaching `main`.
 
+## Stacked pull requests and rollout dependencies
+
+- A normal PR must be independently mergeable and deployable. Split unrelated work rather than using a stack as a way to hide an oversized diff.
+- When a change genuinely depends on an unmerged prerequisite, make that dependency explicit: create the child from the prerequisite branch, target the child PR at that branch, and put `Depends on #<number>` at the top of its body. Keep stacks short and state the intended merge order.
+- Never merge a child into `main` before every prerequisite has merged, deployed where necessary, and been verified. After the prerequisite merges, retarget the child to `main`, refresh its CI, and confirm its diff still contains only the remaining change.
+- A merged migration PR is not evidence that production has the schema. Application code may consume a new table, column, index, constraint, or permission only after the migration has been applied and verified in the target environment.
+- Use expand/contract delivery for schema-dependent changes: ship an additive, backwards-compatible migration; apply and verify it; ship code that uses it; only later remove obsolete schema or compatibility code in a separate change.
+
 ## Pull request descriptions
 
 Write PR titles and bodies in English for a human reviewer and future project history.
@@ -36,3 +44,4 @@ Write PR titles and bodies in English for a human reviewer and future project hi
 - Add `Notes` only for real risks or context: security, migrations, breaking changes, rollout, performance trade-offs, screenshots, or follow-up work.
 - For non-trivial diffs, tell the reviewer where to start, the preferred reading order, and focus areas. Link necessary issues, design discussions, or dependent PRs.
 - Self-review before requesting review. Do not put internal agent narration, command logs, sandbox limitations, empty sections, or routine CI boilerplate in the body.
+- For a stacked PR, add a brief `Dependencies` note with its parent PR, merge order, migration/application status, and the exact condition that makes the child safe to merge.
