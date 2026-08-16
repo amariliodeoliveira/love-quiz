@@ -1,8 +1,8 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
-import { ALL_LEVELS } from "@/data/cards";
 import { withSession } from "@/lib/api";
+import { cardFormSchema } from "@/lib/card";
 import { deleteCard, updateCard } from "@/lib/db";
 import { parseId } from "@/lib/id";
 import { GAME_PATH } from "@/lib/routes";
@@ -19,16 +19,19 @@ export const PATCH = withSession(
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     }
 
-    const { level, question } = await request.json();
-    if (
-      typeof question !== "string" ||
-      !question.trim() ||
-      !ALL_LEVELS.includes(level)
-    ) {
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
       return NextResponse.json({ error: "Invalid data" }, { status: 400 });
     }
+    const parsed = cardFormSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    }
+    const { level, question } = parsed.data;
 
-    const updated = await updateCard(cardId, level, question.trim(), session);
+    const updated = await updateCard(cardId, level, question, session);
     if (!updated) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }

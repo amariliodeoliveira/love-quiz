@@ -9,7 +9,7 @@ export const loginFormSchema = z.object({
     .string()
     .min(1, "Enter your password")
     .max(passwordInputPolicy.maxLength, "Password is too long"),
-  rememberMe: z.boolean().optional().default(false),
+  rememberMe: z.boolean(),
 });
 
 export type LoginFormValues = z.infer<typeof loginFormSchema>;

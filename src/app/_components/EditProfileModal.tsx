@@ -1,12 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 
+import ConfirmationModal from "@/app/_components/ConfirmationModal";
+import FormField from "@/app/_components/FormField";
 import Modal from "@/app/_components/Modal";
-import { AVATAR_COLORS, AVATAR_EMOJIS, isAvatarEmoji } from "@/lib/avatar";
+import TextField from "@/app/_components/TextField";
+import {
+  AVATAR_COLORS,
+  avatarColorHex,
+  avatarInitial,
+  isAvatarEmoji,
+  mergeAvatarEmojiOptions,
+  recordAvatarEmojiSelection,
+} from "@/lib/avatar";
 import { patchJson } from "@/lib/http";
+import {
+  displayNamePolicy,
+  profileEditorSchema,
+  type ProfileEditorValues,
+} from "@/lib/profile";
 
 import ChangePasswordForm from "./ChangePasswordForm";
+
+function isIncompleteEmojiInput(value: string) {
+  return /[\uD800-\uDBFF]$/.test(value);
+}
 
 /** Editing scope is deliberately narrow: display name, avatar color, and avatar emoji —
  * the "how you appear to your partner" settings. Username stays fixed here on purpose —
@@ -36,166 +57,264 @@ export default function EditProfileModal({
     avatarEmojiOptions: string[] | null;
   }) => void;
 }) {
-  const [displayName, setDisplayName] = useState(initialDisplayName);
+  const {
+    register,
+    handleSubmit: handleProfileSubmit,
+    setError: setProfileError,
+    control,
+    formState: {
+      errors: profileErrors,
+      isDirty: profileTextIsDirty,
+      isSubmitting,
+    },
+  } = useForm<ProfileEditorValues>({
+    resolver: zodResolver(profileEditorSchema),
+    defaultValues: { displayName: initialDisplayName },
+    mode: "onTouched",
+  });
+  const displayName = useWatch({ control, name: "displayName" });
   const [avatarColor, setAvatarColor] = useState(initialAvatarColor);
   const [avatarEmoji, setAvatarEmoji] = useState(initialAvatarEmoji);
-  // A picked-via-"+" custom emoji is prepended and bumps the oldest option off the
-  // end, so the grid's size never grows unbounded. Persisted per-user on save (see
-  // handleSubmit) so it's this account's own list next time, not shared/reset.
-  const [emojiOptions, setEmojiOptions] = useState<readonly string[]>(
-    initialAvatarEmojiOptions ?? AVATAR_EMOJIS,
+  const [emojiOptions, setEmojiOptions] = useState<readonly string[]>(() =>
+    mergeAvatarEmojiOptions(initialAvatarEmojiOptions),
   );
   const [emojiOptionsChanged, setEmojiOptionsChanged] = useState(false);
   const [pickingCustomEmoji, setPickingCustomEmoji] = useState(false);
   const [customEmojiDraft, setCustomEmojiDraft] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const customEmojiInputRef = useRef<HTMLInputElement>(null);
   const [view, setView] = useState<"profile" | "password">("profile");
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [passwordDirty, setPasswordDirty] = useState(false);
+  const [discardTarget, setDiscardTarget] = useState<
+    "close" | "profile" | null
+  >(null);
 
-  function commitCustomEmoji() {
-    const trimmed = customEmojiDraft.trim();
+  const profileDirty =
+    profileTextIsDirty ||
+    avatarColor !== initialAvatarColor ||
+    avatarEmoji !== initialAvatarEmoji ||
+    emojiOptionsChanged ||
+    customEmojiDraft.length > 0;
+  const activeViewIsDirty = view === "password" ? passwordDirty : profileDirty;
+
+  function requestClose() {
+    if (isSubmitting) return;
+    if (activeViewIsDirty) {
+      setDiscardTarget("close");
+      return;
+    }
+    onClose();
+  }
+
+  function requestProfileView() {
+    if (passwordDirty) {
+      setDiscardTarget("profile");
+      return;
+    }
+    setView("profile");
+  }
+
+  const handlePasswordDirtyChange = useCallback((isDirty: boolean) => {
+    setPasswordDirty(isDirty);
+  }, []);
+
+  useEffect(() => {
+    if (pickingCustomEmoji) customEmojiInputRef.current?.focus();
+  }, [pickingCustomEmoji]);
+
+  function addCustomEmoji(value: string) {
+    const trimmed = value.trim();
+    if (!isAvatarEmoji(trimmed)) return;
+    selectAvatarEmoji(trimmed);
     setPickingCustomEmoji(false);
     setCustomEmojiDraft("");
-    if (!isAvatarEmoji(trimmed)) return;
-    setAvatarEmoji(trimmed);
-    setEmojiOptions((prev) => [trimmed, ...prev.slice(0, -1)]);
+  }
+
+  function selectAvatarEmoji(emoji: string) {
+    setAvatarEmoji(emoji);
+    setEmojiOptions((previousOptions) =>
+      recordAvatarEmojiSelection(previousOptions, emoji),
+    );
     setEmojiOptionsChanged(true);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    const trimmed = displayName.trim();
-    if (!trimmed) return;
-
-    setSaving(true);
-    setError(null);
-    const avatarEmojiOptions = emojiOptionsChanged ? [...emojiOptions] : null;
-    const { ok } = await patchJson("/api/profile/me", {
-      displayName: trimmed,
-      avatarColor,
-      avatarEmoji,
-      ...(emojiOptionsChanged && { avatarEmojiOptions }),
-    });
-    setSaving(false);
-    if (ok) {
-      onSaved({
-        displayName: trimmed,
-        avatarColor,
-        avatarEmoji,
-        avatarEmojiOptions: emojiOptionsChanged
-          ? avatarEmojiOptions
-          : initialAvatarEmojiOptions,
-      });
-    } else {
-      setError(
-        "Couldn't save your profile — check your connection and try again.",
-      );
-    }
+  function cancelCustomEmoji() {
+    setPickingCustomEmoji(false);
+    setCustomEmojiDraft("");
   }
 
-  const profileSubmitLabel = saving ? "Saving..." : "Save changes";
+  async function submitProfile({ displayName }: ProfileEditorValues) {
+    const avatarEmojiOptions = emojiOptionsChanged ? [...emojiOptions] : null;
+    try {
+      const { ok } = await patchJson("/api/profile/me", {
+        displayName,
+        avatarColor,
+        avatarEmoji,
+        ...(emojiOptionsChanged && { avatarEmojiOptions }),
+      });
+      if (ok) {
+        onSaved({
+          displayName,
+          avatarColor,
+          avatarEmoji,
+          avatarEmojiOptions: emojiOptionsChanged
+            ? avatarEmojiOptions
+            : initialAvatarEmojiOptions,
+        });
+        return;
+      }
+    } catch {
+      // The shared error below covers network and non-success responses alike.
+    }
+    setProfileError("root", {
+      message:
+        "Couldn't save your profile — check your connection and try again.",
+    });
+  }
+
+  const profileSubmitLabel = isSubmitting ? "Saving..." : "Save changes";
 
   return (
     <Modal
       open
-      onClose={onClose}
+      onClose={requestClose}
       title={view === "profile" ? "Profile settings" : "Change password"}
     >
       {view === "password" ? (
         <ChangePasswordForm
-          onBack={() => setView("profile")}
+          onBack={requestProfileView}
+          onDirtyChange={handlePasswordDirtyChange}
           onChanged={() => {
+            setPasswordDirty(false);
             setPasswordSuccess(true);
             setView("profile");
           }}
         />
       ) : (
-        <form onSubmit={handleSubmit} className="modal-form">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="display-name" className="login-hint">
-              Display name
-            </label>
-            <input
+        <form
+          onSubmit={handleProfileSubmit(submitProfile)}
+          className="modal-form"
+          noValidate
+        >
+          <FormField
+            id="display-name"
+            label="Display name"
+            error={profileErrors.displayName?.message}
+          >
+            <TextField
               id="display-name"
               type="text"
-              className="input"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              maxLength={40}
+              placeholder="e.g. Alex"
+              autoComplete="name"
+              maxLength={displayNamePolicy.maxLength}
               autoFocus
+              data-modal-initial-focus
+              aria-invalid={profileErrors.displayName ? "true" : undefined}
+              aria-describedby={
+                profileErrors.displayName ? "display-name-error" : undefined
+              }
+              {...register("displayName")}
             />
-          </div>
+          </FormField>
 
-          <div className="flex flex-col gap-2">
-            <p className="login-hint">Avatar color</p>
-            <div className="avatar-swatches mb-0">
-              {AVATAR_COLORS.map((c) => (
-                <button
-                  key={c.name}
-                  type="button"
-                  className={`avatar-swatch ${c.name === avatarColor ? "selected" : ""}`}
-                  style={{ backgroundColor: c.hex }}
-                  aria-label={`Use ${c.name} avatar color`}
-                  onClick={() => setAvatarColor(c.name)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <p className="login-hint">Avatar emoji</p>
-            <div className="avatar-emoji-grid">
-              {pickingCustomEmoji ? (
-                <input
-                  type="text"
-                  className="avatar-emoji-option avatar-emoji-input"
-                  value={customEmojiDraft}
-                  onChange={(e) => setCustomEmojiDraft(e.target.value)}
-                  onBlur={commitCustomEmoji}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      commitCustomEmoji();
-                    }
-                    if (e.key === "Escape") {
-                      setPickingCustomEmoji(false);
-                      setCustomEmojiDraft("");
-                    }
-                  }}
-                  placeholder="😊"
-                  aria-label="Type or paste any emoji"
-                  autoFocus
-                />
-              ) : (
-                <button
-                  type="button"
-                  className="avatar-emoji-option"
-                  aria-label="Pick any emoji"
-                  onClick={() => setPickingCustomEmoji(true)}
+          <div className="avatar-settings">
+            <div className="avatar-color-choice-row">
+              <fieldset className="avatar-color-controls">
+                <legend className="login-hint">Avatar color</legend>
+                <div className="avatar-swatches mb-0">
+                  {AVATAR_COLORS.map((c) => (
+                    <button
+                      key={c.name}
+                      type="button"
+                      className={`avatar-swatch ${c.name === avatarColor ? "selected" : ""}`}
+                      style={{ backgroundColor: c.hex }}
+                      aria-label={`Use ${c.name} avatar color`}
+                      aria-pressed={c.name === avatarColor}
+                      onClick={() => setAvatarColor(c.name)}
+                    />
+                  ))}
+                </div>
+              </fieldset>
+              <div
+                className="avatar-preview"
+                role="img"
+                aria-label={`Avatar preview: ${avatarEmoji ?? avatarInitial(displayName ?? "")} on ${avatarColor} background`}
+              >
+                <span className="avatar-preview-label">Preview</span>
+                <span
+                  className="avatar-preview-badge"
+                  style={{ backgroundColor: avatarColorHex(avatarColor) }}
+                  aria-hidden="true"
                 >
-                  +
-                </button>
+                  {avatarEmoji ?? avatarInitial(displayName ?? "")}
+                </span>
+              </div>
+            </div>
+
+            <fieldset className="m-0 border-0 p-0">
+              <legend className="login-hint mb-2">Avatar emoji</legend>
+              <div className="avatar-emoji-grid">
+                {pickingCustomEmoji ? (
+                  <input
+                    id="custom-avatar-emoji"
+                    ref={customEmojiInputRef}
+                    type="text"
+                    className="avatar-emoji-option avatar-emoji-input"
+                    value={customEmojiDraft}
+                    onChange={(e) => {
+                      const nextValue = e.target.value;
+                      if (nextValue === "") {
+                        setCustomEmojiDraft("");
+                        return;
+                      }
+                      if (isIncompleteEmojiInput(nextValue)) {
+                        setCustomEmojiDraft(nextValue);
+                        return;
+                      }
+                      addCustomEmoji(nextValue);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") cancelCustomEmoji();
+                    }}
+                    placeholder="😊"
+                    aria-label="Add a custom avatar emoji"
+                    autoFocus
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    className="avatar-emoji-option"
+                    aria-label="Add a custom avatar emoji"
+                    onClick={() => setPickingCustomEmoji(true)}
+                  >
+                    +
+                  </button>
+                )}
+                {emojiOptions.map((e) => (
+                  <button
+                    key={e}
+                    type="button"
+                    className={`avatar-emoji-option ${e === avatarEmoji ? "selected" : ""}`}
+                    aria-label={`Use ${e} as the avatar emoji`}
+                    aria-pressed={e === avatarEmoji}
+                    onClick={() => {
+                      cancelCustomEmoji();
+                      selectAvatarEmoji(e);
+                    }}
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
+              {pickingCustomEmoji && (
+                <p
+                  id="custom-avatar-emoji-hint"
+                  className="avatar-emoji-hint mt-2"
+                >
+                  Use your device&apos;s emoji picker, or paste one emoji.
+                </p>
               )}
-              {emojiOptions.map((e) => (
-                <button
-                  key={e}
-                  type="button"
-                  className={`avatar-emoji-option ${e === avatarEmoji ? "selected" : ""}`}
-                  aria-label={`Use ${e} as the avatar emoji`}
-                  onClick={() => setAvatarEmoji(e)}
-                >
-                  {e}
-                </button>
-              ))}
-            </div>
-            {pickingCustomEmoji && (
-              <p className="avatar-emoji-hint">
-                Open your emoji keyboard (Windows: Win + . — Mac: Cmd + Ctrl +
-                Space), then type or paste one here.
-              </p>
-            )}
+            </fieldset>
           </div>
 
           <section
@@ -230,17 +349,43 @@ export default function EditProfileModal({
             )}
           </section>
 
-          {error && <p className="form-error">{error}</p>}
+          {profileErrors.root?.message && (
+            <p className="form-error" role="alert">
+              {profileErrors.root.message}
+            </p>
+          )}
           <div className="modal-actions">
-            <button type="button" className="btn-ghost" onClick={onClose}>
+            <button type="button" className="btn-ghost" onClick={requestClose}>
               Cancel
             </button>
-            <button type="submit" className="btn" disabled={saving}>
+            <button type="submit" className="btn" disabled={isSubmitting}>
               {profileSubmitLabel}
             </button>
           </div>
         </form>
       )}
+      <ConfirmationModal
+        open={discardTarget !== null}
+        title="Discard unsaved changes?"
+        message={
+          discardTarget === "profile"
+            ? "Your new password will not be saved."
+            : "Your unsaved changes will be lost."
+        }
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        variant="danger"
+        onCancel={() => setDiscardTarget(null)}
+        onConfirm={() => {
+          if (discardTarget === "profile") {
+            setPasswordDirty(false);
+            setView("profile");
+          } else {
+            onClose();
+          }
+          setDiscardTarget(null);
+        }}
+      />
     </Modal>
   );
 }
