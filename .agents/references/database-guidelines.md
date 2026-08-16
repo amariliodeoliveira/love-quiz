@@ -3,7 +3,8 @@
 ## Context
 
 - Postgres runs on Neon. The project uses raw SQL through `@neondatabase/serverless` in `src/lib/db.ts`; there is no ORM.
-- `users` and `cards` are documented in [`db/schema.sql`](../../db/schema.sql). The file is documentation, not a migration runner.
+- The live shape is documented in [`db/schema.sql`](../../db/schema.sql). It is a readable snapshot, not a migration runner.
+- Forward-only, reviewed SQL migrations live in [`db/migrations/`](../../db/migrations/). They are not applied automatically because local credentials target production.
 - `.env.local` targets the real production database. There is no local or test database.
 
 For isolated migration or data experiments, create a Neon branch rather than reconstructing the database locally.
@@ -21,11 +22,12 @@ node --env-file=.env.local scripts/qa-test-user.mjs cleanup
 
 ## Changing the schema
 
-There is no migration tool. For a schema change:
+For a schema change:
 
-1. Run the scoped SQL against Neon.
-2. Update [`db/schema.sql`](../../db/schema.sql) to match production.
-3. Update relevant types and queries in `src/lib/db.ts`.
+1. Add one forward-only timestamped SQL file to `db/migrations/`, following its README.
+2. Review it and test it against a Neon branch where practical.
+3. Obtain explicit approval before applying it to production Neon.
+4. Update [`db/schema.sql`](../../db/schema.sql), relevant types, queries, and tests after application.
 
 If the schema may have drifted, ask for live introspection instead of assuming the snapshot is current.
 
