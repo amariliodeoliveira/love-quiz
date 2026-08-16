@@ -1,8 +1,8 @@
 import { neon } from "@neondatabase/serverless";
 
 import type { Card, Level } from "@/data/cards";
-import type { AvatarColorName } from "@/lib/avatar";
 import type { CardRef } from "@/lib/id";
+import type { ProfileFieldUpdate } from "@/lib/profile";
 import type { ThemeName } from "@/lib/theme";
 
 // @vercel/postgres is deprecated (Vercel Postgres was discontinued in favor of the
@@ -191,14 +191,6 @@ const PROFILE_FIELD_COLUMNS = new Map<keyof ProfileFieldUpdate, string>([
   ["avatarEmojiOptions", "avatar_emoji_options"],
   ["theme", "theme"],
 ]);
-
-export interface ProfileFieldUpdate {
-  displayName?: string;
-  avatarColor?: AvatarColorName;
-  avatarEmoji?: string | null;
-  avatarEmojiOptions?: string[] | null;
-  theme?: ThemeName;
-}
 
 /** A single UPDATE for however many profile fields changed in one request (Edit
  * profile's form submits displayName + avatarColor + avatarEmoji + avatarEmojiOptions

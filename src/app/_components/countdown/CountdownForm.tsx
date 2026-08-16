@@ -64,6 +64,20 @@ export default function CountdownForm({
   let submitLabel = initial ? "Save changes" : "Create countdown";
   if (saving) submitLabel = "Saving...";
 
+  async function searchLocation(query: string) {
+    setSearching(true);
+    try {
+      const { ok, data } = await getJson<{ results: GeocodeResult[] }>(
+        `/api/geocode?q=${encodeURIComponent(query.trim())}`,
+      );
+      setSuggestions(ok && data ? data.results : []);
+    } catch {
+      setSuggestions([]);
+    } finally {
+      setSearching(false);
+    }
+  }
+
   function handleLocationInput(query: string) {
     setLocationQuery(query);
     setTimeZone(null); // a fresh pick is required before this can be saved again
@@ -74,13 +88,8 @@ export default function CountdownForm({
       setSuggestions([]);
       return;
     }
-    searchTimer.current = setTimeout(async () => {
-      setSearching(true);
-      const { ok, data } = await getJson<{ results: GeocodeResult[] }>(
-        `/api/geocode?q=${encodeURIComponent(query.trim())}`,
-      );
-      setSearching(false);
-      setSuggestions(ok && data ? data.results : []);
+    searchTimer.current = setTimeout(() => {
+      void searchLocation(query);
     }, 300);
   }
 

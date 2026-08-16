@@ -14,6 +14,8 @@ export function pickRandomTruthLevel(): Level {
 }
 
 export function buildPrompt(context: PromptContext, level: Level): string {
+  // `level` is a closed union fully covered by LEVEL_META.
+  // eslint-disable-next-line security/detect-object-injection
   const meta = LEVEL_META[level];
   const kind = level === "dare" ? "a dare" : "a truth question";
   const avoid = [context.summary, ...context.recentQuestions].filter(Boolean);

@@ -7,7 +7,13 @@ export function pickRandomItem<T>(
   random: () => number = Math.random,
 ): T | null {
   if (pool.length === 0) return null;
-  const index = Math.floor(random() * pool.length);
+  const randomValue = random();
+  if (!Number.isFinite(randomValue) || randomValue < 0 || randomValue >= 1) {
+    throw new RangeError("random() must return a finite value in [0, 1)");
+  }
+  const index = Math.floor(randomValue * pool.length);
+  // `index` is bounded above; this is array access, not object injection.
+  // eslint-disable-next-line security/detect-object-injection
   return pool[index];
 }
 

@@ -32,6 +32,34 @@ const eslintConfig = defineConfig([
       // Default tolerance (4) flags ordinary camelCase identifiers as "secrets"; 4.5 cuts that noise
       // while still catching real high-entropy tokens/keys.
       "no-secrets/no-secrets": ["error", { tolerance: 4.5 }],
+      // `sonarjs/unused-import` detects the same issue; keep one owner with autofix support.
+      "sonarjs/unused-import": "off",
+      // This rule is intentionally broad and syntactic. Known safe computed accesses are
+      // suppressed at the line after audit; any new access must be reviewed explicitly.
+      "security/detect-object-injection": "error",
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx,mts,cts}"],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      // High-signal async correctness checks omitted by the non-type-aware Next preset.
+      "@typescript-eslint/await-thenable": "error",
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/no-misused-promises": [
+        "error",
+        { checksVoidReturn: { attributes: false } },
+      ],
+      // Enabling parser services also wakes type-aware Sonar rules from its broad preset.
+      // These are too opinionated/noisy for this codebase and are not part of this focused gate.
+      "sonarjs/deprecation": "off",
+      "sonarjs/function-return-type": "off",
+      "sonarjs/prefer-read-only-props": "off",
     },
   },
   {

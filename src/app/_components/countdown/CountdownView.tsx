@@ -52,9 +52,12 @@ export default function CountdownView({
           {STAT_ORDER.map((unit) => (
             <div key={unit} className="flex flex-col items-center">
               <span className="text-text font-serif text-4xl tabular-nums sm:text-5xl">
+                {/* `unit` comes from the closed STAT_ORDER tuple. */}
+                {/* eslint-disable-next-line security/detect-object-injection */}
                 {pad(breakdown[unit])}
               </span>
               <span className="text-muted mt-1 text-xs tracking-[0.08em] uppercase">
+                {/* eslint-disable-next-line security/detect-object-injection */}
                 {STAT_LABEL[unit]}
               </span>
             </div>
