@@ -146,6 +146,8 @@ function DaresTab({
   return cards.map((card, index) => (
     <div key={card.id} className="dashboard-card-row">
       <p className="dashboard-card-question">
+        {/* `index < 3` bounds access to the three badge entries. */}
+        {/* eslint-disable-next-line security/detect-object-injection */}
         {index < 3 ? `${RANK_BADGES[index]} ` : ""}
         {card.question} · {card.timesCompleted}x
       </p>
