@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import type { GeocodeResult } from "@/app/api/geocode/route";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@/lib/countdown";
 import { getJson, patchJson } from "@/lib/http";
 
+import EmojiText from "../EmojiText";
 import DateTimePicker from "./DateTimePicker";
 
 export const DEFAULT_COUNTDOWN_LABEL = "Together again in";
@@ -32,11 +33,13 @@ export default function CountdownForm({
   initial,
   onSaved,
   onCancel,
+  onDirtyChange,
 }: {
   /** Existing countdown to edit, or null when setting one for the first time. */
   initial: CountdownFormInitial | null;
   onSaved: (result: CountdownFormResult) => void;
   onCancel: () => void;
+  onDirtyChange: (isDirty: boolean) => void;
 }) {
   const labelId = useId();
   const cityId = useId();
@@ -60,6 +63,21 @@ export default function CountdownForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const isDirty =
+    label !== (initial?.label ?? "") ||
+    locationQuery !== (initial?.location ?? "") ||
+    timeZone !== (initial?.timeZone ?? null) ||
+    JSON.stringify(dateParts) !==
+      JSON.stringify(
+        initial
+          ? utcToZonedParts(new Date(initial.targetAtIso), initial.timeZone)
+          : null,
+      );
+
+  useEffect(() => {
+    onDirtyChange(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   let submitLabel = initial ? "Save changes" : "Create countdown";
   if (saving) submitLabel = "Saving...";
@@ -115,30 +133,40 @@ export default function CountdownForm({
     }
     setError(null);
 
-    setSaving(true);
-    const { ok, data } = await patchJson<{ error?: string }>("/api/countdown", {
-      ...dateParts,
-      timeZone,
-      location: locationQuery.trim() || null,
-      label: label.trim() || DEFAULT_COUNTDOWN_LABEL,
-    });
-    setSaving(false);
-
-    if (!ok) {
-      setError(
-        data?.error ??
-          "Couldn't save the countdown — check your connection and try again.",
+    try {
+      setSaving(true);
+      const { ok, data } = await patchJson<{ error?: string }>(
+        "/api/countdown",
+        {
+          ...dateParts,
+          timeZone,
+          location: locationQuery.trim() || null,
+          label: label.trim() || DEFAULT_COUNTDOWN_LABEL,
+        },
       );
-      return;
-    }
 
-    const targetAt = zonedTimeToUtc(dateParts, timeZone);
-    onSaved({
-      label: label.trim() || DEFAULT_COUNTDOWN_LABEL,
-      location: locationQuery.trim() || null,
-      timeZone,
-      targetAtIso: targetAt.toISOString(),
-    });
+      if (!ok) {
+        setError(
+          data?.error ??
+            "Couldn't save the countdown — check your connection and try again.",
+        );
+        return;
+      }
+
+      const targetAt = zonedTimeToUtc(dateParts, timeZone);
+      onSaved({
+        label: label.trim() || DEFAULT_COUNTDOWN_LABEL,
+        location: locationQuery.trim() || null,
+        timeZone,
+        targetAtIso: targetAt.toISOString(),
+      });
+    } catch {
+      setError(
+        "Couldn't save the countdown — check your connection and try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -150,15 +178,20 @@ export default function CountdownForm({
           <label htmlFor={labelId} className="login-hint">
             Label
           </label>
-          <input
-            id={labelId}
-            type="text"
-            className="input"
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            placeholder={DEFAULT_COUNTDOWN_LABEL}
-            maxLength={60}
-          />
+          <div className="emoji-text-input">
+            {label && (
+              <EmojiText text={label} className="emoji-text-input-display" />
+            )}
+            <input
+              id={labelId}
+              type="text"
+              className="input"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              placeholder={DEFAULT_COUNTDOWN_LABEL}
+              maxLength={60}
+            />
+          </div>
         </div>
 
         <div className="relative flex flex-col gap-1">

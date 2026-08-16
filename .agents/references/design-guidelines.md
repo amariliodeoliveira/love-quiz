@@ -39,3 +39,9 @@ Keep `leading-[1.05]` bracketed: Tailwind v4 can fail to generate some bare deci
 - Do not validate an untouched field merely because a dialog opened or focus moved programmatically. Validate on submit; after a field has been touched, revalidate as the user corrects it.
 - Make focus clearly visible with more than color alone, preserve native `autocomplete` values, and give password inputs an accessible show/hide control.
 - Build recurring controls from the app's primitives: native inputs use `TextField` and label/help/error composition uses `FormField`. Reuse the documented `.btn` variants for ordinary buttons; introduce a React button component only when shared behavior, not just shared styling, requires it.
+
+## Modal dialogs
+
+- Form dialogs must provide a visible, accessible close control and support Escape. Keep focus trapped while open and return it to the trigger on close.
+- A read-only panel may close from a backdrop click and Escape; when that dismissal is deliberate and obvious, it may omit a redundant visible close control. Form dialogs must not close from a backdrop click: it is too easy to lose work accidentally.
+- A pristine form may close immediately. Before closing, cancelling, or navigating away from a dirty form, ask for confirmation that names the lost work. Use `Keep editing` as the safe/default action and `Discard changes` as the destructive action.

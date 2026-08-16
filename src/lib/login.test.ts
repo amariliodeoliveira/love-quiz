@@ -4,10 +4,10 @@ import { loginFormSchema } from "./login";
 import { passwordInputPolicy } from "./password";
 
 describe("loginFormSchema", () => {
-  it("defaults rememberMe to false", () => {
+  it("requires an explicit remember-device choice", () => {
     expect(
-      loginFormSchema.parse({ username: "alice", password: "secret" }),
-    ).toMatchObject({ rememberMe: false });
+      loginFormSchema.safeParse({ username: "alice", password: "secret" }),
+    ).toMatchObject({ success: false });
   });
 
   it("rejects a password above the request limit", () => {

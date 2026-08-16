@@ -232,31 +232,39 @@ export default function ManageDashboard({
   );
 
   async function handleFormSubmit(level: Level, question: string) {
-    if (formCard === "new") {
-      const { ok, data } = await postJson<{ card: DbCard }>(
-        "/api/profile/cards",
-        {
+    try {
+      if (formCard === "new") {
+        const { ok, data } = await postJson<{ card: DbCard }>(
+          "/api/profile/cards",
+          {
+            level,
+            question,
+          },
+        );
+        if (ok && data) {
+          setCards((prev) => [...prev, data.card]);
+          setFormCard(null);
+          return true;
+        }
+      } else if (formCard) {
+        const { ok } = await patchJson(`/api/profile/cards/${formCard.id}`, {
           level,
           question,
-        },
-      );
-      if (ok && data) {
-        setCards((prev) => [...prev, data.card]);
+        });
+        if (ok) {
+          setCards((prev) =>
+            prev.map((c) =>
+              c.id === formCard.id ? { ...c, level, question } : c,
+            ),
+          );
+          setFormCard(null);
+          return true;
+        }
       }
-    } else if (formCard) {
-      const { ok } = await patchJson(`/api/profile/cards/${formCard.id}`, {
-        level,
-        question,
-      });
-      if (ok) {
-        setCards((prev) =>
-          prev.map((c) =>
-            c.id === formCard.id ? { ...c, level, question } : c,
-          ),
-        );
-      }
+    } catch {
+      // The modal owns the user-facing retry message for failed card saves.
     }
-    setFormCard(null);
+    return false;
   }
 
   async function handleConfirmDelete() {

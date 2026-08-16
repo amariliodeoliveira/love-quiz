@@ -1,10 +1,15 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 
+import ConfirmationModal from "@/app/_components/ConfirmationModal";
+import FormField from "@/app/_components/FormField";
 import Modal from "@/app/_components/Modal";
 import Select from "@/app/_components/Select";
 import { type Level, LEVEL_META } from "@/data/cards";
+import { cardFormSchema, type CardFormValues } from "@/lib/card";
 import type { DbCard } from "@/lib/db";
 import { postJson } from "@/lib/http";
 
@@ -21,23 +26,47 @@ export default function CardFormModal({
   /** Card being edited, or undefined when adding a new one. */
   card?: DbCard;
   onClose: () => void;
-  onSubmit: (level: Level, question: string) => Promise<void>;
+  onSubmit: (level: Level, question: string) => Promise<boolean>;
 }) {
-  const [level, setLevel] = useState<Level>(card?.level ?? "1");
-  const [question, setQuestion] = useState(card?.question ?? "");
-  const [saving, setSaving] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    setValue,
+    control,
+    formState: { errors, isDirty, isSubmitting },
+  } = useForm<CardFormValues>({
+    resolver: zodResolver(cardFormSchema),
+    defaultValues: {
+      level: card?.level ?? "1",
+      question: card?.question ?? "",
+    },
+    mode: "onTouched",
+  });
+  const level = useWatch({ control, name: "level" });
   const [drafting, setDrafting] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
+  const [confirmingDiscard, setConfirmingDiscard] = useState(false);
   let submitLabel = card ? "Save changes" : "Add card";
-  if (saving) submitLabel = "Saving...";
+  if (isSubmitting) submitLabel = "Saving...";
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!question.trim()) return;
+  function requestClose() {
+    if (isSubmitting || drafting) return;
+    if (isDirty) {
+      setConfirmingDiscard(true);
+      return;
+    }
+    onClose();
+  }
 
-    setSaving(true);
-    await onSubmit(level, question.trim());
-    setSaving(false);
+  async function submit({ level: submittedLevel, question }: CardFormValues) {
+    const saved = await onSubmit(submittedLevel, question);
+    if (!saved) {
+      setError("root", {
+        message:
+          "Couldn't save your card — check your connection and try again.",
+      });
+    }
   }
 
   async function handleDraftWithAi() {
@@ -47,36 +76,64 @@ export default function CardFormModal({
     // multiple tabs/requests firing around the client-side disable.
     setDrafting(true);
     setDraftError(null);
-    const { ok, data } = await postJson<{ level: Level; question: string }>(
-      "/api/ai-cards/draft",
-      { level },
-    );
-    setDrafting(false);
-    if (ok && data) {
-      setQuestion(data.question);
-    } else {
+    try {
+      const { ok, data } = await postJson<{ level: Level; question: string }>(
+        "/api/ai-cards/draft",
+        { level },
+      );
+      if (ok && data) {
+        setValue("question", data.question, { shouldDirty: true });
+        return;
+      }
       setDraftError(
         "Couldn't draft a question — check your connection and try again.",
       );
+    } catch {
+      setDraftError(
+        "Couldn't draft a question — check your connection and try again.",
+      );
+    } finally {
+      setDrafting(false);
     }
   }
 
   return (
-    <Modal open onClose={onClose} title={card ? "Edit card" : "Add card"}>
-      <form onSubmit={handleSubmit} className="modal-form">
-        <Select
-          value={level}
-          onChange={(v) => setLevel(v as Level)}
-          options={LEVEL_OPTIONS}
-        />
-        <textarea
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Question or dare..."
-          className="input textarea"
-          autoFocus
-          rows={4}
-        />
+    <Modal open onClose={requestClose} title={card ? "Edit card" : "Add card"}>
+      <form onSubmit={handleSubmit(submit)} className="modal-form" noValidate>
+        <fieldset className="m-0 flex flex-col gap-3 border-0 p-0">
+          <legend className="sr-only">Card details</legend>
+          <fieldset className="m-0 border-0 p-0">
+            <legend className="login-hint mb-1">Card level</legend>
+            <Select
+              value={level}
+              onChange={(value) =>
+                setValue("level", value as Level, { shouldDirty: true })
+              }
+              options={LEVEL_OPTIONS}
+              label="Card level"
+            />
+          </fieldset>
+          <FormField
+            id="card-question"
+            label="Question or dare"
+            error={errors.question?.message}
+          >
+            <textarea
+              id="card-question"
+              placeholder="e.g. What's a small thing that made you smile today?"
+              className="input textarea"
+              autoFocus
+              data-modal-initial-focus
+              rows={4}
+              maxLength={1000}
+              aria-invalid={errors.question ? "true" : undefined}
+              aria-describedby={
+                errors.question ? "card-question-error" : undefined
+              }
+              {...register("question")}
+            />
+          </FormField>
+        </fieldset>
         {!card && (
           <button
             type="button"
@@ -87,16 +144,30 @@ export default function CardFormModal({
             {drafting ? "Drafting..." : "🤖 Ask AI to draft one"}
           </button>
         )}
-        {draftError && <p className="form-error">{draftError}</p>}
+        {(draftError || errors.root?.message) && (
+          <p className="form-error" role="alert">
+            {draftError ?? errors.root?.message}
+          </p>
+        )}
         <div className="modal-actions">
-          <button type="button" className="btn-ghost" onClick={onClose}>
+          <button type="button" className="btn-ghost" onClick={requestClose}>
             Cancel
           </button>
-          <button type="submit" className="btn" disabled={saving}>
+          <button type="submit" className="btn" disabled={isSubmitting}>
             {submitLabel}
           </button>
         </div>
       </form>
+      <ConfirmationModal
+        open={confirmingDiscard}
+        title="Discard unsaved changes?"
+        message="Your card changes will be lost."
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        variant="danger"
+        onCancel={() => setConfirmingDiscard(false)}
+        onConfirm={onClose}
+      />
     </Modal>
   );
 }

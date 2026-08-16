@@ -1,8 +1,8 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
-import { ALL_LEVELS } from "@/data/cards";
 import { withSession } from "@/lib/api";
+import { cardFormSchema } from "@/lib/card";
 import { createCard, getCardsForUser } from "@/lib/db";
 import { GAME_PATH } from "@/lib/routes";
 
@@ -12,17 +12,20 @@ export const GET = withSession(async (session) => {
 });
 
 export const POST = withSession(async (session, request: Request) => {
-  const { level, question } = await request.json();
-
-  if (
-    typeof question !== "string" ||
-    !question.trim() ||
-    !ALL_LEVELS.includes(level)
-  ) {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
+  const parsed = cardFormSchema.safeParse(body);
 
-  const card = await createCard(level, question.trim(), session.userId);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+  }
+  const { level, question } = parsed.data;
+
+  const card = await createCard(level, question, session.userId);
   revalidatePath(GAME_PATH);
   return NextResponse.json({ card });
 });

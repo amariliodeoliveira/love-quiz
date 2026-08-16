@@ -7,6 +7,7 @@ export default function ConfirmationModal({
   title,
   message,
   confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
   variant = "danger",
   onConfirm,
   onCancel,
@@ -15,6 +16,7 @@ export default function ConfirmationModal({
   title: string;
   message: string;
   confirmLabel?: string;
+  cancelLabel?: string;
   /** "danger" for destructive actions (delete), "success" for reversible/positive ones (reactivate). */
   variant?: "danger" | "success";
   onConfirm: () => void;
@@ -24,8 +26,13 @@ export default function ConfirmationModal({
     <Modal open={open} onClose={onCancel} title={title}>
       <p className="modal-message">{message}</p>
       <div className="modal-actions">
-        <button type="button" className="btn-ghost" onClick={onCancel}>
-          Cancel
+        <button
+          type="button"
+          className="btn-ghost"
+          onClick={onCancel}
+          data-modal-initial-focus
+        >
+          {cancelLabel}
         </button>
         <button
           type="button"

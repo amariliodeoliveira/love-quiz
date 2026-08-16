@@ -125,6 +125,31 @@
     color: var(--muted);
     opacity: 1;
   }
+  /* Native inputs cannot contain Twemoji SVGs. This preserves native editing while
+     rendering flags consistently whenever the countdown label is not being edited. */
+  .emoji-text-input {
+    position: relative;
+  }
+  .emoji-text-input-display {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding: var(--space-3);
+    color: var(--text);
+    font-family: var(--font-dm-sans), sans-serif;
+    font-size: 0.9rem;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .emoji-text-input:not(:focus-within) .input {
+    color: transparent;
+    caret-color: transparent;
+  }
+  .emoji-text-input:focus-within .emoji-text-input-display {
+    display: none;
+  }
   /* Chrome/Safari otherwise apply their own light autofill paint, breaking both themes. */
   .input:-webkit-autofill,
   .input:-webkit-autofill:focus {
@@ -257,7 +282,39 @@
     font-family: var(--font-dm-serif), Georgia, serif;
     font-size: 1.3rem;
     color: var(--text);
+    margin: 0;
+  }
+  .modal-header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-3);
     margin-bottom: var(--space-4);
+  }
+  .modal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    margin: calc(var(--space-2) * -1);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--subtext);
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .modal-close:hover {
+    background: var(--border);
+    color: var(--text);
+  }
+  .modal-close:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
   }
   .modal-message {
     color: var(--subtext);

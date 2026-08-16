@@ -112,13 +112,14 @@ describe("createSessionCookieValue / parseSessionCookie", () => {
   });
 
   it("returns null when the role is not admin or user", () => {
+    const expiresAt = Date.now() + 60_000;
     const encoded = Buffer.from(
       JSON.stringify({
         userId: 1,
         username: "alice",
         role: "superadmin",
         sessionVersion: 0,
-        expiresAt: Date.now() + 60_000,
+        expiresAt,
       }),
     ).toString("base64url");
     const cookie = createSessionCookieValue({
@@ -126,7 +127,7 @@ describe("createSessionCookieValue / parseSessionCookie", () => {
       username: "alice",
       role: "superadmin" as Session["role"],
       sessionVersion: 0,
-      expiresAt: Date.now() + 60_000,
+      expiresAt,
     });
     expect(cookie.startsWith(encoded)).toBe(true);
     expect(parseSessionCookie(cookie)).toBeNull();
