@@ -12,6 +12,7 @@ const session: Session = {
   username: "alice",
   role: "user",
   sessionVersion: 0,
+  expiresAt: Date.now() + 60_000,
 };
 
 beforeEach(() => {

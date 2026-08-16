@@ -15,6 +15,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +26,7 @@ function LoginForm() {
 
     const { ok, data } = await postJson<{ error?: string }>(
       "/api/profile/login",
-      { username, password },
+      { username, password, rememberMe },
     );
 
     setLoading(false);
@@ -67,6 +68,15 @@ function LoginForm() {
               autoComplete="current-password"
             />
           </FormField>
+          <label className="text-subtext flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              className="accent-purple"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+            />
+            Keep me signed in for 30 days
+          </label>
           <p className="login-hint">
             First time logging in? The password you enter now will be saved as
             yours.

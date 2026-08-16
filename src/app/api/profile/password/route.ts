@@ -5,7 +5,7 @@ import {
   COOKIE_NAME,
   createSessionCookieValue,
   hashPassword,
-  SESSION_COOKIE_OPTIONS,
+  sessionCookieOptions,
   verifyPassword,
 } from "@/lib/auth";
 import { changeUserPassword, getUserById, registerFailedLogin } from "@/lib/db";
@@ -68,7 +68,7 @@ export const PATCH = withSession(async (session, request: Request) => {
   response.cookies.set(
     COOKIE_NAME,
     createSessionCookieValue({ ...session, sessionVersion }),
-    SESSION_COOKIE_OPTIONS,
+    sessionCookieOptions(session.expiresAt),
   );
   return response;
 });

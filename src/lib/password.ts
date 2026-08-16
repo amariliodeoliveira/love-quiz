@@ -1,8 +1,33 @@
 import { z } from "zod";
 
-const MIN_PASSWORD_LENGTH = 15;
-const MAX_PASSWORD_LENGTH = 128;
-const MAX_CURRENT_PASSWORD_LENGTH = 1024;
+export const passwordPolicy = {
+  minLength: 10,
+  maxLength: 128,
+} as const;
+
+/** Absolute request limit, including verification of older passwords. */
+export const passwordInputPolicy = {
+  maxLength: 1024,
+} as const;
+
+export function isPasswordInputTooLong(password: string): boolean {
+  return password.length > passwordInputPolicy.maxLength;
+}
+
+/** Password policy for every point where an account first chooses a password. */
+export const newPasswordSchema = z
+  .string()
+  .min(
+    passwordPolicy.minLength,
+    `Use at least ${passwordPolicy.minLength} characters`,
+  )
+  .max(
+    passwordPolicy.maxLength,
+    `Use at most ${passwordPolicy.maxLength} characters`,
+  )
+  .refine((value) => value.trim().length > 0, {
+    message: "New password cannot be only whitespace",
+  });
 
 /** Shared by the browser for immediate feedback and the server for input parsing. */
 export const passwordChangeFormSchema = z
@@ -10,17 +35,8 @@ export const passwordChangeFormSchema = z
     currentPassword: z
       .string()
       .min(1, "Enter your current password")
-      .max(MAX_CURRENT_PASSWORD_LENGTH, "Current password is too long"),
-    newPassword: z
-      .string()
-      .min(
-        MIN_PASSWORD_LENGTH,
-        `Use at least ${MIN_PASSWORD_LENGTH} characters`,
-      )
-      .max(MAX_PASSWORD_LENGTH, `Use at most ${MAX_PASSWORD_LENGTH} characters`)
-      .refine((value) => value.trim().length > 0, {
-        message: "New password cannot be only whitespace",
-      }),
+      .max(passwordInputPolicy.maxLength, "Current password is too long"),
+    newPassword: newPasswordSchema,
     confirmPassword: z.string().min(1, "Confirm your new password"),
   })
   .superRefine(({ currentPassword, newPassword, confirmPassword }, ctx) => {
@@ -94,7 +110,7 @@ export function parsePasswordChange(body: unknown): PasswordChangeParseResult {
     }
     return {
       ok: false,
-      error: `New password must be between ${MIN_PASSWORD_LENGTH} and ${MAX_PASSWORD_LENGTH} characters`,
+      error: `New password must be between ${passwordPolicy.minLength} and ${passwordPolicy.maxLength} characters`,
     };
   }
 

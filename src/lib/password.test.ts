@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { parsePasswordChange } from "./password";
+import {
+  isPasswordInputTooLong,
+  parsePasswordChange,
+  passwordInputPolicy,
+  passwordPolicy,
+} from "./password";
 
 const validChange = {
   currentPassword: "current password",
@@ -9,6 +14,15 @@ const validChange = {
 };
 
 describe("parsePasswordChange", () => {
+  it("rejects password input above the shared request limit", () => {
+    expect(
+      isPasswordInputTooLong("a".repeat(passwordInputPolicy.maxLength)),
+    ).toBe(false);
+    expect(
+      isPasswordInputTooLong("a".repeat(passwordInputPolicy.maxLength + 1)),
+    ).toBe(true);
+  });
+
   it.each([null, [], "password", 42])(
     "rejects a non-object request body: %j",
     (body) => {
@@ -69,24 +83,39 @@ describe("parsePasswordChange", () => {
     });
   });
 
-  it.each(["short", "a".repeat(129)])(
-    "enforces the password length policy: %s",
-    (newPassword) => {
-      expect(
-        parsePasswordChange({
-          currentPassword: "current password",
-          newPassword,
-          confirmPassword: newPassword,
-        }),
-      ).toEqual({
-        ok: false,
-        error: "New password must be between 15 and 128 characters",
-      });
-    },
-  );
+  it.each([
+    "a".repeat(passwordPolicy.minLength - 1),
+    "a".repeat(passwordPolicy.maxLength + 1),
+  ])("enforces the password length policy: %s", (newPassword) => {
+    expect(
+      parsePasswordChange({
+        currentPassword: "current password",
+        newPassword,
+        confirmPassword: newPassword,
+      }),
+    ).toEqual({
+      ok: false,
+      error: `New password must be between ${passwordPolicy.minLength} and ${passwordPolicy.maxLength} characters`,
+    });
+  });
+
+  it("accepts a new password at the minimum length", () => {
+    const newPassword = "a".repeat(passwordPolicy.minLength);
+
+    expect(
+      parsePasswordChange({
+        currentPassword: "current password",
+        newPassword,
+        confirmPassword: newPassword,
+      }),
+    ).toEqual({
+      ok: true,
+      value: { currentPassword: "current password", newPassword },
+    });
+  });
 
   it("rejects a password made only of whitespace", () => {
-    const newPassword = " ".repeat(15);
+    const newPassword = " ".repeat(passwordPolicy.minLength);
     expect(
       parsePasswordChange({
         currentPassword: "current password",
