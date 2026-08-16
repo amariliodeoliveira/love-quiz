@@ -1,12 +1,30 @@
+import { z } from "zod";
+
 import {
   type AvatarColorName,
   isAvatarColorName,
   isAvatarEmoji,
+  MAX_AVATAR_EMOJI_OPTIONS,
 } from "@/lib/avatar";
 import { isThemeName, type ThemeName } from "@/lib/theme";
 
-const MAX_DISPLAY_NAME_LENGTH = 40;
-const MAX_EMOJI_OPTIONS = 30;
+export const displayNamePolicy = {
+  maxLength: 40,
+} as const;
+
+/** Client-side contract for the text field in profile settings. */
+export const profileEditorSchema = z.object({
+  displayName: z
+    .string()
+    .trim()
+    .min(1, "Enter a display name")
+    .max(
+      displayNamePolicy.maxLength,
+      `Use at most ${displayNamePolicy.maxLength} characters`,
+    ),
+});
+
+export type ProfileEditorValues = z.infer<typeof profileEditorSchema>;
 
 export interface ProfileFieldUpdate {
   displayName?: string;
@@ -29,14 +47,15 @@ function isValidAvatarEmojiOptions(value: unknown): value is string[] | null {
   return (
     value === null ||
     (Array.isArray(value) &&
-      value.length <= MAX_EMOJI_OPTIONS &&
+      value.length <= MAX_AVATAR_EMOJI_OPTIONS &&
+      new Set(value).size === value.length &&
       value.every((emoji) => isAvatarEmoji(emoji)))
   );
 }
 
 function normalizedDisplayName(value: unknown): string | null {
-  const trimmed = typeof value === "string" ? value.trim() : "";
-  return trimmed && trimmed.length <= MAX_DISPLAY_NAME_LENGTH ? trimmed : null;
+  const parsed = profileEditorSchema.shape.displayName.safeParse(value);
+  return parsed.success ? parsed.data : null;
 }
 
 const FIELD_VALIDATORS: Record<keyof ProfileFieldUpdate, FieldValidator> = {
