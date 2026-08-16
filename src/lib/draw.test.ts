@@ -23,6 +23,15 @@ describe("pickRandomItem", () => {
   it("picks the middle item for a mid-range random value", () => {
     expect(pickRandomItem(["a", "b", "c"], () => 0.5)).toBe("b");
   });
+
+  it.each([1, -0.01, Number.NaN])(
+    "rejects an injected random value outside [0, 1): %s",
+    (randomValue) => {
+      expect(() => pickRandomItem(["a", "b", "c"], () => randomValue)).toThrow(
+        RangeError,
+      );
+    },
+  );
 });
 
 describe("pickNextDare", () => {
