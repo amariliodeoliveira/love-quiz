@@ -1,3 +1,5 @@
+import { createHmac } from "node:crypto";
+
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
@@ -66,7 +68,12 @@ describe("hashPassword / verifyPassword", () => {
 });
 
 describe("createSessionCookieValue / parseSessionCookie", () => {
-  const session: Session = { userId: 1, username: "alice", role: "user" };
+  const session: Session = {
+    userId: 1,
+    username: "alice",
+    role: "user",
+    sessionVersion: 0,
+  };
 
   it("round-trips a session through the signed cookie value", () => {
     const cookie = createSessionCookieValue(session);
@@ -87,7 +94,12 @@ describe("createSessionCookieValue / parseSessionCookie", () => {
     const cookie = createSessionCookieValue(session);
     const [, signature] = cookie.split(".");
     const forgedPayload = Buffer.from(
-      JSON.stringify({ userId: 2, username: "mallory", role: "admin" }),
+      JSON.stringify({
+        userId: 2,
+        username: "mallory",
+        role: "admin",
+        sessionVersion: 0,
+      }),
     ).toString("base64url");
     expect(parseSessionCookie(`${forgedPayload}.${signature}`)).toBeNull();
   });
@@ -100,15 +112,31 @@ describe("createSessionCookieValue / parseSessionCookie", () => {
 
   it("returns null when the role is not admin or user", () => {
     const encoded = Buffer.from(
-      JSON.stringify({ userId: 1, username: "alice", role: "superadmin" }),
+      JSON.stringify({
+        userId: 1,
+        username: "alice",
+        role: "superadmin",
+        sessionVersion: 0,
+      }),
     ).toString("base64url");
     const cookie = createSessionCookieValue({
       userId: 1,
       username: "alice",
       role: "superadmin" as Session["role"],
+      sessionVersion: 0,
     });
     expect(cookie.startsWith(encoded)).toBe(true);
     expect(parseSessionCookie(cookie)).toBeNull();
+  });
+
+  it("returns null when a session has no version", () => {
+    const encoded = Buffer.from(
+      JSON.stringify({ userId: 1, username: "alice", role: "user" }),
+    ).toString("base64url");
+    const signature = createHmac("sha256", process.env.ADMIN_SESSION_SECRET!)
+      .update(encoded)
+      .digest("hex");
+    expect(parseSessionCookie(`${encoded}.${signature}`)).toBeNull();
   });
 
   it("returns null for a cookie missing the signature separator", () => {

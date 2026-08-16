@@ -106,6 +106,10 @@
     outline: none;
     border-color: var(--muted);
   }
+  .input[aria-invalid="true"],
+  .input[aria-invalid="true"]:focus {
+    border-color: var(--red);
+  }
   .input::placeholder {
     color: var(--muted);
   }

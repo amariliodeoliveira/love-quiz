@@ -6,6 +6,8 @@ import Modal from "@/app/_components/Modal";
 import { AVATAR_COLORS, AVATAR_EMOJIS, isAvatarEmoji } from "@/lib/avatar";
 import { patchJson } from "@/lib/http";
 
+import ChangePasswordForm from "./ChangePasswordForm";
+
 /** Editing scope is deliberately narrow: display name, avatar color, and avatar emoji —
  * the "how you appear to your partner" settings. Username stays fixed here on purpose —
  * it's the login credential (typed to sign in, unique, baked into the signed session
@@ -48,6 +50,8 @@ export default function EditProfileModal({
   const [customEmojiDraft, setCustomEmojiDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<"profile" | "password">("profile");
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   function commitCustomEmoji() {
     const trimmed = customEmojiDraft.trim();
@@ -61,6 +65,7 @@ export default function EditProfileModal({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
     const trimmed = displayName.trim();
     if (!trimmed) return;
 
@@ -90,104 +95,144 @@ export default function EditProfileModal({
     }
   }
 
+  const profileSubmitLabel = saving ? "Saving..." : "Save changes";
+
   return (
-    <Modal open onClose={onClose} title="Edit profile">
-      <form onSubmit={handleSubmit} className="modal-form">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="display-name" className="login-hint">
-            Display name
-          </label>
-          <input
-            id="display-name"
-            type="text"
-            className="input"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            maxLength={40}
-            autoFocus
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <p className="login-hint">Avatar color</p>
-          <div className="avatar-swatches mb-0">
-            {AVATAR_COLORS.map((c) => (
-              <button
-                key={c.name}
-                type="button"
-                className={`avatar-swatch ${c.name === avatarColor ? "selected" : ""}`}
-                style={{ backgroundColor: c.hex }}
-                aria-label={`Use ${c.name} avatar color`}
-                onClick={() => setAvatarColor(c.name)}
-              />
-            ))}
+    <Modal
+      open
+      onClose={onClose}
+      title={view === "profile" ? "Profile settings" : "Change password"}
+    >
+      {view === "password" ? (
+        <ChangePasswordForm
+          onBack={() => setView("profile")}
+          onChanged={() => {
+            setPasswordSuccess(true);
+            setView("profile");
+          }}
+        />
+      ) : (
+        <form onSubmit={handleSubmit} className="modal-form">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="display-name" className="login-hint">
+              Display name
+            </label>
+            <input
+              id="display-name"
+              type="text"
+              className="input"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              maxLength={40}
+              autoFocus
+            />
           </div>
-        </div>
 
-        <div className="flex flex-col gap-2">
-          <p className="login-hint">Avatar emoji</p>
-          <div className="avatar-emoji-grid">
-            {pickingCustomEmoji ? (
-              <input
-                type="text"
-                className="avatar-emoji-option avatar-emoji-input"
-                value={customEmojiDraft}
-                onChange={(e) => setCustomEmojiDraft(e.target.value)}
-                onBlur={commitCustomEmoji}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    commitCustomEmoji();
-                  }
-                  if (e.key === "Escape") {
-                    setPickingCustomEmoji(false);
-                    setCustomEmojiDraft("");
-                  }
-                }}
-                placeholder="😊"
-                aria-label="Type or paste any emoji"
-                autoFocus
-              />
-            ) : (
-              <button
-                type="button"
-                className="avatar-emoji-option"
-                aria-label="Pick any emoji"
-                onClick={() => setPickingCustomEmoji(true)}
-              >
-                +
-              </button>
+          <div className="flex flex-col gap-2">
+            <p className="login-hint">Avatar color</p>
+            <div className="avatar-swatches mb-0">
+              {AVATAR_COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  type="button"
+                  className={`avatar-swatch ${c.name === avatarColor ? "selected" : ""}`}
+                  style={{ backgroundColor: c.hex }}
+                  aria-label={`Use ${c.name} avatar color`}
+                  onClick={() => setAvatarColor(c.name)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <p className="login-hint">Avatar emoji</p>
+            <div className="avatar-emoji-grid">
+              {pickingCustomEmoji ? (
+                <input
+                  type="text"
+                  className="avatar-emoji-option avatar-emoji-input"
+                  value={customEmojiDraft}
+                  onChange={(e) => setCustomEmojiDraft(e.target.value)}
+                  onBlur={commitCustomEmoji}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitCustomEmoji();
+                    }
+                    if (e.key === "Escape") {
+                      setPickingCustomEmoji(false);
+                      setCustomEmojiDraft("");
+                    }
+                  }}
+                  placeholder="😊"
+                  aria-label="Type or paste any emoji"
+                  autoFocus
+                />
+              ) : (
+                <button
+                  type="button"
+                  className="avatar-emoji-option"
+                  aria-label="Pick any emoji"
+                  onClick={() => setPickingCustomEmoji(true)}
+                >
+                  +
+                </button>
+              )}
+              {emojiOptions.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  className={`avatar-emoji-option ${e === avatarEmoji ? "selected" : ""}`}
+                  aria-label={`Use ${e} as the avatar emoji`}
+                  onClick={() => setAvatarEmoji(e)}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+            {pickingCustomEmoji && (
+              <p className="avatar-emoji-hint">
+                Open your emoji keyboard (Windows: Win + . — Mac: Cmd + Ctrl +
+                Space), then type or paste one here.
+              </p>
             )}
-            {emojiOptions.map((e) => (
-              <button
-                key={e}
-                type="button"
-                className={`avatar-emoji-option ${e === avatarEmoji ? "selected" : ""}`}
-                aria-label={`Use ${e} as the avatar emoji`}
-                onClick={() => setAvatarEmoji(e)}
-              >
-                {e}
-              </button>
-            ))}
           </div>
-          {pickingCustomEmoji && (
-            <p className="avatar-emoji-hint">
-              Open your emoji keyboard (Windows: Win + . — Mac: Cmd + Ctrl +
-              Space), then type or paste one here.
+
+          <button
+            type="button"
+            className="border-border hover:border-muted flex items-center justify-between rounded-md border p-4 text-left transition-colors"
+            onClick={() => {
+              setPasswordSuccess(false);
+              setView("password");
+            }}
+          >
+            <span className="flex flex-col gap-1">
+              <span className="text-text font-medium">Password</span>
+              <span className="text-subtext text-sm">
+                Change your sign-in password.
+              </span>
+            </span>
+            <span className="text-subtext" aria-hidden="true">
+              ›
+            </span>
+          </button>
+          {passwordSuccess && (
+            <p className="text-green text-sm" role="status">
+              Password changed.
             </p>
           )}
-        </div>
 
-        {error && <p className="form-error">{error}</p>}
-        <div className="modal-actions">
-          <button type="button" className="btn-ghost" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className="btn" disabled={saving}>
-            {saving ? "Saving..." : "Save changes"}
-          </button>
-        </div>
-      </form>
+          {error && <p className="form-error">{error}</p>}
+          <div className="modal-actions">
+            <button type="button" className="btn-ghost" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn" disabled={saving}>
+              {profileSubmitLabel}
+            </button>
+          </div>
+        </form>
+      )}
     </Modal>
   );
 }
