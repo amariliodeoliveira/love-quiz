@@ -35,7 +35,7 @@
     font-family: var(--font-dm-sans), sans-serif;
     font-size: 0.8rem;
     /* Matches .btn's weight — without this it inherited body's base weight, which
-       reads as too light/faint at this size. See .claude/design-guidelines.md. */
+       reads as too light/faint at this size. See .agents/references/design-guidelines.md. */
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -220,7 +220,7 @@
     gap: var(--space-2);
     /* >= .modal-form's own field gap (--space-3) — proximity: the actions row is the
        least related to the field above it, so it must never sit closer than fields
-       sit to each other (see .claude/design-guidelines.md). */
+       sit to each other (see .agents/references/design-guidelines.md). */
     margin-top: var(--space-4);
   }
 }

@@ -5,7 +5,7 @@
        .profile-main, display:flex) and auto margins on a flex item's cross axis
        disable stretch — without an explicit width, the box silently shrinks to fit
        its content instead of filling up to max-width, varying with content on every
-       tab. See .claude/design-guidelines.md. */
+       tab. See .agents/references/design-guidelines.md. */
     width: 100%;
     max-width: 720px;
     margin: 0 auto;
@@ -39,7 +39,7 @@
     padding: var(--space-3) var(--space-4);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    /* internal ≤ external rule (.claude/design-guidelines.md): the row's own vertical
+    /* internal ≤ external rule (.agents/references/design-guidelines.md): the row's own vertical
        padding is --space-3, so the gap to the next row needs to be at least that much,
        or rows read as merging into each other instead of as separate items. */
     margin-bottom: var(--space-3);

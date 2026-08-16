@@ -9,7 +9,7 @@ import type { ThemeName } from "@/lib/theme";
 // Marketplace's native Neon integration) — this project's database is Neon directly, so
 // this is Neon's own driver. It's HTTP-based (no connection pool to hold open), so
 // POSTGRES_URL (this project's pooled/PgBouncer string) works the same as any other Neon
-// connection string here — see .claude/database-guidelines.md for what each env var is for.
+// connection string here — see .agents/references/database-guidelines.md for what each env var is for.
 //
 // The raw `neon()` call has no way to type an individual query's row shape (unlike
 // @vercel/postgres's `sql<Row>\`...\`` generic), so this thin wrapper restores that —
@@ -18,7 +18,7 @@ import type { ThemeName } from "@/lib/theme";
 // Built lazily (on first query, not on module import): unlike @vercel/postgres's `sql`,
 // `neon()` throws immediately if the connection string is missing — and this module is
 // imported (for its types/other exports) by code that never actually queries the DB in
-// tests, where POSTGRES_URL isn't set on purpose (see .claude/testing-guidelines.md).
+// tests, where POSTGRES_URL isn't set on purpose (see .agents/references/testing-guidelines.md).
 let rawSql: ReturnType<typeof neon> | undefined;
 
 function sql<T = Record<string, unknown>>(

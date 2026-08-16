@@ -11,5 +11,5 @@ description: Create or update focused repository skills with valid metadata, pro
 4. Keep `SKILL.md` procedural and concise. Put detailed domain knowledge in `references/`, deterministic repeated operations in `scripts/`, and output templates in `assets/`.
 5. Write a trigger-rich `description` that states what the skill does and when it should activate. Keep all trigger guidance in the description.
 6. Generate `agents/openai.yaml` with the official generator. Include a short default prompt that explicitly mentions `$<skill-name>`.
-7. Preserve product-specific source material unless the user asks to replace it. Adapt Claude-specific tools, permissions, and terminology to Codex instead of copying them blindly.
+7. Preserve product-specific source material unless the user asks to replace it. Adapt legacy-agent tools, permissions, and terminology to Codex instead of copying them blindly.
 8. Run the official `quick_validate.py` against the completed skill and fix every validation error.

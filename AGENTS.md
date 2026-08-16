@@ -10,12 +10,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Project working agreements
 
-- Preserve `.claude/`; it remains the compatibility layer for Claude.
-- Before changing application code, read `.claude/engineering-guidelines.md`.
-- For UI, styling, layout, typography, or UX copy work, also read `.claude/design-guidelines.md`.
-- For tests or logic under `src/lib/`, also read `.claude/testing-guidelines.md` and follow its TDD rules.
-- For database code, schema changes, SQL, or data operations, also read `.claude/database-guidelines.md`. Treat `.env.local` as production access and ask before destructive data changes.
-- For Git history, commits, branches, pushes, or pull requests, read `.claude/git-guidelines.md`. This is an AI-first repository: when asked to implement, finish, or deliver a change, agents may create focused commits and push them under that policy without asking again.
+- Before changing application code, read `.agents/references/engineering-guidelines.md`.
+- For UI, styling, layout, typography, or UX copy work, also read `.agents/references/design-guidelines.md`.
+- For tests or logic under `src/lib/`, also read `.agents/references/testing-guidelines.md` and follow its TDD rules.
+- For database code, schema changes, SQL, or data operations, also read `.agents/references/database-guidelines.md`. Treat `.env.local` as production access and ask before destructive data changes.
+- For Git history, commits, branches, pushes, or pull requests, read `.agents/references/git-guidelines.md`. This is an AI-first repository: when asked to implement, finish, or deliver a change, agents may create focused commits and push them under that policy without asking again.
 - Use repository skills under `.agents/skills/` for reusable workflows. Prefer `$review-changes`, `$prepare-commit`, `$prepare-pr`, and `$write-a-skill` when their descriptions match the request.
 - Keep changes scoped. Fix adjacent issues only when they are directly affected by the requested work.
 - Respect the existing pre-commit gate (`lint-staged` runs ESLint fixes, Prettier, and TypeScript). Add tests and builds in proportion to risk, then monitor the GitHub Actions CI after every push. A red `main` becomes the highest-priority task: fix forward when clear and safe, otherwise revert the offending commit.

@@ -26,7 +26,7 @@ export const POST = withSession(async (_session, request: Request) => {
   // Shares the generate route's rate limit (same underlying LLM cost/quota), even
   // though this route itself never writes the `ai_cards` row that limit is measured
   // against — good enough for this app's threat model (two known users), see
-  // .claude/database-guidelines.md.
+  // .agents/references/database-guidelines.md.
   const lastGeneratedAt = await getLastAiCardCreatedAt();
   if (isAiGenerateRateLimited(lastGeneratedAt, new Date())) {
     return NextResponse.json(

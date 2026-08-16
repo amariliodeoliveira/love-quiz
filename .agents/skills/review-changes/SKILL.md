@@ -7,7 +7,7 @@ description: Review a local diff, commit range, or branch for correctness, regre
 
 1. Determine the target. Default to unstaged plus staged changes against `HEAD`; honor an explicit commit range or branch.
 2. If the target is empty, say so and stop.
-3. Read the project guidance relevant to changed files: always `.claude/engineering-guidelines.md`; add design, testing, database, and Git guidelines only when applicable.
+3. Read the project guidance relevant to changed files: always `.agents/references/engineering-guidelines.md`; add design, testing, database, and Git guidelines only when applicable.
 4. Summarize the change's intent in one or two sentences from the diff and user request. Do not let assumed intent excuse incorrect behavior.
 5. Review for correctness, edge cases, security, auth/session behavior, unsafe SQL, data loss, error and empty states, dead code, naming inconsistencies, and tests that are missing or do not prove their claim.
 6. When subagents are permitted by the active session instructions, use one fresh context-free reviewer for a neutral pass. Give it only the target diff, the short intent summary, and applicable repository conventions. The reviewer must not edit files.

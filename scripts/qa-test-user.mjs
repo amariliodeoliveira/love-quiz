@@ -1,6 +1,6 @@
 // Creates/removes a throwaway user directly in the database for manual or
 // automated visual QA (e.g. screenshotting authenticated pages), without ever
-// setting a real password. See .claude/database-guidelines.md for the why.
+// setting a real password. See .agents/references/database-guidelines.md for the why.
 //
 // Usage:
 //   node --env-file=.env.local scripts/qa-test-user.mjs create
