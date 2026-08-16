@@ -94,15 +94,27 @@
   }
   .avatar-emoji-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: var(--space-2);
+  }
+  /* Phones show the add control plus the 14 newest choices (5 × 3). The full
+     30-slot desktop grid remains available from 480px onward. */
+  @media (max-width: 479px) {
+    .avatar-emoji-grid > :nth-child(n + 16) {
+      display: none;
+    }
+  }
+  @media (min-width: 480px) {
+    .avatar-emoji-grid {
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+    }
   }
   .avatar-emoji-option {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 100%;
+    aspect-ratio: 1;
     border-radius: var(--radius-sm);
     border: 2px solid transparent;
     background: var(--border);
@@ -117,11 +129,57 @@
     padding: 0;
     text-align: center;
     color: var(--text);
-    outline: none;
+    border-color: var(--purple);
+    background: var(--surface);
+    cursor: text;
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
   }
   .avatar-emoji-hint {
     font-size: 0.75rem;
     color: var(--subtext);
+  }
+  .avatar-color-choice-row {
+    position: relative;
+  }
+  .avatar-settings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .avatar-color-controls {
+    margin: 0;
+    padding: 0 56px 0 0;
+    border: 0;
+  }
+  .avatar-color-controls > legend {
+    margin-bottom: var(--space-2);
+  }
+  .avatar-preview {
+    display: flex;
+    position: absolute;
+    top: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+  }
+  .avatar-preview-label {
+    color: var(--subtext);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  .avatar-preview-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--bg);
+    font-family: var(--font-dm-serif), Georgia, serif;
+    font-size: 1.1rem;
   }
   .settings-section {
     display: flex;

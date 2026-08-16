@@ -7,6 +7,9 @@ import {
   avatarInitial,
   isAvatarColorName,
   isAvatarEmoji,
+  MAX_AVATAR_EMOJI_OPTIONS,
+  mergeAvatarEmojiOptions,
+  recordAvatarEmojiSelection,
 } from "./avatar";
 
 describe("isAvatarColorName", () => {
@@ -72,11 +75,71 @@ describe("isAvatarEmoji", () => {
     expect(isAvatarEmoji("42")).toBe(false);
   });
 
-  it("rejects empty/whitespace-only strings, overly long strings, and non-string values", () => {
+  it("rejects text, a broken surrogate, multiple emoji, and non-string values", () => {
     expect(isAvatarEmoji("")).toBe(false);
     expect(isAvatarEmoji("   ")).toBe(false);
-    expect(isAvatarEmoji("🐶".repeat(9))).toBe(false);
+    expect(isAvatarEmoji("猫")).toBe(false);
+    expect(isAvatarEmoji("\uD83E")).toBe(false);
+    expect(isAvatarEmoji("🐶🐱")).toBe(false);
     expect(isAvatarEmoji(undefined)).toBe(false);
     expect(isAvatarEmoji(42)).toBe(false);
+  });
+
+  it("accepts a compound emoji as one grapheme", () => {
+    expect(isAvatarEmoji("👩🏽‍💻")).toBe(true);
+  });
+});
+
+describe("mergeAvatarEmojiOptions", () => {
+  it("returns the complete curated list for a user without personal options", () => {
+    expect(mergeAvatarEmojiOptions(null)).toEqual(AVATAR_EMOJIS);
+  });
+
+  it("preserves custom ordering and appends only missing defaults", () => {
+    expect(mergeAvatarEmojiOptions(["🦄", "🐝"])).toEqual([
+      "🦄",
+      "🐝",
+      ...AVATAR_EMOJIS.filter((emoji) => emoji !== "🐝" && emoji !== "🦄"),
+    ]);
+  });
+
+  it("does not displace a full personal list", () => {
+    const personalOptions = Array.from(
+      { length: MAX_AVATAR_EMOJI_OPTIONS },
+      (_, index) => `custom-${index}`,
+    );
+    expect(mergeAvatarEmojiOptions(personalOptions)).toEqual(personalOptions);
+  });
+
+  it("removes duplicates while retaining the first, most-recent occurrence", () => {
+    expect(mergeAvatarEmojiOptions(["🦄", "🐝", "🦄"])).toEqual([
+      "🦄",
+      "🐝",
+      ...AVATAR_EMOJIS.filter((emoji) => emoji !== "🦄" && emoji !== "🐝"),
+    ]);
+  });
+});
+
+describe("recordAvatarEmojiSelection", () => {
+  it("moves an existing selection to the front without duplicating it", () => {
+    expect(recordAvatarEmojiSelection(["🐝", "🦩", "🌙"], "🌙")).toEqual([
+      "🌙",
+      "🐝",
+      "🦩",
+      ...AVATAR_EMOJIS.filter((emoji) => !["🐝", "🦩", "🌙"].includes(emoji)),
+    ]);
+  });
+
+  it("prepends a new custom emoji and evicts the least-recent item at capacity", () => {
+    const fullOptions = Array.from(
+      { length: MAX_AVATAR_EMOJI_OPTIONS },
+      (_, index) => `emoji-${index}`,
+    );
+
+    const recorded = recordAvatarEmojiSelection(fullOptions, "🦉");
+
+    expect(recorded).toHaveLength(MAX_AVATAR_EMOJI_OPTIONS);
+    expect(recorded[0]).toBe("🦉");
+    expect(recorded).not.toContain("emoji-28");
   });
 });

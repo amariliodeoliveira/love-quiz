@@ -37,6 +37,13 @@ describe("parseProfileUpdate", () => {
     });
   });
 
+  it("rejects duplicated avatar emoji options", () => {
+    expect(parseProfileUpdate({ avatarEmojiOptions: ["🐝", "🐝"] })).toEqual({
+      ok: false,
+      error: "Invalid emoji options",
+    });
+  });
+
   it("ignores unsupported fields", () => {
     expect(parseProfileUpdate({ admin: true })).toEqual({
       ok: true,
