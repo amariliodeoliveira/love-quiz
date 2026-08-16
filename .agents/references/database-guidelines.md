@@ -25,11 +25,27 @@ node --env-file=.env.local scripts/qa-test-user.mjs cleanup
 For a schema change:
 
 1. Add one forward-only timestamped SQL file to `db/migrations/`, following its README.
-2. Review it and test it against a Neon branch where practical.
-3. Obtain explicit approval before applying it to production Neon.
-4. Update [`db/schema.sql`](../../db/schema.sql), relevant types, queries, and tests after application.
+2. For any code that needs the new schema, make the migration a prerequisite PR or run it in a protected deployment pipeline before application code deploys.
+3. Review it and test it against a Neon branch where practical.
+4. Obtain explicit approval before applying it to production Neon.
+5. Verify the target schema with a read-only catalog query, then record that evidence in the PR or deployment record.
+6. Update [`db/schema.sql`](../../db/schema.sql), relevant types, queries, and tests after application.
 
 If the schema may have drifted, ask for live introspection instead of assuming the snapshot is current.
+
+## Deployment safety
+
+The current CI verifies code but deliberately does not connect to production, so it cannot prove a migration has run. Treat a green build as necessary but insufficient for schema-dependent deployment.
+
+Before enabling an automated production deployment, use one controlled pipeline with this order:
+
+1. Run ordinary CI against the candidate commit.
+2. Run approved forward migrations with the direct production connection in a protected `production` environment.
+3. Run a read-only schema readiness check for the tables, columns, indexes, and constraints consumed by that release.
+4. Deploy the already-built application only after the readiness check passes.
+5. Check the deployed health endpoint and retain the migration/deployment record.
+
+Store production database and deployment credentials only as protected environment secrets. If Vercel's Git integration deploys `main` automatically, it bypasses this sequence; disable automatic production deployment before relying on this gate, then deploy from the controlled workflow. Use one deployment concurrency group so a second release cannot overtake an in-progress migration.
 
 ## Hard rules
 
