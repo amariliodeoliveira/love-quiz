@@ -33,6 +33,11 @@ export default function Modal({
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -42,8 +47,7 @@ export default function Modal({
     const initialFocus = panel?.querySelector<HTMLElement>(
       INITIAL_FOCUS_SELECTOR,
     );
-    const focusable = panel?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
-    (initialFocus ?? focusable?.[0] ?? panel)?.focus();
+    (initialFocus ?? panel)?.focus();
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -56,7 +60,7 @@ export default function Modal({
 
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab" || !panel) return;
@@ -69,7 +73,10 @@ export default function Modal({
       const last = nodes.at(-1);
       if (!last) return;
 
-      if (e.shiftKey && document.activeElement === first) {
+      if (
+        e.shiftKey &&
+        (document.activeElement === first || document.activeElement === panel)
+      ) {
         e.preventDefault();
         last.focus();
       } else if (!e.shiftKey && document.activeElement === last) {
@@ -84,7 +91,7 @@ export default function Modal({
       document.body.style.overflow = previousOverflow;
       previouslyFocused.current?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 

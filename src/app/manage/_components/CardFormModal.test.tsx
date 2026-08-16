@@ -13,9 +13,7 @@ describe("CardFormModal", () => {
     render(<CardFormModal onClose={onClose} onSubmit={vi.fn()} />);
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("textbox", { name: "Question or dare" }),
-    ).toHaveFocus();
+    expect(screen.getByRole("dialog", { name: "Add card" })).toHaveFocus();
 
     await user.type(
       screen.getByRole("textbox", { name: "Question or dare" }),
