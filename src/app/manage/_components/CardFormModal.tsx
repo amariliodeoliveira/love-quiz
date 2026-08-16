@@ -122,8 +122,6 @@ export default function CardFormModal({
               id="card-question"
               placeholder="e.g. What's a small thing that made you smile today?"
               className="input textarea"
-              autoFocus
-              data-modal-initial-focus
               rows={4}
               maxLength={1000}
               aria-invalid={errors.question ? "true" : undefined}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import type { CountdownDisplay } from "@/lib/countdown";
 import type { DbUser } from "@/lib/db";
@@ -10,6 +10,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import CountdownBubble from "./countdown/CountdownBubble";
 import CountdownForm, {
   type CountdownFormInitial,
+  type CountdownFormResult,
 } from "./countdown/CountdownForm";
 import CountdownView from "./countdown/CountdownView";
 import Logo from "./Logo";
@@ -43,18 +44,62 @@ export default function AppHeader({
   const [anchoredAt, setAnchoredAt] = useState(() => Date.now());
   const [viewingCountdown, setViewingCountdown] = useState(false);
   const [editingCountdown, setEditingCountdown] = useState(false);
-  const [countdownDirty, setCountdownDirty] = useState(false);
+  // Dirty state only affects what a later close action does. Keeping it in a ref avoids
+  // re-rendering the entire header when the form first becomes dirty or pristine again.
+  const countdownDirty = useRef(false);
   const [confirmingCountdownDiscard, setConfirmingCountdownDiscard] =
     useState(false);
 
-  const formInitial: CountdownFormInitial | null = countdown
-    ? {
-        label: countdown.label,
-        location: countdown.location,
-        timeZone: countdown.timeZone,
-        targetAtIso: countdown.targetAtIso,
-      }
-    : null;
+  const formInitial: CountdownFormInitial | null = useMemo(
+    () =>
+      countdown
+        ? {
+            label: countdown.label,
+            location: countdown.location,
+            timeZone: countdown.timeZone,
+            targetAtIso: countdown.targetAtIso,
+          }
+        : null,
+    [countdown],
+  );
+
+  const openCountdownEditor = useCallback(() => {
+    setEditingCountdown(true);
+  }, []);
+  const openCountdownView = useCallback(() => {
+    setViewingCountdown(true);
+  }, []);
+  const closeCountdownView = useCallback(() => {
+    setViewingCountdown(false);
+  }, []);
+  const requestCountdownEditorClose = useCallback(() => {
+    if (countdownDirty.current) {
+      setConfirmingCountdownDiscard(true);
+    } else {
+      setEditingCountdown(false);
+    }
+  }, []);
+  const recordCountdownDirty = useCallback((isDirty: boolean) => {
+    countdownDirty.current = isDirty;
+  }, []);
+  const saveCountdown = useCallback((result: CountdownFormResult) => {
+    const now = Date.now();
+    setAnchoredAt(now);
+    setCountdown({
+      msRemaining: new Date(result.targetAtIso).getTime() - now,
+      ...result,
+    });
+    countdownDirty.current = false;
+    setEditingCountdown(false);
+  }, []);
+  const keepEditingCountdown = useCallback(() => {
+    setConfirmingCountdownDiscard(false);
+  }, []);
+  const discardCountdownChanges = useCallback(() => {
+    setConfirmingCountdownDiscard(false);
+    countdownDirty.current = false;
+    setEditingCountdown(false);
+  }, []);
 
   return (
     <>
@@ -75,7 +120,7 @@ export default function AppHeader({
             avatarEmojiOptions={user.avatarEmojiOptions}
             theme={user.theme}
             hasCountdown={countdown !== null}
-            onEditCountdown={() => setEditingCountdown(true)}
+            onEditCountdown={openCountdownEditor}
           />
         )}
       </header>
@@ -85,13 +130,13 @@ export default function AppHeader({
           msRemaining={countdown.msRemaining}
           anchoredAt={anchoredAt}
           label={countdown.label}
-          onClick={() => setViewingCountdown(true)}
+          onClick={openCountdownView}
         />
       )}
 
       <Modal
         open={viewingCountdown}
-        onClose={() => setViewingCountdown(false)}
+        onClose={closeCountdownView}
         panelClassName="max-w-lg"
         dismissOnBackdrop
         showCloseButton={false}
@@ -111,37 +156,14 @@ export default function AppHeader({
 
       <Modal
         open={editingCountdown}
-        onClose={() => {
-          if (countdownDirty) {
-            setConfirmingCountdownDiscard(true);
-          } else {
-            setEditingCountdown(false);
-          }
-        }}
+        onClose={requestCountdownEditorClose}
         title="Countdown"
       >
         <CountdownForm
           initial={formInitial}
-          onDirtyChange={setCountdownDirty}
-          onCancel={() => {
-            if (countdownDirty) {
-              setConfirmingCountdownDiscard(true);
-            } else {
-              setEditingCountdown(false);
-            }
-          }}
-          onSaved={(result) => {
-            setAnchoredAt(Date.now());
-            setCountdown({
-              msRemaining: new Date(result.targetAtIso).getTime() - Date.now(),
-              label: result.label,
-              location: result.location,
-              timeZone: result.timeZone,
-              targetAtIso: result.targetAtIso,
-            });
-            setCountdownDirty(false);
-            setEditingCountdown(false);
-          }}
+          onDirtyChange={recordCountdownDirty}
+          onCancel={requestCountdownEditorClose}
+          onSaved={saveCountdown}
         />
       </Modal>
       <ConfirmationModal
@@ -151,12 +173,8 @@ export default function AppHeader({
         confirmLabel="Discard changes"
         cancelLabel="Keep editing"
         variant="danger"
-        onCancel={() => setConfirmingCountdownDiscard(false)}
-        onConfirm={() => {
-          setConfirmingCountdownDiscard(false);
-          setCountdownDirty(false);
-          setEditingCountdown(false);
-        }}
+        onCancel={keepEditingCountdown}
+        onConfirm={discardCountdownChanges}
       />
     </>
   );

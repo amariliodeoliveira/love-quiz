@@ -83,15 +83,47 @@ describe("Modal", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it("does not steal focus from a form control marked for automatic focus", () => {
+  it("focuses the dialog itself when no control explicitly opts in", () => {
     render(
       <Modal open onClose={vi.fn()} title="Add card">
-        <textarea aria-label="Question or dare" data-modal-initial-focus />
+        <textarea aria-label="Question or dare" />
       </Modal>,
     );
 
+    expect(screen.getByRole("dialog", { name: "Add card" })).toHaveFocus();
     expect(
       screen.getByRole("textbox", { name: "Question or dare" }),
-    ).toHaveFocus();
+    ).not.toHaveFocus();
+  });
+
+  it("preserves the active control when the parent passes a new close callback", () => {
+    const { rerender } = render(
+      <Modal open onClose={() => {}} title="Countdown">
+        <input aria-label="City" />
+      </Modal>,
+    );
+    const city = screen.getByRole("textbox", { name: "City" });
+    city.focus();
+
+    rerender(
+      <Modal open onClose={() => {}} title="Countdown">
+        <input aria-label="City" />
+      </Modal>,
+    );
+
+    expect(city).toHaveFocus();
+  });
+
+  it("keeps backward tabbing inside a dialog initially focused on its panel", () => {
+    render(
+      <Modal open onClose={vi.fn()} title="Countdown">
+        <button type="button">Cancel</button>
+        <button type="button">Save changes</button>
+      </Modal>,
+    );
+
+    fireEvent.keyDown(globalThis.window, { key: "Tab", shiftKey: true });
+
+    expect(screen.getByRole("button", { name: "Save changes" })).toHaveFocus();
   });
 });

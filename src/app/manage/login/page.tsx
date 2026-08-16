@@ -63,7 +63,6 @@ function LoginForm() {
               id="username"
               placeholder="Enter your username"
               autoComplete="username"
-              autoFocus
               aria-invalid={errors.username ? "true" : undefined}
               aria-describedby={errors.username ? "username-error" : undefined}
               {...register("username")}

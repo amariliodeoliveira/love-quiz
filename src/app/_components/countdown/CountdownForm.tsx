@@ -211,7 +211,17 @@ export default function CountdownForm({
             aria-controls={cityListId}
             aria-describedby={timeZone ? timeZoneHintId : undefined}
           />
-          {searching && <p className="login-hint">Searching...</p>}
+          <div className="min-h-5" aria-live="polite">
+            {searching ? (
+              <p className="login-hint">Searching...</p>
+            ) : (
+              timeZone && (
+                <p id={timeZoneHintId} className="login-hint">
+                  Time zone: {timeZone}
+                </p>
+              )
+            )}
+          </div>
           {!searching && suggestions.length > 0 && (
             <ul id={cityListId} className="select-menu" role="listbox">
               {suggestions.map((s) => (
@@ -230,11 +240,6 @@ export default function CountdownForm({
                 </li>
               ))}
             </ul>
-          )}
-          {timeZone && (
-            <p id={timeZoneHintId} className="login-hint">
-              Time zone: {timeZone}
-            </p>
           )}
         </div>
 

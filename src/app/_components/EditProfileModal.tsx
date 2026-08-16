@@ -207,8 +207,6 @@ export default function EditProfileModal({
               placeholder="e.g. Alex"
               autoComplete="name"
               maxLength={displayNamePolicy.maxLength}
-              autoFocus
-              data-modal-initial-focus
               aria-invalid={profileErrors.displayName ? "true" : undefined}
               aria-describedby={
                 profileErrors.displayName ? "display-name-error" : undefined

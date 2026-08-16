@@ -20,6 +20,17 @@ function renderModal() {
 }
 
 describe("EditProfileModal custom avatar emoji", () => {
+  it("opens without placing the display name into edit mode", () => {
+    renderModal();
+
+    expect(
+      screen.getByRole("dialog", { name: "Profile settings" }),
+    ).toHaveFocus();
+    expect(
+      screen.getByRole("textbox", { name: "Display name" }),
+    ).not.toHaveFocus();
+  });
+
   it("keeps the picker grid to 30 slots, including the add-emoji control", () => {
     renderModal();
 
