@@ -1,4 +1,4 @@
 interface:
   display_name: "Prepare PR"
-  short_description: "Write and deliver human-friendly pull requests"
-  default_prompt: "Use $prepare-pr to write and deliver a clear, human-friendly pull request in English."
+  short_description: "Prepare human-friendly pull requests"
+  default_prompt: "Use $prepare-pr to prepare a clear pull request in English, then ask for confirmation before opening or merging it."

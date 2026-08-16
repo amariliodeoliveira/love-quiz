@@ -2,10 +2,11 @@
 
 ## AI-first delivery autonomy
 
-The user, as sole owner and operator, authorizes Codex to run ordinary `git add`, `git commit`, and `git push` operations and to open, update, merge, and close pull requests while delivering requested project work. Keep the user's configured Git identity; do not change it.
+The user, as sole owner and operator, authorizes Codex to run ordinary `git add`, `git commit`, and `git push` operations while delivering requested project work. Keep the user's configured Git identity; do not change it.
 
 - Work directly on `main` by default during the early single-maintainer phase. Preserve speed with focused commits, the pre-commit hook, proportional checks, and post-push CI monitoring.
 - Use a branch and PR for database or destructive data work, authentication or security changes, major dependency upgrades, deployment or CI changes, sweeping or uncertain refactors, discardable experiments, or unclear rollback paths.
+- Before opening a PR, present its intended scope, base branch, and reason for isolation, then wait for the user's explicit confirmation. Before merging any PR, wait for a separate explicit confirmation after reporting its CI and review state. Do not infer either approval from a general request to implement, finish, or deliver work.
 - Merge minor and patch dependency bumps with green CI autonomously. Summarize major-version changelogs and breaking changes for the user instead of auto-merging.
 - Split unrelated work into logical commits. Never include pre-existing user changes.
 - Let Husky run lint-staged; do not bypass the hook. It formats staged files and runs full `tsc --noEmit` for TypeScript changes.
