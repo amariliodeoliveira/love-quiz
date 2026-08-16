@@ -73,6 +73,7 @@ describe("createSessionCookieValue / parseSessionCookie", () => {
     username: "alice",
     role: "user",
     sessionVersion: 0,
+    expiresAt: Date.now() + 60_000,
   };
 
   it("round-trips a session through the signed cookie value", () => {
@@ -117,6 +118,7 @@ describe("createSessionCookieValue / parseSessionCookie", () => {
         username: "alice",
         role: "superadmin",
         sessionVersion: 0,
+        expiresAt: Date.now() + 60_000,
       }),
     ).toString("base64url");
     const cookie = createSessionCookieValue({
@@ -124,6 +126,7 @@ describe("createSessionCookieValue / parseSessionCookie", () => {
       username: "alice",
       role: "superadmin" as Session["role"],
       sessionVersion: 0,
+      expiresAt: Date.now() + 60_000,
     });
     expect(cookie.startsWith(encoded)).toBe(true);
     expect(parseSessionCookie(cookie)).toBeNull();

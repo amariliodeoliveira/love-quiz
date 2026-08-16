@@ -101,6 +101,7 @@ export interface Session {
   username: string;
   role: Role;
   sessionVersion: number;
+  expiresAt: number;
 }
 
 interface UserRow {

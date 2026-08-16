@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 
 import {
   COOKIE_NAME,
+  createSession,
   createSessionCookieValue,
   hashPassword,
   isClaimWindowExpired,
-  SESSION_COOKIE_OPTIONS,
+  sessionCookieOptions,
   verifyPassword,
 } from "@/lib/auth";
 import {
@@ -14,11 +15,8 @@ import {
   resetFailedLogins,
   setUserPassword,
 } from "@/lib/db";
-import {
-  isPasswordInputTooLong,
-  newPasswordSchema,
-  passwordPolicy,
-} from "@/lib/password";
+import { loginFormSchema } from "@/lib/login";
+import { newPasswordSchema, passwordPolicy } from "@/lib/password";
 
 // A valid-format but unusable hash, hashed once at module load. Used to run
 // verifyPassword's real scrypt work even when no user was found, so an unknown
@@ -31,16 +29,11 @@ function randomDecoyPassword(): string {
 }
 
 export async function POST(request: Request) {
-  const { username, password } = await request.json();
-
-  if (
-    typeof username !== "string" ||
-    typeof password !== "string" ||
-    !password ||
-    isPasswordInputTooLong(password)
-  ) {
+  const parsed = loginFormSchema.safeParse(await request.json());
+  if (!parsed.success) {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
+  const { username, password, rememberMe } = parsed.data;
 
   const user = await findUserByUsername(username.trim());
   const invalidCredentials = NextResponse.json(
@@ -93,16 +86,20 @@ export async function POST(request: Request) {
 
   await resetFailedLogins(user.id);
 
-  const response = NextResponse.json({ ok: true });
-  response.cookies.set(
-    COOKIE_NAME,
-    createSessionCookieValue({
+  const session = createSession(
+    {
       userId: user.id,
       username: user.username,
       role: user.role,
       sessionVersion: user.sessionVersion,
-    }),
-    SESSION_COOKIE_OPTIONS,
+    },
+    rememberMe,
+  );
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set(
+    COOKIE_NAME,
+    createSessionCookieValue(session),
+    sessionCookieOptions(session.expiresAt),
   );
   return response;
 }

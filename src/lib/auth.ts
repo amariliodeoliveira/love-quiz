@@ -12,13 +12,36 @@ import { type DbUser, getUserById, type Role, type Session } from "@/lib/db";
 const COOKIE_NAME = "admin_session";
 const SCRYPT_KEYLEN = 64;
 
-export const SESSION_COOKIE_OPTIONS = {
+const SESSION_COOKIE_BASE_OPTIONS = {
   httpOnly: true,
   secure: true,
   sameSite: "lax" as const,
   path: "/",
-  maxAge: 60 * 60 * 24 * 7,
 };
+
+export const SESSION_DURATION_SECONDS = {
+  standard: 60 * 60 * 24 * 7,
+  remembered: 60 * 60 * 24 * 30,
+} as const;
+
+export function createSession(
+  session: Omit<Session, "expiresAt">,
+  rememberMe: boolean,
+  now = Date.now(),
+): Session {
+  const duration = rememberMe
+    ? SESSION_DURATION_SECONDS.remembered
+    : SESSION_DURATION_SECONDS.standard;
+  return { ...session, expiresAt: now + duration * 1000 };
+}
+
+export function sessionCookieOptions(expiresAt: number) {
+  return {
+    ...SESSION_COOKIE_BASE_OPTIONS,
+    expires: new Date(expiresAt),
+    maxAge: Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000)),
+  };
+}
 
 /** How long an account with no password (freshly provisioned by an admin, username
  * shared out-of-band) can be "claimed" by whoever submits a password first. Past this
@@ -89,6 +112,9 @@ export function parseSessionCookie(
       typeof payload?.sessionVersion !== "number" ||
       !Number.isSafeInteger(payload.sessionVersion) ||
       payload.sessionVersion < 0 ||
+      typeof payload.expiresAt !== "number" ||
+      !Number.isSafeInteger(payload.expiresAt) ||
+      payload.expiresAt <= Date.now() ||
       (payload.role !== "admin" && payload.role !== "user")
     ) {
       return null;
@@ -98,6 +124,7 @@ export function parseSessionCookie(
       username: payload.username,
       role: payload.role as Role,
       sessionVersion: payload.sessionVersion,
+      expiresAt: payload.expiresAt,
     };
   } catch {
     return null;
