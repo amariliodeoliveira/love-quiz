@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 
 import { patchJson } from "@/lib/http";
@@ -16,19 +17,25 @@ import TextField from "./TextField";
 export default function ChangePasswordForm({
   onBack,
   onChanged,
+  onDirtyChange,
 }: {
   onBack: () => void;
   onChanged: () => void;
+  onDirtyChange: (isDirty: boolean) => void;
 }) {
   const {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors, isDirty, isSubmitting },
   } = useForm<PasswordChangeFormValues>({
     resolver: zodResolver(passwordChangeFormSchema),
     mode: "onTouched",
   });
+
+  useEffect(() => {
+    onDirtyChange(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   async function submit(values: PasswordChangeFormValues) {
     try {

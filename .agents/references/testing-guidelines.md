@@ -8,9 +8,14 @@ Every `src/lib/` module with real logic gets a co-located Vitest file (`foo.ts` 
 
 A one-line wrapper around `fetch` need not receive exhaustive tests, but branchy logic or behavior with a realistic failure mode does.
 
+## UI components
+
+React component tests use React Testing Library + `user-event` in jsdom (`*.test.tsx`). Test behavior and semantics that could regress: accessible names, labels and errors, keyboard interactions, focus, close/discard flows, and important conditional states. Do not snapshot implementation markup or assert incidental utility classes.
+
+jsdom does not lay out CSS like a browser. Visually verify spacing, responsive layout, color contrast, and animation in a browser whenever those change; add browser-level visual regression tests once the app has a stable deployed preview and a chosen baseline workflow.
+
 ## Deliberately not unit-tested yet
 
-- **React components**: no React Testing Library or jsdom is configured. Visually verify behavior in a browser; revisit if component logic becomes too complex for manual coverage.
 - **API route handlers**: keep them thin `withSession(...)` wrappers. Extract branching or validation into a `src/lib/` function and test it there.
 - **`src/lib/db.ts`**: it requires the live Postgres database. Do not mock the client; use `scripts/qa-test-user.mjs` for manual verification and revisit when a real test database exists.
 

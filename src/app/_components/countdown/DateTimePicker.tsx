@@ -17,6 +17,15 @@ const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, i) => i).map((m) => ({
   label: String(m).padStart(2, "0"),
 }));
 
+export function getCalendarPlacement(
+  trigger: Pick<DOMRect, "top" | "bottom">,
+  viewportHeight: number,
+): "top" | "bottom" {
+  const spaceAbove = trigger.top;
+  const spaceBelow = viewportHeight - trigger.bottom;
+  return spaceAbove > spaceBelow ? "top" : "bottom";
+}
+
 function to12Hour(hour24: number): { hour12: number; period: "AM" | "PM" } {
   const period = hour24 < 12 ? "AM" : "PM";
   const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12;
@@ -50,6 +59,7 @@ export default function DateTimePicker({
   const [popoverPos, setPopoverPos] = useState<{
     top: number;
     left: number;
+    placement: "top" | "bottom";
   } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -58,7 +68,12 @@ export default function DateTimePicker({
   function toggleOpen() {
     if (!open && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      setPopoverPos({ top: rect.bottom + 6, left: rect.left });
+      const placement = getCalendarPlacement(rect, window.innerHeight);
+      setPopoverPos({
+        top: placement === "top" ? rect.top - 6 : rect.bottom + 6,
+        left: rect.left,
+        placement,
+      });
     }
     setOpen((o) => !o);
   }
@@ -124,11 +139,15 @@ export default function DateTimePicker({
 
       {open && popoverPos && (
         <div
+          role="dialog"
+          aria-label="Choose date and time"
           className="select-menu max-h-none w-max p-3"
           style={{
             position: "fixed",
             top: popoverPos.top,
             left: popoverPos.left,
+            transform:
+              popoverPos.placement === "top" ? "translateY(-100%)" : undefined,
             zIndex: 70,
           }}
         >
@@ -149,12 +168,14 @@ export default function DateTimePicker({
               value={String(hour12)}
               onChange={(v) => commit({ hour12: Number(v) })}
               options={HOUR_OPTIONS}
+              label="Hour"
             />
             <span className="text-text">:</span>
             <Select
               value={String(minute).padStart(2, "0")}
               onChange={(v) => commit({ minute: Number(v) })}
               options={MINUTE_OPTIONS}
+              label="Minute"
             />
             <div className="flex gap-1">
               {(["AM", "PM"] as const).map((p) => (

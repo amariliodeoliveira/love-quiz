@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { CountdownDisplay } from "@/lib/countdown";
 import type { DbUser } from "@/lib/db";
 
+import ConfirmationModal from "./ConfirmationModal";
 import CountdownBubble from "./countdown/CountdownBubble";
 import CountdownForm, {
   type CountdownFormInitial,
@@ -42,6 +43,9 @@ export default function AppHeader({
   const [anchoredAt, setAnchoredAt] = useState(() => Date.now());
   const [viewingCountdown, setViewingCountdown] = useState(false);
   const [editingCountdown, setEditingCountdown] = useState(false);
+  const [countdownDirty, setCountdownDirty] = useState(false);
+  const [confirmingCountdownDiscard, setConfirmingCountdownDiscard] =
+    useState(false);
 
   const formInitial: CountdownFormInitial | null = countdown
     ? {
@@ -89,6 +93,9 @@ export default function AppHeader({
         open={viewingCountdown}
         onClose={() => setViewingCountdown(false)}
         panelClassName="max-w-lg"
+        dismissOnBackdrop
+        showCloseButton={false}
+        ariaLabel="Countdown"
       >
         {countdown && (
           <CountdownView
@@ -104,12 +111,25 @@ export default function AppHeader({
 
       <Modal
         open={editingCountdown}
-        onClose={() => setEditingCountdown(false)}
+        onClose={() => {
+          if (countdownDirty) {
+            setConfirmingCountdownDiscard(true);
+          } else {
+            setEditingCountdown(false);
+          }
+        }}
         title="Countdown"
       >
         <CountdownForm
           initial={formInitial}
-          onCancel={() => setEditingCountdown(false)}
+          onDirtyChange={setCountdownDirty}
+          onCancel={() => {
+            if (countdownDirty) {
+              setConfirmingCountdownDiscard(true);
+            } else {
+              setEditingCountdown(false);
+            }
+          }}
           onSaved={(result) => {
             setAnchoredAt(Date.now());
             setCountdown({
@@ -119,10 +139,25 @@ export default function AppHeader({
               timeZone: result.timeZone,
               targetAtIso: result.targetAtIso,
             });
+            setCountdownDirty(false);
             setEditingCountdown(false);
           }}
         />
       </Modal>
+      <ConfirmationModal
+        open={confirmingCountdownDiscard}
+        title="Discard unsaved changes?"
+        message="Your countdown changes will be lost."
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        variant="danger"
+        onCancel={() => setConfirmingCountdownDiscard(false)}
+        onConfirm={() => {
+          setConfirmingCountdownDiscard(false);
+          setCountdownDirty(false);
+          setEditingCountdown(false);
+        }}
+      />
     </>
   );
 }

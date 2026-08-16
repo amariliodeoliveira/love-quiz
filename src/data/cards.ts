@@ -1,4 +1,6 @@
-export type Level = "1" | "2" | "3" | "dare";
+export const ALL_LEVELS = ["1", "2", "3", "dare"] as const;
+
+export type Level = (typeof ALL_LEVELS)[number];
 
 export interface Card {
   id: string;
@@ -19,5 +21,3 @@ export const LEVEL_META: Record<Level, LevelMeta> = {
   "3": { label: "Level 3 — Heavy", emoji: "🔴", className: "l3" },
   dare: { label: "Dares", emoji: "😈", className: "ldare" },
 };
-
-export const ALL_LEVELS: Level[] = ["1", "2", "3", "dare"];

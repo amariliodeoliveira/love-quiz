@@ -1,9 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
+import { useForm } from "react-hook-form";
 
 import { postJson } from "@/lib/http";
+import { loginFormSchema, type LoginFormValues } from "@/lib/login";
 import { GAME_PATH } from "@/lib/routes";
 import { isSafeRedirectTarget } from "@/lib/url";
 
@@ -13,67 +16,79 @@ import TextField from "../../_components/TextField";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: { username: "", password: "", rememberMe: false },
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  async function submit(values: LoginFormValues) {
+    try {
+      const { ok, data } = await postJson<{ error?: string }>(
+        "/api/profile/login",
+        values,
+      );
 
-    const { ok, data } = await postJson<{ error?: string }>(
-      "/api/profile/login",
-      { username, password, rememberMe },
-    );
-
-    setLoading(false);
-
-    if (!ok) {
-      setError(data?.error ?? "Incorrect username or password");
-      return;
+      if (ok) {
+        const from = searchParams.get("from");
+        router.push(isSafeRedirectTarget(from) ? from : GAME_PATH);
+        router.refresh();
+        return;
+      }
+      setError("root", {
+        message: data?.error ?? "Incorrect username or password",
+      });
+    } catch {
+      setError("root", {
+        message: "Couldn't sign in — check your connection and try again.",
+      });
     }
-
-    const from = searchParams.get("from");
-    router.push(isSafeRedirectTarget(from) ? from : GAME_PATH);
-    router.refresh();
   }
 
   return (
     <div className="flex flex-1 items-center justify-center p-6">
       <div className="login-card">
         <h1 className="page-title">Login</h1>
-        <form onSubmit={handleSubmit} className="login-form">
-          <FormField id="username" label="Username">
+        <form onSubmit={handleSubmit(submit)} className="login-form" noValidate>
+          <FormField
+            id="username"
+            label="Username"
+            error={errors.username?.message}
+          >
             <TextField
               id="username"
-              name="username"
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
               placeholder="Enter your username"
               autoComplete="username"
               autoFocus
+              aria-invalid={errors.username ? "true" : undefined}
+              aria-describedby={errors.username ? "username-error" : undefined}
+              {...register("username")}
             />
           </FormField>
-          <FormField id="password" label="Password">
+          <FormField
+            id="password"
+            label="Password"
+            error={errors.password?.message}
+          >
             <TextField
               id="password"
               type="password"
-              name="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
               placeholder="Enter your password"
               autoComplete="current-password"
+              aria-invalid={errors.password ? "true" : undefined}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              {...register("password")}
             />
           </FormField>
           <label className="text-subtext flex items-center gap-2 text-sm">
             <input
               type="checkbox"
               className="accent-purple"
-              checked={rememberMe}
-              onChange={(event) => setRememberMe(event.target.checked)}
+              {...register("rememberMe")}
             />
             Keep me signed in for 30 days
           </label>
@@ -81,9 +96,17 @@ function LoginForm() {
             First time logging in? The password you enter now will be saved as
             yours.
           </p>
-          {error && <p className="form-error">{error}</p>}
-          <button type="submit" disabled={loading} className="btn btn-block">
-            {loading ? "Signing in..." : "Sign in"}
+          {errors.root?.message && (
+            <p className="form-error" role="alert">
+              {errors.root.message}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="btn btn-block"
+          >
+            {isSubmitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
       </div>
