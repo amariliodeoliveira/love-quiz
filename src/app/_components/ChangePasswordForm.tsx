@@ -10,6 +10,7 @@ import {
 } from "@/lib/password";
 
 import FormField from "./FormField";
+import TextField from "./TextField";
 
 export default function ChangePasswordForm({
   onBack,
@@ -25,7 +26,7 @@ export default function ChangePasswordForm({
     formState: { errors, isSubmitting },
   } = useForm<PasswordChangeFormValues>({
     resolver: zodResolver(passwordChangeFormSchema),
-    mode: "onBlur",
+    mode: "onTouched",
   });
 
   async function submit(values: PasswordChangeFormValues) {
@@ -75,12 +76,11 @@ export default function ChangePasswordForm({
         label="Current password"
         error={errors.currentPassword?.message}
       >
-        <input
+        <TextField
           id="current-password"
           type="password"
-          className="input"
+          placeholder="Enter your current password"
           autoComplete="current-password"
-          autoFocus
           maxLength={1024}
           aria-invalid={errors.currentPassword ? "true" : undefined}
           aria-describedby={
@@ -96,10 +96,10 @@ export default function ChangePasswordForm({
         hint="Use 15 to 128 characters. A memorable passphrase works well."
         error={errors.newPassword?.message}
       >
-        <input
+        <TextField
           id="new-password"
           type="password"
-          className="input"
+          placeholder="Create a new password"
           autoComplete="new-password"
           minLength={15}
           maxLength={128}
@@ -116,10 +116,10 @@ export default function ChangePasswordForm({
         label="Confirm new password"
         error={errors.confirmPassword?.message}
       >
-        <input
+        <TextField
           id="confirm-password"
           type="password"
-          className="input"
+          placeholder="Repeat your new password"
           autoComplete="new-password"
           minLength={15}
           maxLength={128}

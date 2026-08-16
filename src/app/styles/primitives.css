@@ -18,6 +18,14 @@
   .btn:hover {
     opacity: 0.85;
   }
+  .btn:focus-visible,
+  .btn-ghost:focus-visible,
+  .btn-danger:focus-visible,
+  .btn-danger-solid:focus-visible,
+  .btn-success-solid:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
+  }
   .btn:disabled {
     opacity: 0.5;
     cursor: default;
@@ -103,8 +111,11 @@
     font-size: 0.9rem;
   }
   .input:focus {
-    outline: none;
     border-color: var(--muted);
+  }
+  .input:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
   }
   .input[aria-invalid="true"],
   .input[aria-invalid="true"]:focus {
@@ -112,6 +123,14 @@
   }
   .input::placeholder {
     color: var(--muted);
+    opacity: 1;
+  }
+  /* Chrome/Safari otherwise apply their own light autofill paint, breaking both themes. */
+  .input:-webkit-autofill,
+  .input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+    -webkit-text-fill-color: var(--text);
+    caret-color: var(--text);
   }
   .textarea {
     resize: vertical;
@@ -119,7 +138,39 @@
 
   .form-error {
     color: var(--red);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  .form-hint {
+    color: var(--subtext);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  .input-with-action {
+    position: relative;
+  }
+  .input-with-action .input {
+    padding-right: var(--space-10);
+  }
+  .input-action {
+    position: absolute;
+    top: 50%;
+    right: var(--space-2);
+    display: flex;
+    align-items: center;
+    transform: translateY(-50%);
+    padding: var(--space-1);
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .input-action:hover {
+    color: var(--text);
+  }
+  .input-action:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
   }
 
   /* Custom rounded <select> replacement (native dropdown popups can't be themed) */

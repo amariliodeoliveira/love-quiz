@@ -31,3 +31,11 @@ Keep `leading-[1.05]` bracketed: Tailwind v4 can fail to generate some bare deci
 - Use leading emoji consistently across comparable labels; do not decorate a single sibling arbitrarily.
 - Match the existing error shape: `Couldn't <specific thing> — check your connection and try again.`
 - Use sentence case for buttons and links except deliberate proper nouns or game terms.
+
+## Form controls
+
+- Use a visible `<label>` explicitly associated with every native control. A placeholder may show an example or expected format, but never replaces its label.
+- Keep helper text and field errors in the same position below a control. When invalid, replace the helper with a clear error rather than stacking both messages.
+- Do not validate an untouched field merely because a dialog opened or focus moved programmatically. Validate on submit; after a field has been touched, revalidate as the user corrects it.
+- Make focus clearly visible with more than color alone, preserve native `autocomplete` values, and give password inputs an accessible show/hide control.
+- Build recurring controls from the app's primitives: native inputs use `TextField` and label/help/error composition uses `FormField`. Reuse the documented `.btn` variants for ordinary buttons; introduce a React button component only when shared behavior, not just shared styling, requires it.

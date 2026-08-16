@@ -123,6 +123,62 @@
     font-size: 0.75rem;
     color: var(--subtext);
   }
+  .settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    border-top: 1px solid var(--border);
+    padding-top: var(--space-4);
+  }
+  .settings-section-title {
+    color: var(--subtext);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .settings-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    width: 100%;
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-dm-sans), sans-serif;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      background 0.2s;
+  }
+  .settings-action:hover {
+    border-color: var(--muted);
+    background: var(--border);
+  }
+  .settings-action:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: 2px;
+  }
+  .settings-action-copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .settings-action-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .settings-action-description,
+  .settings-action-icon {
+    color: var(--subtext);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  .settings-action-icon {
+    font-size: 1.25rem;
+  }
   /* Menu links/buttons (Edit profile, Edit countdown, Deck Studio, Log out). A filled,
      rounded hover state — not just an underline/color change — is what makes these
      read as clickable *rows* instead of a flat stack of text. The negative margin lets
