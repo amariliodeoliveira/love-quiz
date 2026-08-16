@@ -14,6 +14,7 @@ import {
   resetFailedLogins,
   setUserPassword,
 } from "@/lib/db";
+import { newPasswordSchema } from "@/lib/password";
 
 // A valid-format but unusable hash, hashed once at module load. Used to run
 // verifyPassword's real scrypt work even when no user was found, so an unknown
@@ -67,6 +68,12 @@ export async function POST(request: Request) {
             "This account was never activated in time. Ask an admin to reset it.",
         },
         { status: 401 },
+      );
+    }
+    if (!newPasswordSchema.safeParse(password).success) {
+      return NextResponse.json(
+        { error: "Choose a password between 10 and 128 characters" },
+        { status: 400 },
       );
     }
     // First login: the submitted password becomes the account's password.

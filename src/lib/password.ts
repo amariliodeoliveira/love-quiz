@@ -1,8 +1,17 @@
 import { z } from "zod";
 
-const MIN_PASSWORD_LENGTH = 15;
+const MIN_PASSWORD_LENGTH = 10;
 const MAX_PASSWORD_LENGTH = 128;
 const MAX_CURRENT_PASSWORD_LENGTH = 1024;
+
+/** Password policy for every point where an account first chooses a password. */
+export const newPasswordSchema = z
+  .string()
+  .min(MIN_PASSWORD_LENGTH, `Use at least ${MIN_PASSWORD_LENGTH} characters`)
+  .max(MAX_PASSWORD_LENGTH, `Use at most ${MAX_PASSWORD_LENGTH} characters`)
+  .refine((value) => value.trim().length > 0, {
+    message: "New password cannot be only whitespace",
+  });
 
 /** Shared by the browser for immediate feedback and the server for input parsing. */
 export const passwordChangeFormSchema = z
@@ -11,16 +20,7 @@ export const passwordChangeFormSchema = z
       .string()
       .min(1, "Enter your current password")
       .max(MAX_CURRENT_PASSWORD_LENGTH, "Current password is too long"),
-    newPassword: z
-      .string()
-      .min(
-        MIN_PASSWORD_LENGTH,
-        `Use at least ${MIN_PASSWORD_LENGTH} characters`,
-      )
-      .max(MAX_PASSWORD_LENGTH, `Use at most ${MAX_PASSWORD_LENGTH} characters`)
-      .refine((value) => value.trim().length > 0, {
-        message: "New password cannot be only whitespace",
-      }),
+    newPassword: newPasswordSchema,
     confirmPassword: z.string().min(1, "Confirm your new password"),
   })
   .superRefine(({ currentPassword, newPassword, confirmPassword }, ctx) => {

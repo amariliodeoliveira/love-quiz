@@ -69,7 +69,7 @@ describe("parsePasswordChange", () => {
     });
   });
 
-  it.each(["short", "a".repeat(129)])(
+  it.each(["a".repeat(9), "a".repeat(129)])(
     "enforces the password length policy: %s",
     (newPassword) => {
       expect(
@@ -80,13 +80,28 @@ describe("parsePasswordChange", () => {
         }),
       ).toEqual({
         ok: false,
-        error: "New password must be between 15 and 128 characters",
+        error: "New password must be between 10 and 128 characters",
       });
     },
   );
 
+  it("accepts a new password at the minimum length", () => {
+    const newPassword = "a".repeat(10);
+
+    expect(
+      parsePasswordChange({
+        currentPassword: "current password",
+        newPassword,
+        confirmPassword: newPassword,
+      }),
+    ).toEqual({
+      ok: true,
+      value: { currentPassword: "current password", newPassword },
+    });
+  });
+
   it("rejects a password made only of whitespace", () => {
-    const newPassword = " ".repeat(15);
+    const newPassword = " ".repeat(10);
     expect(
       parsePasswordChange({
         currentPassword: "current password",

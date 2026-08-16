@@ -93,7 +93,7 @@ export default function ChangePasswordForm({
       <FormField
         id="new-password"
         label="New password"
-        hint="Use 15 to 128 characters. A memorable passphrase works well."
+        hint="Use 10 to 128 characters. A memorable passphrase works well."
         error={errors.newPassword?.message}
       >
         <TextField
@@ -101,7 +101,7 @@ export default function ChangePasswordForm({
           type="password"
           placeholder="Create a new password"
           autoComplete="new-password"
-          minLength={15}
+          minLength={10}
           maxLength={128}
           aria-invalid={errors.newPassword ? "true" : undefined}
           aria-describedby={
@@ -121,7 +121,7 @@ export default function ChangePasswordForm({
           type="password"
           placeholder="Repeat your new password"
           autoComplete="new-password"
-          minLength={15}
+          minLength={10}
           maxLength={128}
           aria-invalid={errors.confirmPassword ? "true" : undefined}
           aria-describedby={
