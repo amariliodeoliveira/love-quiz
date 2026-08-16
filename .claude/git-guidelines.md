@@ -95,6 +95,35 @@ Rules:
 - The commit body (if needed) explains _why_, not _what_.
 - Don't mix unrelated types in one commit (e.g. a `fix` and a `feat` together) — split them.
 
+## Pull request descriptions
+
+Write PR titles and bodies in English for a human reviewer and for the future project history.
+
+- Use a specific, imperative title: `<type>: concise description`. It must make sense by itself in a
+  list of commits or PRs; avoid vague titles such as `fix issues` or `update validation`.
+- Keep the PR focused on one self-contained objective, including its directly related tests. A PR is
+  small when a reviewer can understand its purpose and impact without reconstructing several unrelated
+  stories from the diff.
+- Treat roughly 800 effective changed lines, many unrelated files, or multiple subsystems as prompts to
+  reconsider the scope. They are not mechanical limits: generated files, deletions, and one cohesive
+  implementation have different review costs. Around 1,000 effective lines normally deserves a split or
+  explicit reviewer agreement.
+- Open with one or two short paragraphs that state the problem, why it matters, the chosen approach, and
+  the resulting behavior. Explain decisions and trade-offs that the diff cannot explain; do not repeat a
+  file list.
+- Add a compact `What changed` section when it improves scanning. Group changes by behavior or design,
+  not by filename.
+- For behavior changes, add `How to verify`: describe the shortest meaningful manual reviewer journey,
+  then the relevant automated coverage. State only checks that actually ran or will run in CI.
+- Add `Notes` only for reviewer-relevant risk: auth or security implications, migrations, breaking
+  changes, rollout or feature-flag details, performance trade-offs, screenshots, or follow-up work.
+  Omit empty sections.
+- When a PR spans several important files, tell the reviewer where to start, the preferred review order,
+  and any area that needs especially careful feedback. Link issues, design discussions, or dependent PRs
+  when they provide necessary context.
+- Review the PR diff yourself before requesting review. Keep internal agent narration, command logs,
+  sandbox limitations, and routine CI boilerplate out of the body.
+
 ## Git flow
 
 Branches:
