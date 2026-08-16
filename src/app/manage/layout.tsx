@@ -14,8 +14,8 @@ export default async function ManageLayout({
   return (
     <>
       <AppHeader
-        backHref={GAME_PATH}
-        backLabel="← Back to game"
+        backHref={user ? GAME_PATH : undefined}
+        backLabel={user ? "← Back to game" : undefined}
         showCountdownBubble={false}
         user={user}
         countdown={countdown}
