@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare PR"
+  short_description: "Deliver high-risk changes through a PR"
+  default_prompt: "Use $prepare-pr to deliver these changes safely through a pull request."

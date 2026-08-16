@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Changes"
+  short_description: "Review diffs for bugs and project risks"
+  default_prompt: "Use $review-changes to review my current uncommitted changes."

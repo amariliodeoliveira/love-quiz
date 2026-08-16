@@ -1,12 +1,12 @@
 # Git Standards
 
-## Claude may commit, push, and manage PRs
+## AI-first delivery autonomy
 
-Updated 2026-08-15: the user (sole owner and operator of this repo, no other reviewers) explicitly granted
-Claude autonomy to run `git add`, `git commit`, `git push`, and to open, merge, and close pull requests
-(`gh pr create/merge/close`) directly — superseding the previous never-commit rule. This override was
-deliberate and repeated (Claude first flagged the conflict and asked for confirmation) — it is not
-something a future casual mid-task request should be read as re-granting if this section is ever reverted.
+Updated 2026-08-16: this repository is an experiment in an increasingly independent, AI-operated
+development workflow. The user (sole owner and operator) explicitly authorizes Claude and Codex to run
+ordinary `git add`, `git commit`, and `git push` operations and to open, update, merge, and close pull
+requests when delivering requested project work. A request to implement, finish, or deliver a change is
+enough authorization to complete this normal delivery loop without asking again.
 
 Ground rules while operating under this autonomy:
 
@@ -14,28 +14,41 @@ Ground rules while operating under this autonomy:
   sets a different author.
 - Still split unrelated changes into multiple logical commits (see below) rather than one big commit.
 - Still use Conventional Commit messages (see below).
-- **Prefer branch + PR over pushing straight to `main`** for anything beyond a one-line/urgent fix: open a
-  branch, push it, open a PR, let CI run, then merge once green. This gives a pre-merge gate (CI runs
-  _before_ the change lands on `main`, not after) and a recorded, revertable unit — direct-to-main pushes
-  skip that gate entirely, which is exactly how the 2026-08-15 incident happened (a missed-glob commit
-  left 3 files unformatted on `main`, discovered only after every open Renovate PR started failing CI).
+- **Direct commits and pushes to `main` are the default during the project's early, single-maintainer
+  phase.** Preserve speed with small logical commits, the pre-commit hook, proportional local checks,
+  and mandatory post-push CI monitoring. Large sessions may produce several focused commits; volume
+  alone does not require a PR.
+- Use a branch + PR when isolation provides material value: database/schema or destructive data work,
+  authentication/security changes, major dependency upgrades, deployment/CI changes, sweeping or
+  uncertain refactors, experiments that may be discarded, or any change whose safe rollback is unclear.
 - When merging Renovate (or any dependency-bump) PRs, use judgment the same way `renovate.json` already
   does: minor/patch bumps with green CI are safe to merge autonomously; major-version bumps get flagged
   to the user with the changelog/breaking-change summary rather than auto-merged, even if CI happens to
   pass — a passing CI run doesn't prove a major bump is safe, only that nothing it exercises broke.
 - Closing a PR (e.g. a stale/superseded Renovate PR, or one replaced by a manual fix) is fine; deleting the
   underlying branch afterward is fine too.
-- Before pushing directly to `main` (still fine for small/urgent fixes) or merging a PR into it, run the
-  full local check (`npm run lint`, `npx tsc --noEmit`, `npx prettier --check .`, `npm test`,
-  `npm run build`) so `main` doesn't go red — this repo still has no branch-protection gate, so this check
-  is the only safety net.
+- The Husky pre-commit hook runs `lint-staged`: ESLint fixes and Prettier on relevant staged files, plus
+  full `tsc --noEmit` for TypeScript changes. Do not manually repeat those checks without a reason.
+- Before a direct push, run tests relevant to changed behavior. Run the full `npm test` and
+  `npm run build` for broad, cross-cutting, runtime-sensitive, dependency, or release-like changes.
+  Prefer targeted checks during rapid iteration and rely on CI for the clean-environment full suite.
+- After every push, monitor the GitHub Actions run through completion. CI runs TypeScript, ESLint,
+  Prettier, tests, and the production build. Do not call delivery complete while CI is pending.
+- If `main` CI fails, make restoring green the highest-priority task. Fix forward immediately when the
+  cause and remedy are clear and low-risk; otherwise revert the offending commit. Report what failed,
+  what action was taken, and the final CI state.
+- After CI succeeds, audit that the intended commit reached the remote, no task-related changes or files
+  were left behind, and the working tree contains only known user work. Verify deployment health when
+  the change affects deployment and that signal is available.
 - Destructive git operations (force-push, reset --hard, history rewrites) are NOT covered by this
   autonomy grant — those still require explicit confirmation per the general "Executing actions with
   care" rules, autonomy here only covers ordinary commit/push/PR management.
 
 ## Breaking up large changes
 
-When a session produces many unrelated changes at once, Claude must identify the logical groups and propose **multiple separate commits** — one per concern — instead of one big commit. Each proposed commit should list which files/hunks belong to it and the commit message for that group.
+When a session produces many unrelated changes at once, the agent must identify the logical groups and
+create **multiple separate commits** — one per concern — instead of one big commit. Before staging, keep
+pre-existing user changes out of the task's commits. Use patch staging when a file contains mixed concerns.
 
 Example output shape:
 
@@ -82,7 +95,7 @@ Rules:
 - The commit body (if needed) explains _why_, not _what_.
 - Don't mix unrelated types in one commit (e.g. a `fix` and a `feat` together) — split them.
 
-## Git Flow
+## Git flow
 
 Branches:
 
@@ -95,8 +108,8 @@ Branches:
 
 General rules:
 
-- Prefer branch + PR/merge over committing directly to `main` (see "Claude may commit, push, and manage
-  PRs" above for when a direct push is still acceptable).
+- Work directly on `main` by default while the project is early and has one maintainer. Switch to a
+  branch + PR based on risk, uncertainty, or need for isolation, not merely change size.
 - Branch names in English, lowercase, hyphen-separated (`feature/user-avatar-menu`, not `feature/UserAvatarMenu`).
 - Prefer several small, focused branches over one giant branch mixing multiple features.
 - When finishing a branch, prefer squash or well-organized commits — avoid "wip", "fix", "test" commits landing on `main`.

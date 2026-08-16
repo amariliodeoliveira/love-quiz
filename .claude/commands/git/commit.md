@@ -1,13 +1,13 @@
 ---
-description: Prepares commit message(s) from staged changes and prints the git commands for the user to run
+description: Reviews changes, creates focused commits, and delivers them under the repository's AI-first Git policy
 ---
 
-Analyze only the files in `Staged Changes` (`git diff --staged`) and, following `.claude/git-guidelines.md`,
-print the `git add` / `git commit -m "..."` commands ready for the user to copy and paste — never run
-`git commit`, `git push`, or any variation directly.
+Follow `.claude/git-guidelines.md`. Inspect staged, unstaged, and untracked changes; distinguish task work
+from pre-existing user work; split unrelated concerns; then create the requested focused commit(s).
+When the request is to finish or deliver the work, push under the repository policy and monitor CI.
 
-If changes of different types are staged together, split them into multiple proposed commits (one command
-block per commit), as shown in the example in `git-guidelines.md`.
+If changes of different types are staged together, split them into multiple commits as shown in
+`git-guidelines.md`. Use patch staging for mixed files and never absorb unrelated user changes.
 
 ## Commit conventions
 

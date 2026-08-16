@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare Commit"
+  short_description: "Create and deliver focused commits"
+  default_prompt: "Use $prepare-commit to organize, commit, and deliver the current changes."

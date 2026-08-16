@@ -1,11 +1,12 @@
 ---
-description: Prepares PR title and description, and prints the gh pr create/edit command for the user to run
+description: Creates or updates a PR for changes that benefit from isolation, then monitors CI
 ---
 
 Using the GitHub CLI:
 
-- Never run `git push`, `gh pr create`, or `gh pr edit` directly — following `.claude/git-guidelines.md`,
-  only build the full command (with `--title`/`--body` via heredoc) and present it for the user to copy and paste.
+- Following `.claude/git-guidelines.md`, push the branch and create or update the PR when the task calls
+  for PR isolation. Monitor its CI and merge when green if delivery was requested and no high-risk
+  ambiguity remains.
 - Build the command to open or update a PR from the current branch, targeting origin by default unless another
   branch is explicitly specified.
   - Background:
