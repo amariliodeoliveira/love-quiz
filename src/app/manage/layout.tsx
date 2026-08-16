@@ -2,7 +2,7 @@ import { getAppHeaderData } from "@/lib/appHeaderData";
 import { GAME_PATH } from "@/lib/routes";
 
 import AppHeader from "../_components/AppHeader";
-import Logo from "../_components/Logo";
+import SiteFooter from "../_components/SiteFooter";
 
 export default async function ManageLayout({
   children,
@@ -14,16 +14,14 @@ export default async function ManageLayout({
   return (
     <>
       <AppHeader
-        backHref={GAME_PATH}
-        backLabel="← Back to game"
+        backHref={user ? GAME_PATH : undefined}
+        backLabel={user ? "← Back to game" : undefined}
         showCountdownBubble={false}
         user={user}
         countdown={countdown}
       />
       <main className="profile-main">{children}</main>
-      <footer>
-        <Logo />
-      </footer>
+      <SiteFooter />
     </>
   );
 }
