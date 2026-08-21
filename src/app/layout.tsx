@@ -7,6 +7,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getSessionUser } from "@/lib/appHeaderData";
 import { DEFAULT_THEME } from "@/lib/theme";
 
+import messages from "../../messages/en.json";
+
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
@@ -47,7 +49,9 @@ export default async function RootLayout({
           one full screen, keeping a page footer pinned to the bottom instead of
           floating right after short content. */}
       <body className="flex min-h-dvh flex-col">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
