@@ -67,6 +67,18 @@ export const truthOrDareRuleSections: TruthOrDareRuleSection[] = [
     ],
   },
   {
+    id: "intimacy-and-adult-topics",
+    title: "Intimacy and adult topics",
+    paragraphs: [
+      "Questions about intimacy, compatibility, a future together, desires, concerns, and adult topics are allowed. They can create conversations that might not happen naturally otherwise.",
+      "These questions must stay respectful, balanced, and comfortable for both players. The game is not a sexual interview, and nobody has to share more than they want to.",
+    ],
+    note: {
+      title: "Make room, do not apply pressure",
+      text: "Use these topics to understand each other, not to test, corner, or persuade each other. A question can be intimate without demanding an intimate answer.",
+    },
+  },
+  {
     id: "dare-cards",
     title: "Dare cards",
     paragraphs: [
@@ -80,7 +92,7 @@ export const truthOrDareRuleSections: TruthOrDareRuleSection[] = [
     ],
     example: {
       title: "Example: choosing a dare",
-      text: "Mingo asks Bee a truth. Bee does not want to answer and chooses Face the dare. The game reveals: Show Mingo the last conversation in your phone. Bee completes it, and the question is recorded as dare completed rather than answered.",
+      text: 'Mingo asks Bee a truth. Bee does not want to answer and chooses to face the dare. The game reveals the dare, "Show Mingo the last conversation on your phone." Bee completes it. The truth is recorded as dare completed, not answered.',
     },
     note: {
       title: "Keep it safe",
@@ -91,13 +103,14 @@ export const truthOrDareRuleSections: TruthOrDareRuleSection[] = [
     id: "ai-cards",
     title: "AI-generated cards",
     paragraphs: [
-      "The AI can draft or generate cards when the deck needs something new. Its suggestions are starting points, not decisions made for the players.",
-      "A generated card follows the same rules as every other card. Keep it, edit it, or replace it when it does not feel fair, respectful, specific enough, or right for the moment.",
+      "The game has two different AI card flows.",
+      "During a game, the players may generate a new truth when their own unanswered truth cards run out. This lets the conversation continue. The generated truth enters the round like any other truth; it is not a separate kind of turn.",
+      "In Deck Studio, the AI can suggest a card while a player is creating one. That suggestion is a draft for review. Edit it, keep it, or replace it before adding it to the deck.",
     ],
     bullets: [
       "The AI is a card-writing assistant, not a referee.",
-      "The players decide what belongs in their deck.",
-      "Consent and judgment always belong to the players.",
+      "AI-generated truths follow the same rules as player-written truths.",
+      "Players decide what belongs in the deck and what feels right for the moment.",
     ],
   },
   {
