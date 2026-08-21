@@ -1,8 +1,5 @@
 import { getRequestConfig } from "next-intl/server";
 
-export default getRequestConfig(async () => {
-  const importedMessages = await import("../../messages/en.json");
-  const messages = importedMessages.default;
+import messages from "../../messages/en.json";
 
-  return { locale: "en", messages };
-});
+export default getRequestConfig(async () => ({ locale: "en", messages }));
