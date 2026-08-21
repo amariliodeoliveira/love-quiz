@@ -66,7 +66,7 @@ function RoundContent({
         </button>
         {dareError && (
           <p className="form-error w-full basis-full text-center">
-            {dareError || t("messages.dareSaveError")}
+            {dareError}
           </p>
         )}
       </RoundCard>
@@ -288,7 +288,7 @@ export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
         onGenerateAi={handleGenerateAi}
       />
       <Link href={GAME_PATH} className="profile-back-link">
-        ➔ Exit Game
+        {t("actions.exitGame")}
       </Link>
     </div>
   );

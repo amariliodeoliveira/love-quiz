@@ -25,7 +25,7 @@ export const truthOrDareRuleSections: TruthOrDareRuleSection[] = [
     ],
     steps: [
       "One player asks a truth and asks the other player to answer.",
-      "The person being asked answers, or chooses a dare instead.",
+      "The person being asked answers, or chooses a dare as an alternative.",
       "The asker may answer the same truth too, but never has to.",
       "When the moment is complete, the person who was asked asks the next truth.",
     ],
@@ -44,7 +44,7 @@ export const truthOrDareRuleSections: TruthOrDareRuleSection[] = [
       "Ask a truth.",
       "Read it to the other player.",
       "Give the person being asked time to answer.",
-      "If the person being asked does not answer, offer a dare.",
+      "If the person being asked does not want to answer, offer a dare as an alternative.",
       "Once the truth or dare is complete, the person who was asked becomes the next asker.",
     ],
     note: {
@@ -82,8 +82,9 @@ export const truthOrDareRuleSections: TruthOrDareRuleSection[] = [
     id: "dare-cards",
     title: "Dare cards",
     paragraphs: [
-      "A dare is a challenge, not another question. It is what happens when the person being asked chooses not to answer the truth.",
+      "A dare is a challenge, not another question. It is an alternative when the person being asked chooses not to answer the truth.",
       "Dares should create a small, harmless, slightly awkward moment. They should be possible for both people and reasonable for the setting, whether you are on a call or together in person.",
+      "After the dare is complete, the game returns to the truth and the round continues from there.",
     ],
     bullets: [
       "Light truth -> light dare.",
@@ -92,7 +93,7 @@ export const truthOrDareRuleSections: TruthOrDareRuleSection[] = [
     ],
     example: {
       title: "Example: choosing a dare",
-      text: 'Mingo asks Bee a truth. Bee does not want to answer and chooses to face the dare. The game reveals the dare, "Show Mingo the last conversation on your phone." Bee completes it. The truth is recorded as dare completed, not answered.',
+      text: 'Mingo asks Bee a truth. Bee does not want to answer and chooses to face the dare. The game reveals the dare, "Show Mingo the last conversation on your phone." Bee completes it, and the game returns to the truth so the round can continue.',
     },
     note: {
       title: "Keep it safe",
@@ -119,7 +120,7 @@ export const truthOrDareRuleSections: TruthOrDareRuleSection[] = [
     paragraphs: [
       "A genuine no is allowed. If a truth or dare crosses a boundary, replace it or move on. No explanation is required beyond whatever the person wants to share.",
       "A skip is not a failure and it is not a debate. The point is to stretch a little, not to make anyone feel trapped.",
-      "Skipping a card is different from completing it. A skipped card has not been answered and has not been accepted as a dare; it is simply a card you chose not to play right now.",
+      "Skipping a card is different from completing it. A skipped card has not been answered and has not been accepted as a dare. The game avoids an immediate repeat, but the card may appear again later.",
     ],
     example: {
       title: "Example: an unexpected boundary",

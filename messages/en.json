@@ -15,7 +15,8 @@
       "drawTruth": "Draw a truth",
       "addQuestions": "Add new questions",
       "askAi": "🤖 Ask AI for one",
-      "generating": "Generating..."
+      "generating": "Generating...",
+      "exitGame": "➔ Exit game"
     },
     "labels": {
       "aiGenerated": "🤖 AI generated",
