@@ -4,7 +4,7 @@
 
 The user, as sole owner and operator, authorizes Codex to run ordinary `git add`, `git commit`, and `git push` operations while delivering requested project work. Keep the user's configured Git identity; do not change it.
 
-- Work directly on `main` by default during the early single-maintainer phase. Preserve speed with focused commits, the pre-commit hook, proportional checks, and post-push CI monitoring.
+- Deliver changes through focused branches and pull requests by default, including during the early single-maintainer phase. Direct pushes to `main` require the owner's explicit request or an emergency fix that cannot wait for review.
 - Use a branch and PR for database or destructive data work, authentication or security changes, major dependency upgrades, deployment or CI changes, sweeping or uncertain refactors, discardable experiments, or unclear rollback paths.
 - Before opening a PR, present its intended scope, base branch, and reason for isolation, then wait for the user's explicit confirmation. Before merging any PR, wait for a separate explicit confirmation after reporting its CI and review state. Do not infer either approval from a general request to implement, finish, or deliver work.
 - Merge minor and patch dependency bumps with green CI autonomously. Summarize major-version changelogs and breaking changes for the user instead of auto-merging.
@@ -12,6 +12,7 @@ The user, as sole owner and operator, authorizes Codex to run ordinary `git add`
 - Let Husky run lint-staged; do not bypass the hook. It formats staged files and runs full `tsc --noEmit` for TypeScript changes.
 - Before direct pushes, run tests relevant to the behavior. Run full `npm test` and `npm run build` for broad, runtime-sensitive, dependency, or release-like work.
 - Monitor GitHub Actions after every push. Do not call delivery complete while CI is pending.
+- Treat a green pull-request CI run as required before merging. Until GitHub branch protection is available for this private repository, this remains a delivery rule rather than an enforceable repository setting.
 - If `main` becomes red, fix forward when the remedy is clear and low risk; otherwise revert. After green CI, confirm the remote commit, clean task state, and deployment health when applicable.
 - Force-pushes, hard resets, and history rewrites always require explicit confirmation.
 
@@ -24,6 +25,8 @@ Use Conventional Commits in English:
 ```
 
 Use `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, or `style` as appropriate. Explain why in a commit body when one is useful. Use lowercase, hyphenated English branch names such as `feature/user-avatar-menu` or `fix/session-expiry`; avoid WIP commits reaching `main`.
+
+After a merged pull request has a green `main` CI run, delete its remote branch and then its local branch. Keep a branch only when it is the declared base of an unmerged stacked pull request.
 
 ## Stacked pull requests and rollout dependencies
 
