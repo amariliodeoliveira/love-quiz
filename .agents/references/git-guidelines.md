@@ -28,11 +28,20 @@ Use `feat`, `fix`, `refactor`, `chore`, `docs`, `test`, or `style` as appropriat
 
 After a merged pull request has a green `main` CI run, delete its remote branch and then its local branch. Keep a branch only when it is the declared base of an unmerged stacked pull request.
 
+## Epic integration branches
+
+Use an `epic/<slug>` branch only when an initiative needs multiple independently reviewed changes and integrated QA before it can safely reach `main`. It is a temporary integration branch, not a release branch and not a permanent `develop` branch.
+
+- Create each child from the epic base and name it `feature/<epic>-<slice>`, `fix/<epic>-<slice>`, or another standard type prefix that describes one reviewable slice.
+- Child PRs target `epic/<slug>`. Require their CI to pass before merging, then let the push CI on the epic branch validate the integrated state.
+- Open one final PR from `epic/<slug>` to `main` only after its acceptance criteria and integrated QA are complete. It requires green CI and the owner's explicit merge confirmation.
+- Delete child branches after their PRs merge into the epic branch. Delete the epic branch only after its final PR has merged and `main` is green.
+
 ## Stacked pull requests and rollout dependencies
 
 - A normal PR must be independently mergeable and deployable. Split unrelated work rather than using a stack as a way to hide an oversized diff.
 - When a change genuinely depends on an unmerged prerequisite, make that dependency explicit: create the child from the prerequisite branch, target the child PR at that branch, and put `Depends on #<number>` at the top of its body. Keep stacks short and state the intended merge order.
-- Never merge a child into `main` before every prerequisite has merged, deployed where necessary, and been verified. After the prerequisite merges, retarget the child to `main`, refresh its CI, and confirm its diff still contains only the remaining change.
+- Never merge a child into `main` before every prerequisite has merged, deployed where necessary, and been verified. After the prerequisite merges, retarget the child to `main`, refresh its CI, and confirm its diff still contains only the remaining change. This retargeting rule does not apply to child PRs deliberately based on an `epic/<slug>` integration branch; those stay targeted at the epic until the final epic PR goes to `main`.
 - A merged migration PR is not evidence that production has the schema. Application code may consume a new table, column, index, constraint, or permission only after the migration has been applied and verified in the target environment.
 - Use expand/contract delivery for schema-dependent changes: ship an additive, backwards-compatible migration; apply and verify it; ship code that uses it; only later remove obsolete schema or compatibility code in a separate change.
 

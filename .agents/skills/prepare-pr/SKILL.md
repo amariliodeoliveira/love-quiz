@@ -7,7 +7,7 @@ description: Analyze, prepare, open, update, monitor, or merge a focused GitHub 
 
 1. Read `.agents/references/git-guidelines.md`, including `Pull request descriptions`, and use a PR for its listed high-risk or isolation-worthy changes. Inspect `.github/pull_request_template.md` when it exists.
 2. Inspect the current branch, upstream, status, commits, and diff. Do not include unrelated working-tree changes in the PR summary.
-3. Infer the base from branch ancestry rather than always choosing `main`. For a genuine stacked change, target the direct prerequisite branch, record `Depends on #<number>` and merge order in the body, and keep the stack short. Honor an explicitly requested base.
+3. Infer the base from branch ancestry rather than always choosing `main`. For a genuine stacked change, target the direct prerequisite branch, record `Depends on #<number>` and merge order in the body, and keep the stack short. For a child of an `epic/<slug>` integration branch, target that epic directly and state the epic plus the final merge direction in the body; do not add a `Depends on` line unless another PR is its direct prerequisite. Honor an explicitly requested base.
 4. Draft the title and body in English. Use `<type>: imperative description` for the title and follow the repository PR template when it exists.
 5. Apply the canonical PR description standard. Before publishing, compare the title and body with the
    actual diff, tests, and CI plan; make the review order and focus areas explicit whenever the change

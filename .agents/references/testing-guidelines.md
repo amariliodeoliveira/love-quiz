@@ -12,7 +12,7 @@ A one-line wrapper around `fetch` need not receive exhaustive tests, but branchy
 
 React component tests use React Testing Library + `user-event` in jsdom (`*.test.tsx`). Test behavior and semantics that could regress: accessible names, labels and errors, keyboard interactions, focus, close/discard flows, and important conditional states. Do not snapshot implementation markup or assert incidental utility classes.
 
-jsdom does not lay out CSS like a browser. Visually verify spacing, responsive layout, color contrast, and animation in a browser whenever those change; add browser-level visual regression tests once the app has a stable deployed preview and a chosen baseline workflow.
+jsdom does not lay out CSS like a browser. Visually verify spacing, responsive layout, color contrast, and animation in a browser whenever those change. Playwright and Chromium are available in this repository: capture relevant desktop and mobile screenshots for meaningful visual work, and inspect them before delivery. For authenticated visual QA, use the disposable QA account script from the database guidelines and clean it up afterward. Add browser-level visual regression tests once the app has a stable deployed preview and a chosen baseline workflow.
 
 ## Deliberately not unit-tested yet
 
