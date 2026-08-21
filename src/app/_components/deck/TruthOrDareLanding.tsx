@@ -1,19 +1,22 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
-import { GAME_ROUND_PATH } from "@/lib/routes";
+import { GAME_ROUND_PATH, GAME_RULES_PATH } from "@/lib/routes";
 
 import LandingHero from "../LandingHero";
 
-export default function TruthOrDareLanding() {
+export default async function TruthOrDareLanding() {
+  const t = await getTranslations("Game");
+
   return (
-    <LandingHero description="On a call together? Draw a card and read it out loud.">
-      <div className="flex flex-wrap justify-center gap-3">
+    <LandingHero description={t("landing.description")}>
+      <div className="flex flex-wrap items-center justify-center gap-3">
         <Link href={GAME_ROUND_PATH} className="btn">
-          🚀 Play
+          {t("landing.play")}
         </Link>
-        <button type="button" className="btn-ghost" disabled>
-          📖 View rules
-        </button>
+        <Link href={GAME_RULES_PATH} className="btn-ghost">
+          {t("landing.viewRules")}
+        </Link>
       </div>
     </LandingHero>
   );

@@ -2,9 +2,12 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { DM_Sans, DM_Serif_Display } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
 
 import { getSessionUser } from "@/lib/appHeaderData";
 import { DEFAULT_THEME } from "@/lib/theme";
+
+import messages from "../../messages/en.json";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -45,7 +48,11 @@ export default async function RootLayout({
           the body — and any `flex-1` main content inside it — reliably fills at least
           one full screen, keeping a page footer pinned to the bottom instead of
           floating right after short content. */}
-      <body className="flex min-h-dvh flex-col">{children}</body>
+      <body className="flex min-h-dvh flex-col">
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }
