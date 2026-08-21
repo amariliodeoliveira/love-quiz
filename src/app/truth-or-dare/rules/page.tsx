@@ -53,7 +53,7 @@ export default async function TruthOrDareRulesPage() {
                     <span className="text-muted mr-2 tabular-nums">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    {section.title}
+                    {t(section.titleKey)}
                   </a>
                 </li>
               ))}
@@ -68,25 +68,25 @@ export default async function TruthOrDareRulesPage() {
                 className="scroll-mt-8 py-8 first:pt-0 last:pb-0"
               >
                 <h2 className="text-text font-serif text-2xl font-normal sm:text-3xl">
-                  {section.title}
+                  {t(section.titleKey)}
                 </h2>
                 <div className="text-subtext mt-4 space-y-4 leading-7">
-                  {section.paragraphs.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
+                  {section.paragraphKeys?.map((paragraphKey) => (
+                    <p key={paragraphKey}>{t(paragraphKey)}</p>
                   ))}
                 </div>
-                {section.bullets ? (
+                {section.bulletKeys ? (
                   <ul className="text-subtext mt-5 list-disc space-y-2 pl-5 leading-7">
-                    {section.bullets.map((bullet) => (
-                      <li key={bullet}>{bullet}</li>
+                    {section.bulletKeys.map((bulletKey) => (
+                      <li key={bulletKey}>{t(bulletKey)}</li>
                     ))}
                   </ul>
                 ) : null}
-                {section.steps ? (
+                {section.stepKeys ? (
                   <ol className="text-subtext marker:text-text mt-5 list-decimal space-y-3 pl-5 leading-7 marker:font-medium">
-                    {section.steps.map((step) => (
-                      <li key={step} className="pl-2">
-                        {step}
+                    {section.stepKeys.map((stepKey) => (
+                      <li key={stepKey} className="pl-2">
+                        {t(stepKey)}
                       </li>
                     ))}
                   </ol>
@@ -94,20 +94,20 @@ export default async function TruthOrDareRulesPage() {
                 {section.example ? (
                   <aside className="bg-surface border-border mt-6 rounded-sm border p-4 sm:p-5">
                     <p className="text-text mb-2 text-sm font-medium">
-                      {section.example.title}
+                      {t(section.example.titleKey)}
                     </p>
                     <p className="text-subtext leading-7">
-                      {section.example.text}
+                      {t(section.example.textKey)}
                     </p>
                   </aside>
                 ) : null}
                 {section.note ? (
                   <aside className="border-purple bg-purple-dim mt-6 rounded-sm border-l-4 p-4 sm:px-5">
                     <p className="text-purple mb-2 text-sm font-medium">
-                      {section.note.title}
+                      {t(section.note.titleKey)}
                     </p>
                     <p className="text-subtext leading-7">
-                      {section.note.text}
+                      {t(section.note.textKey)}
                     </p>
                   </aside>
                 ) : null}
