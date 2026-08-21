@@ -21,6 +21,32 @@ describe("buildPrompt", () => {
     expect(prompt).toContain("a truth question");
   });
 
+  it("grounds both card types in the game's relationship and safety rules", () => {
+    const truthPrompt = buildPrompt({ summary: "", recentQuestions: [] }, "3");
+    const darePrompt = buildPrompt(
+      { summary: "", recentQuestions: [] },
+      "dare",
+    );
+
+    for (const prompt of [truthPrompt, darePrompt]) {
+      expect(prompt).toContain(
+        "without assuming their gender, relationship history, sexual experience",
+      );
+      expect(prompt).toContain(
+        "anything that requires either player to describe something they have done",
+      );
+      expect(prompt).toContain(
+        "No humiliation, degradation, coercion, threats, danger",
+      );
+    }
+    expect(truthPrompt).toContain(
+      "Truths may explore intimacy, curiosity, expectations",
+    );
+    expect(darePrompt).toContain(
+      "A dare is a concrete, optional-feeling challenge and not another question",
+    );
+  });
+
   it("omits the avoid-list section when there is no context yet", () => {
     const prompt = buildPrompt({ summary: "", recentQuestions: [] }, "1");
     expect(prompt).not.toContain("Do not repeat");
