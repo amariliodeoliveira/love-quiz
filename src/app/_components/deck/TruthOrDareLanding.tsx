@@ -10,7 +10,7 @@ export default async function TruthOrDareLanding() {
 
   return (
     <LandingHero description={t("landing.description")}>
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-3">
         <Link href={GAME_ROUND_PATH} className="btn">
           {t("landing.play")}
         </Link>
