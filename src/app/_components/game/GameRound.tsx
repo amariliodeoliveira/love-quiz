@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { type Card, LEVEL_META } from "@/data/cards";
@@ -48,22 +49,24 @@ function RoundContent({
   onDrawTruth: () => void;
   onGenerateAi: () => void;
 }): React.ReactNode {
+  const t = useTranslations("Game");
+
   if (screen === "dare" && currentDare) {
     return (
       <RoundCard
         meta={LEVEL_META.dare}
         question={currentDare.question}
-        badge={isAiCardId(currentDare.id) ? "🤖 AI generated" : undefined}
+        badge={isAiCardId(currentDare.id) ? t("labels.aiGenerated") : undefined}
       >
         <button type="button" className="btn" onClick={onDareDone}>
-          🔥 Done
+          {t("actions.done")}
         </button>
         <button type="button" className="btn-ghost" onClick={onSkipDare}>
-          🔄 Skip
+          {t("actions.skip")}
         </button>
         {dareError && (
           <p className="form-error w-full basis-full text-center">
-            {dareError}
+            {dareError || t("messages.dareSaveError")}
           </p>
         )}
       </RoundCard>
@@ -75,9 +78,11 @@ function RoundContent({
       <RoundCard
         meta={LEVEL_META[currentTruth.level]}
         question={currentTruth.question}
-        skipLabel="Skip this one"
+        skipLabel={t("actions.skipThisOne")}
         onSkip={onSkipTruth}
-        badge={isAiCardId(currentTruth.id) ? "🤖 AI generated" : undefined}
+        badge={
+          isAiCardId(currentTruth.id) ? t("labels.aiGenerated") : undefined
+        }
       >
         {hasDares && (
           <button
@@ -86,7 +91,7 @@ function RoundContent({
             onClick={onDrawDareInstead}
             disabled={aiLoading}
           >
-            😈 Draw a dare instead
+            {t("actions.drawDare")}
           </button>
         )}
         <button
@@ -95,7 +100,7 @@ function RoundContent({
           onClick={onConfirmRound}
           disabled={aiLoading}
         >
-          {aiLoading ? "Finding your next question..." : "Confirm & next"}
+          {aiLoading ? t("actions.findingNext") : t("actions.confirmNext")}
         </button>
       </RoundCard>
     );
@@ -104,11 +109,9 @@ function RoundContent({
   if (screen === "finished") {
     return (
       <>
-        <p className="text-text font-serif text-xl">
-          You&apos;ve answered every question in the deck!
-        </p>
+        <p className="text-text font-serif text-xl">{t("messages.finished")}</p>
         <Link href={MANAGE_PATH} className="btn">
-          Add new questions
+          {t("actions.addQuestions")}
         </Link>
         <button
           type="button"
@@ -116,7 +119,7 @@ function RoundContent({
           onClick={onGenerateAi}
           disabled={aiLoading}
         >
-          {aiLoading ? "Generating..." : "🤖 Ask AI for one"}
+          {aiLoading ? t("actions.generating") : t("actions.askAi")}
         </button>
         {aiError && (
           <p className="form-error w-full basis-full text-center">{aiError}</p>
@@ -127,12 +130,13 @@ function RoundContent({
 
   return (
     <button type="button" className="btn" onClick={onDrawTruth}>
-      Draw a Truth
+      {t("actions.drawTruth")}
     </button>
   );
 }
 
 export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
+  const t = useTranslations("Game");
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [screen, setScreen] = useState<Screen>(() =>
     initialCards.some((c) => c.level !== "dare" && !c.answered)
@@ -180,9 +184,7 @@ export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
     setAiLoading(false);
 
     if (!ok || !data) {
-      setAiError(
-        "Couldn't generate a question — check your connection and try again.",
-      );
+      setAiError(t("messages.aiGenerateError"));
       return;
     }
 
@@ -249,7 +251,7 @@ export default function GameRound({ cards: initialCards }: { cards: Card[] }) {
     setDareError(null);
     const { ok } = await patchJson(`/api/cards/${dareId}/complete`, {});
     if (!ok) {
-      setDareError("Couldn't save that — check your connection and try again.");
+      setDareError(t("messages.dareSaveError"));
       return;
     }
     setScreen("truth");

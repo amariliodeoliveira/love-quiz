@@ -1,0 +1,35 @@
+{
+  "Game": {
+    "landing": {
+      "description": "On a call together? Draw a card and read it out loud.",
+      "play": "🚀 Play",
+      "viewRules": "📖 View rules"
+    },
+    "actions": {
+      "done": "🔥 Done",
+      "skip": "🔄 Skip",
+      "skipThisOne": "Skip this one",
+      "drawDare": "😈 Draw a dare instead",
+      "confirmNext": "Confirm & next",
+      "findingNext": "Finding your next question...",
+      "drawTruth": "Draw a truth",
+      "addQuestions": "Add new questions",
+      "askAi": "🤖 Ask AI for one",
+      "generating": "Generating..."
+    },
+    "labels": {
+      "aiGenerated": "🤖 AI generated",
+      "rules": "Game rules",
+      "backToGame": "← Back to the game",
+      "startPlaying": "🚀 Start playing",
+      "onThisPage": "On this page",
+      "rulesIntro": "A shared guide for making the game curious, fair, and comfortable for both of you.",
+      "rulesReady": "Ready to see what comes up?"
+    },
+    "messages": {
+      "finished": "You've answered every question in the deck!",
+      "dareSaveError": "Couldn't save that — check your connection and try again.",
+      "aiGenerateError": "Couldn't generate a question — check your connection and try again."
+    }
+  }
+}
