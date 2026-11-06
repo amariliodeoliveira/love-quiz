@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.39",
-    "@hookform/resolvers": "^5.9.0",
+    "@hookform/resolvers": "^7.0.0",
     "@neondatabase/serverless": "^1.1.0",
     "@twemoji/api": "^17.0.3",
     "@vercel/functions": "^3.9.1",
